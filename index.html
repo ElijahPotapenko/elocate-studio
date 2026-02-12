@@ -1,76 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Elocate Studio</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./styles/theme.css">
-  </head>
-  <body>
-    <header class="header container">
-      <h1 class="logo">Elocate</h1>
-      <nav>
-        <a href="#portfolio">Work</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </header>
 
-    <main>
-      <section class="hero container">
-        <div class="hero-text">
-          <h2 class="hero-title">Design collaboration<br> across disciplines</h2>
-          <a href="#contact" class="btn btn-primary">Let’s talk ✦</a>
-        
-        <div class="hero-image">
-          
-        
-      </section>
+<head>
+  <meta charset="UTF-8" />
+  <title>Elocate Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles/theme.css">
+</head>
 
-<section class="spacer-xl"></section>
-<section class="pre-about-cards">
-  <div class="container cards-grid">
-    <div class="card">
-      <img src="./assets/images/top/chat.webp" alt="Chat interface design">
-      <h3 class="card-title">ChatGPT Mobile Concept</h3>
-      <p class="card-desc">Experimental conversational UI with modern dark interface and memory feedback.</p>
-    </div>
-    <div class="card">
-      <img src="./assets/images/top/finance.webp" alt="Finance management app UI">
-      <h3 class="card-title">Finance App</h3>
-      <p class="card-desc">Colorful dashboard for managing expenses, with branded widgets and insights.</p>
-    </div>
-  </div>
-</section>
+<body>
+  <header class="header container">
+    <a href="#" class="logo-link">
+      <img src="./assets/images/logo.svg" alt="Elocate Logo" class="logo-img">
+    </a>
+    <nav>
+      <a href="#portfolio">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-text">
+        <h2 class="hero-title">Design collaboration<br> across disciplines</h2>
+        <a href="#contact" class="btn btn-primary">Let’s talk ✦</a>
+      </div>
+      <div class="hero-image">
+        <!-- Image is background in CSS -->
+      </div>
+    </section>
+
+    <section class="spacer-xl"></section>
+    <section class="pre-about-cards">
+      <div class="container cards-grid">
+        <div class="card">
+          <img src="./assets/images/top/finance.webp" alt="Finance management app UI">
+          <div class="card-header">
+            <h3 class="card-title">ChatGPT Mobile Concept</h3>
+            <a href="https://dribbble.com/shots/25655033-ChatGPT-Voice-Interface-Redesign-Concept" target="_blank"
+              class="card-link" aria-label="View on Dribbble">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-arrow-up-right">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </a>
+          </div>
+          <p class="card-desc">Experimental conversational UI with modern dark interface and memory feedback.</p>
+        </div>
+        <div class="card">
+          <img src="./assets/images/top/chat.webp" alt="Chat interface design">
+          <div class="card-header">
+            <h3 class="card-title">Finance App</h3>
+            <a href="https://dribbble.com/shots/8139279-Save-Finance-App" target="_blank" class="card-link"
+              aria-label="View on Dribbble">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-arrow-up-right">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </a>
+          </div>
+          <p class="card-desc">Colorful dashboard for managing expenses, with branded widgets and insights.</p>
+        </div>
+      </div>
+    </section>
 
 
-<section id="about" class="section container">
-        
-<h2 class="section-title">About the studio</h2>
-<p class="section-desc">
-  We are a design collective specializing in collaborative digital experiences and meaningful UI systems.
-</p>
-
-  </div>
-</section>
-
-
+    <section id="about" class="section container about-section">
+      <div class="about-logo-container">
+        <img src="./assets/images/logo.svg" alt="Elocate Studio 3D Logo" class="about-logo">
+      </div>
+      <h2 class="section-title">About the studio</h2>
+      <p class="section-desc">
+        We are a design collective specializing in collaborative digital experiences and meaningful UI systems.
+      </p>
+    </section>
 
 
-<section class="contact">
-  <div class="container">
-    <h2 class="section-title">Let’s connect</h2>
-    <form class="contact-form">
-      <input type="text" placeholder="Your name" required>
-      <input type="email" placeholder="Your email" required>
-      <textarea placeholder="Your message" rows="4" required></textarea>
-      <button type="submit">Send message</button>
-    </form>
-  </div>
-</section>
 
-<footer class="footer container">
+
+    <section class="contact">
+      <div class="container">
+        <h2 class="section-title">Let’s connect</h2>
+        <form class="contact-form">
+          <input type="email" placeholder="Your email" required>
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </section>
+
+    <footer class="footer container">
       <p>© 2025 Elocate Design — All rights reserved.</p>
     </footer>
-  </body>
+    <script src="./assets/js/tilt.js"></script>
+</body>
+
 </html>
