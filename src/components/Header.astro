@@ -11,15 +11,54 @@ const links = [
 <header class="site-header">
   <div class="container bar">
     <a href="#top" class="brand" aria-label="Elocate Studio — home">
-      <img src="/assets/brand/logo-e.png" alt="" class="brand-mark" width="30" height="30" />
+      <img src="/assets/brand/logo-e.png" alt="" class="brand-mark mark-dark" width="30" height="30" />
+      <img src="/assets/brand/logo-e-dark.png" alt="" class="brand-mark mark-light" width="30" height="30" />
       elocate<span class="brand-suffix">{t('brand.suffix')}</span>
     </a>
-    <nav class="nav" aria-label="Primary">
+    <nav class="nav" id="primary-nav" aria-label="Primary">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
       <a href="#contact" class="btn btn-ghost nav-cta">{t('nav.cta')}</a>
     </nav>
+    <div class="bar-controls">
+      <button class="theme-toggle" type="button" aria-label="Toggle light / dark theme">
+        <svg class="i-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+        </svg>
+        <svg class="i-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+        </svg>
+      </button>
+      <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="primary-nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </header>
+
+<script>
+  // Мобильное меню: тоггл панели + закрытие по клику на пункт. Прогрессивно —
+  // без JS на мобиле панель показывается развёрнутой (см. .no-js гард в CSS не нужен,
+  // т.к. при отсутствии JS класс open не ставится, но fallback ниже держит ссылки видимыми).
+  const header = document.querySelector('.site-header');
+  const toggle = header?.querySelector('.nav-toggle');
+  const nav = header?.querySelector('.nav');
+  const close = () => { header?.classList.remove('open'); toggle?.setAttribute('aria-expanded', 'false'); };
+  toggle?.addEventListener('click', () => {
+    const open = header.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  nav?.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
+
+  // Переключалка темы: тоггл data-theme + память в localStorage + событие для sphere.js
+  const themeBtn = header?.querySelector('.theme-toggle');
+  themeBtn?.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    dispatchEvent(new Event('themechange'));
+  });
+</script>
 
 <style>
   .site-header {
@@ -27,19 +66,20 @@ const links = [
     inset: 0 0 auto 0;
     z-index: 100;
     backdrop-filter: blur(10px);
-    background: linear-gradient(180deg, rgba(8, 8, 12, 0.7), rgba(8, 8, 12, 0));
+    background: linear-gradient(180deg, rgba(var(--bg-rgb), 0.7), rgba(var(--bg-rgb), 0));
     border-bottom: 1px solid transparent;
   }
   .bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: clamp(1rem, 3vw, 2.2rem);
     height: 72px;
   }
   .brand {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
+    margin-right: auto;          /* двигает навигацию и контролы вправо */
     font-family: var(--font-display);
     font-weight: 600;
     font-size: 1.12rem;
@@ -56,7 +96,74 @@ const links = [
   .nav > a:not(.nav-cta):hover { color: var(--text); }
   .nav-cta { --pad-y: 0.5rem; padding-block: 0.5rem; }
 
+  /* контролы справа (тема + бургер) */
+  .bar-controls { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-toggle {
+    display: grid; place-items: center;
+    width: 42px; height: 42px;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.25s var(--ease), color 0.25s var(--ease);
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle svg { display: block; }
+  /* тёмная тема → показываем солнце (клик = к светлой); светлая → луну */
+  .theme-toggle .i-moon { display: none; }
+  :root[data-theme='light'] .theme-toggle .i-sun { display: none; }
+  :root[data-theme='light'] .theme-toggle .i-moon { display: block; }
+
+  /* бургер — только на мобиле */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 42px; height: 42px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 18px; height: 1.6px;
+    margin: 0 auto;
+    background: var(--text);
+    border-radius: 2px;
+    transition: transform 0.3s var(--ease), opacity 0.2s var(--ease);
+  }
+  .site-header.open .nav-toggle span:nth-child(1) { transform: translateY(6.6px) rotate(45deg); }
+  .site-header.open .nav-toggle span:nth-child(2) { opacity: 0; }
+  .site-header.open .nav-toggle span:nth-child(3) { transform: translateY(-6.6px) rotate(-45deg); }
+
   @media (max-width: 620px) {
-    .nav > a:not(.nav-cta) { display: none; }
+    .nav-toggle { display: flex; }
+    .nav {
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0.4rem clamp(1.1rem, 4vw, 2.5rem) 1.1rem;
+      background: rgba(var(--bg-rgb), 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      transform: translateY(-10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+    }
+    .site-header.open .nav { transform: none; opacity: 1; pointer-events: auto; }
+    .nav > a:not(.nav-cta) {
+      font-size: 1.05rem;
+      color: var(--text);
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-cta { justify-content: center; margin-top: 0.9rem; --pad-y: 0.8rem; }
   }
 </style>

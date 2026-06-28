@@ -44,9 +44,12 @@ export const ui = {
     'work.02.title': 'Finance Dashboard',
     'work.02.desc':
       'A colorful dashboard for managing expenses — branded widgets, insights, and a clear hierarchy.',
-    'work.03.title': 'Identity System',
+    'work.03.title': 'Design in Motion',
     'work.03.desc':
-      'A flexible identity: a logo grid, motion tokens, and one rhythm across every medium.',
+      'A kinetic 3D wordmark — chrome, depth, and rhythm; typography that moves and still reads clean.',
+    'work.04.title': 'Travel to Asia',
+    'work.04.desc':
+      'A playful 3D travel story — bold scenes, warm palette, and motion that carries the journey.',
 
     // — about —
     'about.eyebrow': 'About the studio',

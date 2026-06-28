@@ -10,8 +10,20 @@ const {
 <!doctype html>
 <html lang={Astro.currentLocale ?? 'en'}>
   <head>
-    <!-- mark JS as alive early → CSS hides .reveal only then; without JS content stays visible -->
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <!-- mark JS as alive early → CSS hides .reveal only then; without JS content stays visible.
+         Тема ставится ДО отрисовки (из localStorage / системной) — без вспышки. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t !== 'light' && t !== 'dark') t = 'dark'; // тёмная по умолчанию (бренд), светлая — по выбору
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.png" type="image/png" />
@@ -55,16 +67,16 @@ const {
         width: 10px; height: 10px;
         margin: -5px 0 0 -5px;            /* центрируем относительно translate3d */
         border-radius: 50%;
-        background: #fff;
+        background: var(--cursor);
         pointer-events: none;
         z-index: 9999;
         /* НЕ анимируем transform → точка идёт за мышью без лага.
            Плавность только у размера/прозрачности. */
-        transition: width 0.18s var(--ease), height 0.18s var(--ease), margin 0.18s var(--ease), opacity 0.2s;
+        transition: width 0.18s var(--ease), height 0.18s var(--ease), margin 0.18s var(--ease), opacity 0.2s, background 0.4s var(--ease);
       }
       .cursor-hover .cursor-dot {
         width: 20px; height: 20px; margin: -10px 0 0 -10px;
-        background: rgba(255, 255, 255, 0.85);
+        opacity: 0.85;
       }
       .cursor-hidden .cursor-dot { opacity: 0; }
 
@@ -85,14 +97,12 @@ const {
       import { initCursor } from '../scripts/cursor.js';
       import { initReveal } from '../scripts/reveal.js';
       import { initTilt } from '../scripts/tilt.js';
-      import { initFramePlayers } from '../scripts/frames.js';
 
       const start = () => {
         initSphere();
         initCursor();
         initReveal();
         initTilt();
-        initFramePlayers();
 
         // прогресс скролла
         const bar = document.querySelector('.scroll-progress span');

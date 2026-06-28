@@ -62,6 +62,15 @@ export function initSphere() {
   const px = new Float32Array(maxLen);
   const py = new Float32Array(maxLen);
 
+  // цвет штриха — из токена темы; обновляем по событию смены темы (без чтения в кадре)
+  let stroke = 'rgb(63, 197, 104)';
+  const readStroke = () => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--sphere-stroke').trim();
+    if (v) stroke = v;
+  };
+  readStroke();
+  addEventListener('themechange', readStroke);
+
   function draw(ts) {
     const t = ts * 0.001;
     mx = lerp(mx, mouseX, 0.08);
@@ -81,7 +90,7 @@ export function initSphere() {
     const depth = 2.8;
 
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = 'rgb(63, 197, 104)'; // осветлённый фирменный зелёный (--accent-lite) — пышнее на чёрном
+    ctx.strokeStyle = stroke; // из токена --sphere-stroke (адаптируется к теме)
 
     for (const line of lines) {
       const n = line.length;

@@ -12,7 +12,8 @@ const socials = [
 <footer class="site-footer">
   <div class="container foot">
     <div class="foot-brand">
-      <img src="/assets/brand/logo-e.png" alt="" class="foot-mark" width="24" height="24" />
+      <img src="/assets/brand/logo-e.png" alt="" class="foot-mark mark-dark" width="24" height="24" />
+      <img src="/assets/brand/logo-e-dark.png" alt="" class="foot-mark mark-light" width="24" height="24" />
       <span>elocate<span class="muted">{t('brand.suffix')}</span></span>
     </div>
     <nav class="foot-links" aria-label="Footer">
@@ -34,5 +35,5 @@ const socials = [
   .foot-links { display: flex; gap: 1.6rem; }
   .foot-links a { color: var(--muted); font-size: 0.9rem; transition: color 0.25s var(--ease); }
   .foot-links a:hover { color: var(--accent); }
-  .foot-copy { width: 100%; color: #5c5c69; font-size: 0.82rem; margin-top: 0.4rem; }
+  .foot-copy { width: 100%; color: var(--muted); font-size: 0.82rem; margin-top: 0.4rem; }
 </style>

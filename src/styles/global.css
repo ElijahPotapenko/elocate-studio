@@ -15,9 +15,16 @@
 
   --accent:        #2b9f4c;                 /* фирменный зелёный (из лого «e») */
   --accent-lite:   #3fc568;                 /* осветлённый тот же зелёный — для свечения/текста на near-black */
-  --accent-ink:    #03250f;                 /* тёмно-зелёный текст на акценте (кнопки) */
+  --accent-ink:    #03250f;                 /* текст на акцент-заливке (кнопки) */
   --accent-glow:   rgba(43, 159, 76, 0.5);
   --accent-soft:   rgba(43, 159, 76, 0.12);
+
+  /* — токены, зависящие от темы (переопределяются в [data-theme='light']) — */
+  --bg-rgb:        8, 8, 12;        /* фон как r,g,b — для полупрозрачных хедера/панелей */
+  --cursor:        #fff;            /* кастомный курсор-точка */
+  --sphere-stroke: #3fc568;         /* штрих вайрфрейм-сферы (читается в sphere.js) */
+  --glow-op:       1;               /* множитель фоновой ауры (body::before) */
+  --grain:         rgba(255, 255, 255, 0.025);  /* зерно в hero */
 
   /* — типографика — */
   --font-display: 'Space Grotesk', 'Helvetica Neue', system-ui, sans-serif;
@@ -45,6 +52,35 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ☀️ СВЕТЛАЯ ТЕМА — переопределяем только палитру (всё остальное на токенах) */
+:root[data-theme='light'] {
+  --bg:        #f6f6f2;   /* тёплый near-white */
+  --bg-soft:   #ffffff;   /* карточки/инпуты — чистый белый поверх off-white */
+  --bg-elev:   #ecece6;
+  --text:      #15151b;
+  --muted:     #565a63;   /* ≈4.7:1 на --bg (WCAG AA) */
+  --line:      rgba(0, 0, 0, 0.10);
+  --line-2:    rgba(0, 0, 0, 0.18);
+
+  --accent:        #1f8a40;                 /* чуть темнее зелёный — читаемее на белом */
+  --accent-lite:   #1f8a40;
+  --accent-ink:    #ffffff;                 /* белый текст на зелёной кнопке */
+  --accent-glow:   rgba(31, 138, 64, 0.32);
+  --accent-soft:   rgba(31, 138, 64, 0.10);
+
+  --bg-rgb:        246, 246, 242;
+  --cursor:        #15151b;
+  --sphere-stroke: #1f8a40;
+  --glow-op:       0.45;
+  --grain:         rgba(0, 0, 0, 0.03);
+}
+
+/* свап лого по теме (Header+Footer): тёмный фон → бело-зелёный лого; светлый → тёмно-зелёный.
+   !important — перебиваем скоуп-стиль .brand-mark/.foot-mark{display:block} (он выше по специфичности). */
+.mark-light { display: none !important; }
+:root[data-theme='light'] .mark-dark { display: none !important; }
+:root[data-theme='light'] .mark-light { display: block !important; }
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -59,6 +95,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
 }
 
 /* фоновое свечение под всем сайтом — мягкая аура акцента */
@@ -67,6 +104,7 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -2;
+  opacity: var(--glow-op);
   background:
     radial-gradient(120vw 80vh at 78% -10%, rgba(43, 159, 76, 0.13), transparent 60%),
     radial-gradient(90vw 60vh at 0% 110%, rgba(43, 159, 76, 0.07), transparent 55%);

@@ -21,10 +21,6 @@ const disciplines = t('hero.disciplines').split(',');
       {disciplines.concat(disciplines).map((d) => <li>{d}<span>✦</span></li>)}
     </ul>
   </div>
-
-  <a href="#work" class="scroll-cue" aria-label="Scroll to work">
-    <span></span>
-  </a>
 </section>
 
 <style>
@@ -47,7 +43,7 @@ const disciplines = t('hero.disciplines').split(',');
   }
   .hero-grain {
     position: absolute; inset: 0; z-index: -1; pointer-events: none;
-    background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-image: radial-gradient(var(--grain) 1px, transparent 1px);
     background-size: 3px 3px;
   }
   .hero-inner { padding-top: 96px; max-width: 920px; }
@@ -86,25 +82,16 @@ const disciplines = t('hero.disciplines').split(',');
   .hero-marquee span { color: var(--accent); opacity: 0.7; }
   @keyframes marquee { to { transform: translateX(-50%); } }
 
-  .scroll-cue {
-    position: absolute;
-    bottom: 1.8rem; left: 50%; translate: -50% 0;
-    width: 26px; height: 42px;
-    border: 1px solid var(--line-2);
-    border-radius: 14px;
-    display: grid; place-items: start center;
-    padding-top: 7px;
-  }
-  .scroll-cue span {
-    width: 3px; height: 8px; border-radius: 3px; background: var(--accent);
-    animation: cue 1.6s var(--ease) infinite;
-  }
-  @keyframes cue { 0%,100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(9px); opacity: 0.2; } }
-
   @media (prefers-reduced-motion: reduce) {
-    .hero-marquee, .scroll-cue span { animation: none; }
+    .hero-marquee { animation: none; }
   }
   @media (max-width: 620px) {
-    .hero-canvas { opacity: 0.55; }
+    /* на мобиле текст во всю ширину → сфера уезжает вниз-вправо и гаснет,
+       чтобы линии не шли сквозь заголовок и лид (читаемость) */
+    .hero-canvas {
+      opacity: 0.38;
+      transform: translateY(14%) scale(1.04);
+      mask-image: radial-gradient(72% 58% at 72% 68%, #000 42%, transparent 100%);
+    }
   }
 </style>
