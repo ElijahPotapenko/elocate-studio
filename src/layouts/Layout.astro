@@ -1,0 +1,113 @@
+---
+import '../styles/global.css';
+
+const {
+  title = 'Elocate Studio — Design collaboration across disciplines',
+  description = 'Elocate — a design studio working across disciplines: product, interface, and brand in one coherent system.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang={Astro.currentLocale ?? 'en'}>
+  <head>
+    <!-- mark JS as alive early → CSS hides .reveal only then; without JS content stays visible -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#08080c" />
+
+    <!-- OpenGraph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={Astro.site} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!-- scroll progress indicator -->
+    <div class="scroll-progress" aria-hidden="true"><span></span></div>
+
+    <slot />
+
+    <style is:global>
+      /* — кастомный курсор: простая белая точка — */
+      .has-custom-cursor,
+      .has-custom-cursor a,
+      .has-custom-cursor button,
+      .has-custom-cursor input,
+      .has-custom-cursor textarea,
+      .has-custom-cursor [role='button'] { cursor: none; }
+
+      .cursor-dot {
+        position: fixed;
+        top: 0; left: 0;
+        width: 10px; height: 10px;
+        margin: -5px 0 0 -5px;            /* центрируем относительно translate3d */
+        border-radius: 50%;
+        background: #fff;
+        pointer-events: none;
+        z-index: 9999;
+        /* НЕ анимируем transform → точка идёт за мышью без лага.
+           Плавность только у размера/прозрачности. */
+        transition: width 0.18s var(--ease), height 0.18s var(--ease), margin 0.18s var(--ease), opacity 0.2s;
+      }
+      .cursor-hover .cursor-dot {
+        width: 20px; height: 20px; margin: -10px 0 0 -10px;
+        background: rgba(255, 255, 255, 0.85);
+      }
+      .cursor-hidden .cursor-dot { opacity: 0; }
+
+      /* — индикатор скролла — */
+      .scroll-progress {
+        position: fixed; top: 0; left: 0; right: 0;
+        height: 2px; z-index: 9998; background: transparent; pointer-events: none;
+      }
+      .scroll-progress span {
+        display: block; height: 100%; width: var(--p, 0%);
+        background: linear-gradient(90deg, transparent, var(--accent));
+        box-shadow: 0 0 12px var(--accent-glow);
+      }
+    </style>
+
+    <script>
+      import { initSphere } from '../scripts/sphere.js';
+      import { initCursor } from '../scripts/cursor.js';
+      import { initReveal } from '../scripts/reveal.js';
+      import { initTilt } from '../scripts/tilt.js';
+      import { initFramePlayers } from '../scripts/frames.js';
+
+      const start = () => {
+        initSphere();
+        initCursor();
+        initReveal();
+        initTilt();
+        initFramePlayers();
+
+        // прогресс скролла
+        const bar = document.querySelector('.scroll-progress span');
+        const onScroll = () => {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          const p = max > 0 ? (h.scrollTop / max) * 100 : 0;
+          bar?.style.setProperty('--p', p + '%');
+        };
+        addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      };
+
+      if (document.readyState !== 'loading') start();
+      else document.addEventListener('DOMContentLoaded', start);
+    </script>
+  </body>
+</html>

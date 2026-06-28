@@ -1,0 +1,38 @@
+---
+import { useTranslations, resolveLang } from '../i18n/utils';
+const t = useTranslations(resolveLang(Astro.currentLocale));
+const year = new Date().getFullYear();
+const socials = [
+  { href: 'https://github.com/elijahpotapenko', label: t('footer.github') },
+  { href: 'mailto:hello@elocate.studio', label: t('footer.email') },
+  { href: '#top', label: t('footer.top') },
+];
+---
+
+<footer class="site-footer">
+  <div class="container foot">
+    <div class="foot-brand">
+      <img src="/assets/brand/logo-e.png" alt="" class="foot-mark" width="24" height="24" />
+      <span>elocate<span class="muted">{t('brand.suffix')}</span></span>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
+      {socials.map((s) => <a href={s.href}>{s.label}</a>)}
+    </nav>
+    <p class="foot-copy">© {year} {t('footer.copy')}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer { border-top: 1px solid var(--line); padding-block: 2.6rem; }
+  .foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 1.2rem;
+  }
+  .foot-brand { display: inline-flex; align-items: center; gap: 0.55rem; font-family: var(--font-display); font-weight: 600; }
+  .foot-mark { height: 24px; width: auto; display: block; }
+  .muted { color: var(--muted); font-weight: 400; }
+  .foot-links { display: flex; gap: 1.6rem; }
+  .foot-links a { color: var(--muted); font-size: 0.9rem; transition: color 0.25s var(--ease); }
+  .foot-links a:hover { color: var(--accent); }
+  .foot-copy { width: 100%; color: #5c5c69; font-size: 0.82rem; margin-top: 0.4rem; }
+</style>

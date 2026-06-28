@@ -1,0 +1,140 @@
+---
+import { useTranslations, resolveLang } from '../i18n/utils';
+const t = useTranslations(resolveLang(Astro.currentLocale));
+// Тексты (title/desc) — в i18n-словаре по ключу work.<n>.*; здесь только структура/ассеты.
+// href — пока заглушка `#contact` (рабочая навигация); заменить на реальные кейс-URL/страницы.
+const projects = [
+  { n: '01', tags: ['Product', 'UI System'], img: '/assets/work/finance.webp', href: '#contact' },
+  { n: '02', tags: ['Product', 'Data Viz'], img: '/assets/work/chat.webp', href: '#contact' },
+  {
+    n: '03',
+    tags: ['Brand', 'Motion'],
+    img: null,
+    frames: { base: '/assets/work/identity-frames/f', count: 123, fps: 12, ext: 'jpg', pad: 3, w: 480, h: 360 },
+    href: '#contact',
+  },
+];
+---
+
+<section class="section" id="work">
+  <div class="container">
+    <header class="work-head reveal">
+      <p class="eyebrow">{t('work.eyebrow')}</p>
+      <h2 set:html={t('work.heading')}></h2>
+    </header>
+
+    <ul class="work-list">
+      {projects.map((p) => (
+        <li class="work-item reveal" data-tilt>
+          <a class="work-link" href={p.href}>
+          <div class="work-media">
+            {p.frames
+              ? <canvas
+                  class="work-frames"
+                  data-base={p.frames.base}
+                  data-count={p.frames.count}
+                  data-fps={p.frames.fps}
+                  data-ext={p.frames.ext}
+                  data-pad={p.frames.pad}
+                  data-w={p.frames.w}
+                  data-h={p.frames.h}
+                  role="img"
+                  aria-label={t(`work.${p.n}.title`)}
+                ></canvas>
+              : p.img
+                ? <img src={p.img} alt={t(`work.${p.n}.title`)} loading="lazy" width="640" height="420" />
+                : <div class="work-placeholder" aria-hidden="true"><span>{p.n}</span></div>}
+            <span class="work-n">{p.n}</span>
+          </div>
+          <div class="work-body">
+            <h3>{t(`work.${p.n}.title`)}</h3>
+            <p class="work-desc">{t(`work.${p.n}.desc`)}</p>
+            <ul class="work-tags">{p.tags.map((tag) => <li>{tag}</li>)}</ul>
+            <span class="work-cta">{t('work.cta')} <span aria-hidden="true">↗</span></span>
+          </div>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .work-head { margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+  .work-head h2 { font-size: var(--fs-h2); margin-top: 0.9rem; }
+
+  .work-list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: clamp(1.2rem, 2.5vw, 2rem);
+  }
+  .work-item {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    will-change: transform;
+  }
+  .work-item:hover {
+    border-color: var(--line-2);
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--accent-soft);
+  }
+  .work-link { display: block; color: inherit; text-decoration: none; }
+
+  /* affordance «View case ↗» — карточка теперь честная ссылка */
+  .work-cta {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    margin-top: 1.1rem;
+    font-family: var(--font-display); font-size: 0.85rem; font-weight: 500;
+    color: var(--accent);
+    opacity: 0; transform: translateX(-4px);
+    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+  }
+  .work-item:hover .work-cta { opacity: 1; transform: none; }
+  @media (hover: none) { .work-cta { opacity: 1; transform: none; } } /* тач — affordance всегда видна */
+
+  /* 3-я карточка (покадровка, тёмная) — лёгкий акцент-вес, чтобы не проваливалась в ряду */
+  .work-media:has(.work-frames) {
+    box-shadow: inset 0 0 0 1px var(--accent-soft), inset 0 -50px 60px -45px var(--accent-soft);
+  }
+
+  .work-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bg-elev); }
+  .work-media img,
+  .work-frames {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.6s var(--ease), filter 0.6s var(--ease);
+    filter: saturate(0.9) contrast(1.02);
+    display: block;
+  }
+  .work-item:hover .work-media img,
+  .work-item:hover .work-frames { transform: scale(1.05); filter: none; }
+  .work-placeholder {
+    width: 100%; height: 100%;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(120% 120% at 80% 0%, var(--accent-soft), transparent 60%),
+      var(--bg-elev);
+  }
+  .work-placeholder span {
+    font-family: var(--font-display); font-size: 4rem; font-weight: 700;
+    color: var(--line-2);
+  }
+  .work-n {
+    position: absolute; top: 0.8rem; left: 0.9rem;
+    font-family: var(--font-display); font-size: 0.78rem; letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem; border-radius: 999px;
+    background: rgba(8, 8, 12, 0.65); border: 1px solid var(--line);
+    color: var(--accent);
+  }
+  .work-body { padding: 1.4rem 1.5rem 1.7rem; }
+  .work-body h3 { font-size: var(--fs-h3); }
+  .work-desc { margin-top: 0.6rem; color: var(--muted); font-size: 0.97rem; }
+  .work-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.1rem 0 0; padding: 0; }
+  .work-tags li {
+    font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.3rem 0.65rem; border: 1px solid var(--line); border-radius: 999px;
+  }
+</style>

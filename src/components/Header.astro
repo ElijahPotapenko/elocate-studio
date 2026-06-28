@@ -1,0 +1,62 @@
+---
+import { useTranslations, resolveLang } from '../i18n/utils';
+const t = useTranslations(resolveLang(Astro.currentLocale));
+const links = [
+  { href: '#work', label: t('nav.work') },
+  { href: '#about', label: t('nav.about') },
+  { href: '#contact', label: t('nav.contact') },
+];
+---
+
+<header class="site-header">
+  <div class="container bar">
+    <a href="#top" class="brand" aria-label="Elocate Studio — home">
+      <img src="/assets/brand/logo-e.png" alt="" class="brand-mark" width="30" height="30" />
+      elocate<span class="brand-suffix">{t('brand.suffix')}</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a href="#contact" class="btn btn-ghost nav-cta">{t('nav.cta')}</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background: linear-gradient(180deg, rgba(8, 8, 12, 0.7), rgba(8, 8, 12, 0));
+    border-bottom: 1px solid transparent;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.12rem;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark { height: 30px; width: auto; display: block; }
+  .brand-suffix { color: var(--muted); font-weight: 400; }
+  .nav { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2.2rem); }
+  .nav > a:not(.nav-cta) {
+    font-size: 0.95rem;
+    color: var(--muted);
+    transition: color 0.25s var(--ease);
+  }
+  .nav > a:not(.nav-cta):hover { color: var(--text); }
+  .nav-cta { --pad-y: 0.5rem; padding-block: 0.5rem; }
+
+  @media (max-width: 620px) {
+    .nav > a:not(.nav-cta) { display: none; }
+  }
+</style>

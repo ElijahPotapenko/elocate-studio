@@ -1,0 +1,158 @@
+/* ============================================================
+   Elocate Studio — глобальная тема (тёмная, премиальная)
+   Источник истины токенов. Один акцент (мятно-аква неон).
+   ============================================================ */
+
+:root {
+  /* — палитра — */
+  --bg:        #08080c;   /* near-black фон */
+  --bg-soft:   #101019;   /* поверхность карточек/инпутов */
+  --bg-elev:   #16161f;   /* приподнятая поверхность (hover) */
+  --text:      #f3f3f7;   /* основной текст */
+  --muted:     #9aa0ac;   /* вторичный текст — ≈4.7:1 на фоне (WCAG AA) */
+  --line:      rgba(255, 255, 255, 0.09);  /* тонкие границы */
+  --line-2:    rgba(255, 255, 255, 0.16);
+
+  --accent:        #2b9f4c;                 /* фирменный зелёный (из лого «e») */
+  --accent-lite:   #3fc568;                 /* осветлённый тот же зелёный — для свечения/текста на near-black */
+  --accent-ink:    #03250f;                 /* тёмно-зелёный текст на акценте (кнопки) */
+  --accent-glow:   rgba(43, 159, 76, 0.5);
+  --accent-soft:   rgba(43, 159, 76, 0.12);
+
+  /* — типографика — */
+  --font-display: 'Space Grotesk', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+
+  --fs-display: clamp(2.75rem, 7vw + 0.5rem, 6.5rem);
+  --fs-h2:      clamp(1.75rem, 3.5vw + 0.5rem, 3rem);
+  --fs-h3:      clamp(1.15rem, 1vw + 0.75rem, 1.5rem);
+  --fs-lead:    clamp(1.05rem, 0.6vw + 0.9rem, 1.3rem);
+  --fs-body:    1rem;
+  --fs-eyebrow: 0.78rem;
+
+  /* — ритм / форма — */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.75rem;
+  --space-4: 3rem;
+  --space-5: 5rem;
+  --space-6: 8rem;
+
+  --radius:    14px;
+  --radius-lg: 22px;
+
+  --maxw: 1240px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* фоновое свечение под всем сайтом — мягкая аура акцента */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(120vw 80vh at 78% -10%, rgba(43, 159, 76, 0.13), transparent 60%),
+    radial-gradient(90vw 60vh at 0% 110%, rgba(43, 159, 76, 0.07), transparent 55%);
+  pointer-events: none;
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.05; margin: 0; letter-spacing: -0.02em; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* — раскладка — */
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: clamp(1.1rem, 4vw, 2.5rem);
+}
+
+.section { padding-block: clamp(4rem, 9vw, var(--space-6)); }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.eyebrow::before {
+  content: '';
+  width: 28px; height: 1px;
+  background: var(--accent);
+  opacity: 0.7;
+}
+
+/* — кнопки — */
+.btn {
+  --pad-y: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: var(--pad-y) 1.6rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.98rem;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
+  will-change: transform;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 0 0 0 var(--accent-glow);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 34px -8px var(--accent-glow);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line-2);
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* доступность фокуса */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+/* появление при скролле */
+/* Гард no-JS: прячем .reveal ТОЛЬКО когда есть класс `js` (ставится ранним инлайн-скриптом).
+   Без JS → класса нет → контент виден сразу (прогрессивное улучшение, не пропадает). */
+.js .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .js .reveal { opacity: 1; transform: none; transition: none; }
+}

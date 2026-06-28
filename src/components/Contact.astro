@@ -1,0 +1,115 @@
+---
+// Форма на Netlify Forms: data-netlify + скрытое form-name + ловушка-honeypot.
+// На задеплоенном Netlify сабмиты приходят в дашборд (Forms) без бэкенда.
+import { useTranslations, resolveLang } from '../i18n/utils';
+const t = useTranslations(resolveLang(Astro.currentLocale));
+---
+
+<section class="section contact" id="contact">
+  <div class="container contact-grid">
+    <div class="contact-lead reveal">
+      <p class="eyebrow">{t('contact.eyebrow')}</p>
+      <h2 set:html={t('contact.heading')}></h2>
+      <p class="contact-text">
+        {t('contact.text.pre')}
+        <a href={`mailto:${t('contact.email')}`} class="mail">{t('contact.email')}</a>.
+      </p>
+
+      <div class="contact-meta">
+        <span class="status"><span class="status-dot"></span>{t('contact.status')}</span>
+        <dl class="meta-list">
+          <div><dt>{t('contact.meta.1.k')}</dt><dd>{t('contact.meta.1.v')}</dd></div>
+          <div><dt>{t('contact.meta.2.k')}</dt><dd>{t('contact.meta.2.v')}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <form
+      class="contact-form reveal"
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+    >
+      <input type="hidden" name="form-name" value="contact" />
+      <p class="hp" hidden>
+        <label>Don’t fill this out: <input name="bot-field" /></label>
+      </p>
+
+      <div class="field">
+        <label for="name">{t('contact.form.name')}</label>
+        <input id="name" type="text" name="name" placeholder={t('contact.form.name.ph')} required />
+      </div>
+      <div class="field">
+        <label for="email">{t('contact.form.email')}</label>
+        <input id="email" type="email" name="email" placeholder={t('contact.form.email.ph')} required />
+      </div>
+      <div class="field">
+        <label for="message">{t('contact.form.message')}</label>
+        <textarea id="message" name="message" rows="4" placeholder={t('contact.form.message.ph')} required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">{t('contact.form.submit')} <span aria-hidden="true">→</span></button>
+    </form>
+  </div>
+</section>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+  .contact-lead h2 { font-size: var(--fs-h2); margin-top: 1rem; }
+  .contact-text { margin-top: 1.4rem; color: var(--muted); max-width: 40ch; font-size: var(--fs-lead); }
+  .mail { color: var(--accent); border-bottom: 1px solid var(--accent-soft); }
+  .mail:hover { border-color: var(--accent); }
+
+  /* левая колонка: статус-плашка + детали (заполняет пустоту под lead) */
+  .contact-meta { margin-top: 2.6rem; display: flex; flex-direction: column; gap: 1.6rem; }
+  .status {
+    display: inline-flex; align-items: center; gap: 0.6rem; align-self: flex-start;
+    font-family: var(--font-display); font-size: 0.9rem;
+    padding: 0.5rem 0.95rem; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--accent-soft); color: var(--text);
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px var(--accent-glow);
+    animation: pulse 2s var(--ease) infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .meta-list { margin: 0; display: grid; grid-template-columns: repeat(2, auto); gap: 0.4rem 2.8rem; justify-content: start; }
+  .meta-list div { display: flex; flex-direction: column; gap: 0.25rem; }
+  .meta-list dt { font-size: 0.76rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+  .meta-list dd { margin: 0; font-family: var(--font-display); font-size: 1.02rem; }
+  @media (prefers-reduced-motion: reduce) { .status-dot { animation: none; } }
+
+  .contact-form { display: flex; flex-direction: column; gap: 1.1rem; }
+  .field { display: flex; flex-direction: column; gap: 0.45rem; }
+  .field label { font-size: 0.82rem; color: var(--muted); letter-spacing: 0.03em; }
+  .field input,
+  .field textarea {
+    font: inherit;
+    color: var(--text);
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+    resize: vertical;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder { color: #5c5c69; }
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-elev);
+  }
+  .contact-form .btn { align-self: flex-start; margin-top: 0.4rem; }
+
+  @media (max-width: 760px) {
+    .contact-grid { grid-template-columns: 1fr; }
+  }
+</style>

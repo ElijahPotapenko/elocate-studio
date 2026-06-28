@@ -1,0 +1,110 @@
+---
+import { useTranslations, resolveLang } from '../i18n/utils';
+const t = useTranslations(resolveLang(Astro.currentLocale));
+const disciplines = t('hero.disciplines').split(',');
+---
+
+<section class="hero" id="top">
+  <canvas id="bg-sphere" class="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-grain" aria-hidden="true"></div>
+
+  <div class="container hero-inner">
+    <p class="eyebrow">{t('hero.eyebrow')}</p>
+    <h1 class="hero-title" set:html={t('hero.title')}></h1>
+    <p class="hero-lead">{t('hero.lead')}</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn btn-primary">{t('hero.cta.primary')} <span aria-hidden="true">✦</span></a>
+      <a href="#work" class="btn btn-ghost">{t('hero.cta.secondary')}</a>
+    </div>
+
+    <ul class="hero-marquee" aria-hidden="true">
+      {disciplines.concat(disciplines).map((d) => <li>{d}<span>✦</span></li>)}
+    </ul>
+  </div>
+
+  <a href="#work" class="scroll-cue" aria-label="Scroll to work">
+    <span></span>
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.9;
+    mask-image: radial-gradient(80% 80% at 60% 45%, #000 55%, transparent 100%);
+  }
+  .hero-grain {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+  .hero-inner { padding-top: 96px; max-width: 920px; }
+  .hero-title {
+    font-size: var(--fs-display);
+    margin: 1.1rem 0 0;
+  }
+  .hero-title .accent {
+    color: var(--accent);
+    text-shadow: 0 0 38px var(--accent-glow);
+  }
+  .hero-lead {
+    margin-top: 1.6rem;
+    max-width: 46ch;
+    font-size: var(--fs-lead);
+    color: var(--muted);
+  }
+  .hero-actions { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: 0.9rem; }
+
+  .hero-marquee {
+    list-style: none;
+    margin: 3.4rem 0 0;
+    padding: 0;
+    display: flex;
+    gap: 2.2rem;
+    width: max-content;
+    color: var(--muted);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.8rem;
+    animation: marquee 22s linear infinite;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .hero-marquee li { display: inline-flex; align-items: center; gap: 2.2rem; white-space: nowrap; }
+  .hero-marquee span { color: var(--accent); opacity: 0.7; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 1.8rem; left: 50%; translate: -50% 0;
+    width: 26px; height: 42px;
+    border: 1px solid var(--line-2);
+    border-radius: 14px;
+    display: grid; place-items: start center;
+    padding-top: 7px;
+  }
+  .scroll-cue span {
+    width: 3px; height: 8px; border-radius: 3px; background: var(--accent);
+    animation: cue 1.6s var(--ease) infinite;
+  }
+  @keyframes cue { 0%,100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(9px); opacity: 0.2; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-marquee, .scroll-cue span { animation: none; }
+  }
+  @media (max-width: 620px) {
+    .hero-canvas { opacity: 0.55; }
+  }
+</style>
