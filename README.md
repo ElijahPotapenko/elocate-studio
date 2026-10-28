@@ -12,10 +12,17 @@
 ```bash
 BOT_LLM=claude python3 server.py        # http://127.0.0.1:8765 (нужен вход в Claude Code)
 BOT_LLM=ollama python3 server.py        # локальная модель qwen2.5:3b
-python3 -m unittest discover -s tests -t .   # 22 теста, без сети
+python3 -m unittest discover -s tests -t .   # 45 тестов, без сети
 python3 scripts/record.py               # записать настоящие разговоры в transcripts/all.json
 python3 scripts/export_static.py        # статичная версия dist/index.html (для сайта студии)
 ```
+
+## Telegram
+1. В Telegram откройте **@BotFather** → `/newbot` → имя → username (заканчивается на `bot`) → он пришлёт токен. Токен никому не показывайте и в чат с ассистентом не вставляйте.
+2. Скопируйте токен (он в буфере обмена) и сохраните его в Keychain, не показывая: `pbpaste | python3 -m bot.save_token --clear-clipboard`
+3. Запуск: `python3 -m bot.telegram` (Ctrl+C остановит). Токен читается из Keychain (или `.env`, или переменной `TELEGRAM_BOT_TOKEN`), в логах и ошибках его нет.
+4. Уведомления оператору (передача человеку, готовая заявка): напишите боту `/myid`, возьмите число и добавьте в `.env` строку `OPERATOR_CHAT_ID=число`.
+Бот работает только в личных чатах, не больше 20 сообщений в минуту с чата. Команды: `/start`, `/reset`, `/myid`.
 
 ## Структура
 `bot/engine.py` (логика и защиты) · `bot/llm.py` (Claude CLI, Ollama, Mock) · `bot/kb.py` (знания) · `server.py` (локальный сервер) · `ui/index.html` (чат + «что видит команда») · `tests/` · `transcripts/` (записи с реальной моделью)

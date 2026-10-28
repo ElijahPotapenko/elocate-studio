@@ -1,4 +1,5 @@
+*.pyc
+.env
+__pycache__/
 data/
 dist/
-__pycache__/
-*.pyc
