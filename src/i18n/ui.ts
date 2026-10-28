@@ -50,6 +50,9 @@ export const ui = {
     'work.04.title': 'Travel to Asia',
     'work.04.desc':
       'A playful 3D travel story — bold scenes, warm palette, and motion that carries the journey.',
+    'work.05.title': 'AI Support Bot',
+    'work.05.desc':
+      'A multilingual customer-support assistant for a clinic: answers only from its knowledge base, books visits step by step, and hands over to a human when it should.',
 
     // — about —
     'about.eyebrow': 'About the studio',
