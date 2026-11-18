@@ -4,19 +4,19 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
 // Тексты (title/desc) — в i18n-словаре по ключу work.<n>.*; здесь только структура/ассеты.
 // href — пока заглушка `#contact` (рабочая навигация); заменить на реальные кейс-URL/страницы.
 const projects = [
+  {
+    n: '04',
+    tags: ['Motion', '3D'],
+    img: null,
+    video: { src: '/assets/work/travel.mp4', poster: '/assets/work/travel-poster.jpg' },
+    href: '#contact',
+  },
   { n: '02', tags: ['Product', 'Data Viz'], img: '/assets/work/chat.webp', href: '#contact' },
   {
     n: '03',
     tags: ['Type', 'Motion'],
     img: null,
     video: { src: '/assets/work/identity.mp4', poster: '/assets/work/identity-poster.jpg' },
-    href: '#contact',
-  },
-  {
-    n: '04',
-    tags: ['Motion', '3D'],
-    img: null,
-    video: { src: '/assets/work/travel.mp4', poster: '/assets/work/travel-poster.jpg' },
     href: '#contact',
   },
   { n: '05', tags: ['AI', 'Automation'], img: '/assets/work/support-bot.webp', href: '/demos/support-bot/' },
@@ -94,19 +94,18 @@ const projects = [
     gap: clamp(1.2rem, 2.5vw, 2rem);
   }
 
-  /* БЕНТО на десктопе (6 колонок), 6 карточек после удаления «ChatGPT Mobile Concept» (2026-11-18):
-     ряд1: [02 ·3][03 видео ·3] — две равные плитки
-     ряд2: [04 Travel видео ·6] — полноширинный баннер-фича
-     ряд3: [05 Support Bot ·6] — ТОЖЕ полноширинный баннер (редизайн в аввардз-стиле со scroll-историей,
-           «витрина»-кейс заслуживает тот же вес, что и 04/07, не квадратик)
+  /* БЕНТО на десктопе (6 колонок) — ритм большая/маленькие/большая/маленькие (2026-11-18):
+     ряд1: [04 Travel видео ·6] — полноширинный баннер
+     ряд2: [02 ·3][03 видео ·3] — две равные плитки
+     ряд3: [05 Support Bot ·6] — снова полноширинный баннер (тот же вес, что у 04/07)
      ряд4: [06 ·3][07 ·3] — две равные плитки, закрывают сетку */
   @media (min-width: 760px) {
     .work-list { grid-template-columns: repeat(6, 1fr); }
-    .work-item:nth-child(1) { grid-column: span 3; }
-    .work-item:nth-child(2) { grid-column: span 3; }
-    .work-item:nth-child(3) { grid-column: span 6; }
+    .work-item:nth-child(1) { grid-column: span 6; }
     /* широкий баннер — кинематографичный кроп 4:3-видео */
-    .work-item:nth-child(3) .work-media { aspect-ratio: 21 / 9; }
+    .work-item:nth-child(1) .work-media { aspect-ratio: 21 / 9; }
+    .work-item:nth-child(2) { grid-column: span 3; }
+    .work-item:nth-child(3) { grid-column: span 3; }
     .work-item:nth-child(4) { grid-column: span 6; }
     .work-item:nth-child(4) .work-media { aspect-ratio: 21 / 9; }
     .work-item:nth-child(5) { grid-column: span 3; }
