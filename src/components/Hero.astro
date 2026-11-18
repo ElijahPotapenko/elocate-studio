@@ -46,7 +46,11 @@ const disciplines = t('hero.disciplines').split(',');
     background-image: radial-gradient(var(--grain) 1px, transparent 1px);
     background-size: 3px 3px;
   }
-  .hero-inner { padding-top: 96px; max-width: 920px; }
+  /* .hero-inner делит div с .container (max-width:var(--maxw), 1240px, центрирован) — свой
+     max-width здесь раньше сужал блок до 920px и центрировал его ЗАНОВО независимо от .container,
+     из-за чего левый край героя (260px на 1440 вьюпорте) не совпадал с хедером/Work/About (100px).
+     Узкий замер текста — на самих h1/.hero-lead (ch-юниты), не на всём контейнере. */
+  .hero-inner { padding-top: 96px; }
   .hero-title {
     font-size: var(--fs-display);
     margin: 1.1rem 0 0;
