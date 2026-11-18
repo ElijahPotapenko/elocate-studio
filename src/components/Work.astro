@@ -22,6 +22,7 @@ const projects = [
   },
   { n: '05', tags: ['AI', 'Automation'], img: '/assets/work/support-bot.webp', href: '/demos/support-bot/' },
   { n: '06', tags: ['Product', 'Data Viz'], img: '/assets/work/analytics-pulse.webp', href: '/demos/analytics-pulse/' },
+  { n: '07', tags: ['Brand', '3D'], img: '/assets/work/nova.webp', href: '/demos/nova/' },
 ];
 ---
 
@@ -108,6 +109,9 @@ const projects = [
     /* ряд3: [05][06] — две равные плитки (без явного span сжимались бы в 1/6 ширины) */
     .work-item:nth-child(5) { grid-column: span 3; }
     .work-item:nth-child(6) { grid-column: span 3; }
+    /* ряд4: [07] — полноширинный баннер под wow-кейс, тот же приём, что и 04 */
+    .work-item:nth-child(7) { grid-column: span 6; }
+    .work-item:nth-child(7) .work-media { aspect-ratio: 21 / 9; }
   }
   .work-item {
     background: var(--bg-soft);

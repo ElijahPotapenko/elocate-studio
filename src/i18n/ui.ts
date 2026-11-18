@@ -56,6 +56,9 @@ export const ui = {
     'work.06.title': 'Analytics Pulse',
     'work.06.desc':
       'A product-analytics dashboard for a SaaS team — count-up metrics, a self-drawing revenue chart with live tooltips, and channel breakdowns that feel alive, not archived.',
+    'work.07.title': 'Nova — AI Copilot',
+    'work.07.desc':
+      'A speculative brand concept pushed to the edge: an iridescent 3D hero, orbiting intelligence rings, velocity-driven motion, and magnetic everything.',
 
     // — about —
     'about.eyebrow': 'About the studio',
