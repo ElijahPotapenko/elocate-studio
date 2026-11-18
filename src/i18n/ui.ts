@@ -47,9 +47,9 @@ export const ui = {
     'work.04.title': 'Travel to Asia',
     'work.04.desc':
       'A playful 3D travel story — bold scenes, warm palette, and motion that carries the journey.',
-    'work.05.title': 'AI Support Bot',
+    'work.05.title': 'The Assistant That Says No',
     'work.05.desc':
-      'A multilingual customer-support assistant for a clinic: answers only from its knowledge base, books visits step by step, and hands over to a human when it should.',
+      'A scroll-told case study for a multilingual clinic assistant — the guardrails, the refused prompt injection, the paper trail, and four real recorded conversations you can replay live.',
     'work.06.title': 'Analytics Pulse',
     'work.06.desc':
       'A product-analytics dashboard for a SaaS team — count-up metrics, a self-drawing revenue chart with live tooltips, and channel breakdowns that feel alive, not archived.',
