@@ -61,8 +61,11 @@ section.demo{padding:64px 0; border-top:1px solid var(--line)}
 .demo-head h2{font-family:var(--font-display); font-weight:600; font-size:1.6rem; margin:0}
 .demo-head .used-in{font-family:var(--font-mono); font-size:12px; color:var(--muted)}
 .demo-head .used-in b{color:var(--accent-lite); font-weight:500}
-.demo-desc{color:var(--muted); font-size:14.5px; max-width:60ch; margin:0 0 30px}
-.stage{background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:40px; display:flex; flex-wrap:wrap; gap:16px; align-items:center}
+.demo-desc{color:var(--muted); font-size:14.5px; max-width:60ch; margin:0 0 20px}
+
+/* подложка-ПОДЛОЖКА БЕЗ ЗАЛИВКИ — только контур, компонент сам несёт свой фон/цвет, стенд его не перекрашивает */
+.stage{position:relative; background:transparent; border:1px dashed var(--line-2); border-radius:var(--radius-lg); padding:44px 32px 32px; display:flex; flex-wrap:wrap; gap:16px; align-items:center}
+.stage-label{position:absolute; top:-11px; left:24px; background:var(--bg); padding:0 10px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
 
 /* MagneticCTA */
 .lab-btn{
@@ -96,6 +99,41 @@ section.demo{padding:64px 0; border-top:1px solid var(--line)}
 
 .code{font-family:var(--font-mono); font-size:12.5px; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:14px 16px; color:var(--accent-lite); white-space:pre; overflow-x:auto; margin-top:18px}
 
+/* ── База: цвет / типографика / сетка ── */
+.found{padding:60px 0; border-top:1px solid var(--line)}
+.found-head{margin-bottom:40px}
+.found-head h2{font-family:var(--font-display); font-weight:600; font-size:1.6rem; margin:0 0 8px}
+.found-head p{color:var(--muted); font-size:14.5px; margin:0; max-width:60ch}
+.found-sub{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-lite); margin:0 0 18px}
+
+.swatches{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:14px; margin-bottom:56px}
+.swatch{border:1px solid var(--line); border-radius:12px; overflow:hidden}
+.swatch-fill{height:64px}
+.swatch-meta{padding:10px 12px; background:var(--bg)}
+.swatch-meta b{display:block; font-family:var(--font-mono); font-size:12px}
+.swatch-meta span{display:block; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:2px}
+
+.type-rows{display:flex; flex-direction:column; gap:26px; margin-bottom:56px}
+.type-row{display:grid; grid-template-columns:140px 1fr; gap:24px; align-items:baseline; border-bottom:1px solid var(--line); padding-bottom:22px}
+.type-row:last-child{border-bottom:none}
+.type-tag{font-family:var(--font-mono); font-size:11px; color:var(--muted); line-height:1.5}
+.type-tag b{display:block; color:var(--text); font-size:12px}
+.t-display{font-family:var(--font-display); font-weight:700}
+.t-display.h1s{font-size:clamp(1.8rem,3.4vw,2.6rem)}
+.t-display.h2s{font-size:1.6rem}
+.t-display.h3s{font-size:1.15rem; font-weight:600}
+.t-body{font-family:var(--font-body); font-size:1rem; color:var(--muted); line-height:1.6; max-width:52ch}
+.t-mono{font-family:var(--font-mono); font-size:13px; color:var(--accent-lite)}
+
+.space-rows{display:flex; flex-direction:column; gap:10px; margin-bottom:0}
+.space-row{display:grid; grid-template-columns:90px 1fr 70px; align-items:center; gap:14px}
+.space-row .sp-name{font-family:var(--font-mono); font-size:11.5px; color:var(--muted)}
+.space-row .sp-bar{height:10px; background:var(--accent-soft); border:1px solid var(--line-2); border-radius:4px}
+.space-row .sp-val{font-family:var(--font-mono); font-size:11.5px; color:var(--text); text-align:right}
+
+.grid-demo{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.grid-col{height:34px; background:var(--accent-soft); border:1px solid var(--line-2); border-radius:6px}
+
 .rule{padding:70px 0 100px; text-align:center}
 .rule-box{background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:40px; max-width:640px; margin:0 auto}
 .rule-box h3{font-family:var(--font-display); margin:0 0 12px}
@@ -105,8 +143,11 @@ section.demo{padding:64px 0; border-top:1px solid var(--line)}
 footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:center; color:var(--muted); font-size:13px}
 
 @media (max-width:620px){
-  .stage{padding:26px}
+  .stage{padding:34px 20px 20px}
   .demo-head{flex-direction:column; align-items:flex-start}
+  .type-row{grid-template-columns:1fr; gap:8px}
+  .space-row{grid-template-columns:70px 1fr 56px}
+  .grid-demo{grid-template-columns:repeat(4,1fr)}
 }
 </style>
 </head>
@@ -126,11 +167,39 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:
   </div>
 </header>
 
+<section class="found">
+  <div class="wrap">
+    <div class="found-head">
+      <span class="eyebrow">Foundations</span>
+      <h2 style="font-family:var(--font-display); font-weight:600; font-size:1.8rem; margin:10px 0 8px">Base, before the parts</h2>
+      <p style="color:var(--muted); font-size:14.5px; max-width:60ch; margin:0">The same color/type/grid tokens that run <code class="t-mono" style="font-size:12.5px">src/styles/global.css</code> on the main site — reproduced here by value, since this page lives outside the Astro build.</p>
+    </div>
+
+    <p class="found-sub">Color</p>
+    <div class="swatches" id="swatches"></div>
+
+    <p class="found-sub">Typography</p>
+    <div class="type-rows">
+      <div class="type-row"><div class="type-tag"><b>Display / H1</b>Space Grotesk 700<br>clamp(1.8–2.6rem)</div><div class="t-display h1s">Design, built in systems</div></div>
+      <div class="type-row"><div class="type-tag"><b>Display / H2</b>Space Grotesk 600<br>1.6rem</div><div class="t-display h2s">One copilot, five surfaces</div></div>
+      <div class="type-row"><div class="type-tag"><b>Display / H3</b>Space Grotesk 600<br>1.15rem</div><div class="t-display h3s">MagneticCTA</div></div>
+      <div class="type-row"><div class="type-tag"><b>Body</b>Inter 400<br>1rem / 1.6</div><div class="t-body">Elocate is a small studio that brings product, interface, and brand into one coherent system.</div></div>
+      <div class="type-row"><div class="type-tag"><b>Mono</b>JetBrains Mono 400<br>13px</div><div class="t-mono">&lt;MagneticCTA strength={0.3} /&gt;</div></div>
+    </div>
+
+    <p class="found-sub">Spacing scale</p>
+    <div class="space-rows" id="spaceRows" style="margin-bottom:56px"></div>
+
+    <p class="found-sub">Grid — 12 columns, max-width 1240px</p>
+    <div class="grid-demo" id="gridDemo"></div>
+  </div>
+</section>
+
 <section class="demo">
   <div class="wrap">
     <div class="demo-head"><h2>MagneticCTA</h2><div class="used-in">used in <b>Nova</b></div></div>
     <p class="demo-desc">A button that leans toward the cursor on approach and snaps back on leave — spring physics, not a transition.</p>
-    <div class="stage" id="stageCta"></div>
+    <div class="stage"><span class="stage-label">state · idle → hover-tug → tap</span><div id="stageCta" style="display:contents"></div></div>
     <div class="code">&lt;MagneticCTA label="Start a project" href="/#contact" strength={0.3} tapScale={0.04} /&gt;</div>
   </div>
 </section>
@@ -139,7 +208,7 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:
   <div class="wrap">
     <div class="demo-head"><h2>TiltCard</h2><div class="used-in">used in <b>Nova</b></div></div>
     <p class="demo-desc">3D tilt that tracks the cursor position inside the card. Content and color are entirely up to the caller.</p>
-    <div class="stage"><div class="lab-cards" id="stageCards"></div></div>
+    <div class="stage"><span class="stage-label">state · 3 motion lenses, same component</span><div class="lab-cards" id="stageCards"></div></div>
     <div class="code">&lt;TiltCard maxTilt={8} hoverY={-4}&gt;...&lt;/TiltCard&gt;</div>
   </div>
 </section>
@@ -148,7 +217,7 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:
   <div class="wrap">
     <div class="demo-head"><h2>VelocityMarquee</h2><div class="used-in">used in <b>Nova</b></div></div>
     <p class="demo-desc">Scroll this page — the strip below speeds up and even reverses direction with your scroll velocity.</p>
-    <div class="stage" style="padding:0"><div class="lab-marquee-wrap"><div id="stageMarquee"></div></div></div>
+    <div class="stage" style="padding-top:44px"><span class="stage-label">state · idle drift → accelerates with scroll velocity</span><div class="lab-marquee-wrap" style="width:100%"><div id="stageMarquee"></div></div></div>
   </div>
 </section>
 
@@ -156,7 +225,7 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:
   <div class="wrap">
     <div class="demo-head"><h2>CountUp</h2><div class="used-in">used in <b>Nova</b> · <b>Support Bot</b></div></div>
     <p class="demo-desc">Counts up from zero the first time it enters the viewport. Never replays.</p>
-    <div class="stage"><div class="lab-stats" id="stageStats"></div></div>
+    <div class="stage"><span class="stage-label">state · 0 → target, fires once on viewport enter</span><div class="lab-stats" id="stageStats"></div></div>
   </div>
 </section>
 
@@ -164,7 +233,7 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:
   <div class="wrap">
     <div class="demo-head"><h2>Reveal</h2><div class="used-in">used in <b>Support Bot</b></div></div>
     <p class="demo-desc">Fade + slide-up when scrolled into view. Each row below reveals independently, once.</p>
-    <div class="stage"><div class="lab-reveal-stack" id="stageReveal"></div></div>
+    <div class="stage"><span class="stage-label">state · hidden → revealed, staggered 0.1s</span><div class="lab-reveal-stack" id="stageReveal"></div></div>
   </div>
 </section>
 
@@ -179,6 +248,29 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:
 </section>
 
 <footer class="bottom"><div class="wrap">Elocate Studio — internal component lab, not a public case study</div></footer>
+
+<script>
+/* — База: цвет/отступы/сетка — чистый DOM, без React, это статичная витрина токенов — */
+const SWATCHES = [
+  { n: '--bg', v: '#08080c' }, { n: '--bg-soft', v: '#101019' }, { n: '--bg-elev', v: '#16161f' },
+  { n: '--text', v: '#f3f3f7' }, { n: '--muted', v: '#9aa0ac' },
+  { n: '--accent', v: '#2b9f4c' }, { n: '--accent-lite', v: '#3fc568' },
+];
+document.getElementById('swatches').innerHTML = SWATCHES.map(s => `
+  <div class="swatch">
+    <div class="swatch-fill" style="background:${s.v}"></div>
+    <div class="swatch-meta"><b>${s.n}</b><span>${s.v}</span></div>
+  </div>
+`).join('');
+
+const SPACES = [['--space-1','8px',8],['--space-2','16px',16],['--space-3','28px',28],['--space-4','48px',48],['--space-5','80px',80],['--space-6','128px',128]];
+const maxSp = 128;
+document.getElementById('spaceRows').innerHTML = SPACES.map(([n,label,px]) => `
+  <div class="space-row"><span class="sp-name">${n}</span><span class="sp-bar" style="width:${(px/maxSp*100).toFixed(0)}%"></span><span class="sp-val">${label}</span></div>
+`).join('');
+
+document.getElementById('gridDemo').innerHTML = Array.from({length:12}, () => '<div class="grid-col"></div>').join('');
+</script>
 
 <script type="module">
 import React from 'react';
