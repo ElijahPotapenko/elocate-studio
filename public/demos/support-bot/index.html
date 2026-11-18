@@ -14,7 +14,7 @@
     "react-dom": "https://esm.sh/react-dom@18.3.1",
     "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
     "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-    "framer-motion": "https://esm.sh/framer-motion@11.3.19?external=react,react-dom",
+    "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
     "htm": "https://esm.sh/htm@3.1.1"
   }
 }
@@ -248,10 +248,10 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0; text-align:cente
 <section class="stats">
   <div class="wrap">
     <div class="stats-grid">
-      <div class="stat"><div class="stat-n"><span class="cnt" data-to="4">0</span></div><div class="stat-l">Languages handled live in one thread</div></div>
-      <div class="stat"><div class="stat-n"><span class="cnt" data-to="100">0</span><small>%</small></div><div class="stat-l">Prices grounded in the knowledge base — zero improvised</div></div>
-      <div class="stat"><div class="stat-n">&lt;<span class="cnt" data-to="5">0</span><small>s</small></div><div class="stat-l">Average time to first reply</div></div>
-      <div class="stat"><div class="stat-n"><span class="cnt" data-to="0">0</span></div><div class="stat-l">Discounts improvised under pressure</div></div>
+      <div class="stat"><div class="stat-n"><span id="cntLangs"></span></div><div class="stat-l">Languages handled live in one thread</div></div>
+      <div class="stat"><div class="stat-n"><span id="cntPrices"></span><small>%</small></div><div class="stat-l">Prices grounded in the knowledge base — zero improvised</div></div>
+      <div class="stat"><div class="stat-n">&lt;<span id="cntReply"></span><small>s</small></div><div class="stat-l">Average time to first reply</div></div>
+      <div class="stat"><div class="stat-n"><span id="cntDiscounts"></span></div><div class="stat-l">Discounts improvised under pressure</div></div>
     </div>
   </div>
 </section>
@@ -286,10 +286,9 @@ footer.bottom{border-top:1px solid var(--line); padding:26px 0; text-align:cente
 
 <script type="module">
 import { createRoot } from 'react-dom/client';
-import htm from 'htm';
-import React, { useEffect, useRef } from 'react';
-import { motion, useInView, animate } from 'framer-motion';
-const html = htm.bind(React.createElement);
+import React from 'react';
+import { motion } from 'framer-motion';
+import { CountUp, Reveal, html } from '../_shared/motion.js';
 
 /* — language ribbon (бесконечная лента, дублируем список) — */
 const LANGS = ['PORTUGUÊS','ENGLISH','POLSKI','РУССКИЙ'];
@@ -300,46 +299,11 @@ let rx = 0;
 function tickRibbon(){ rx -= 0.4; if (Math.abs(rx) > ribbon.scrollWidth / 2) rx = 0; ribbon.style.transform = `translate3d(${rx}px,0,0)`; requestAnimationFrame(tickRibbon); }
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(tickRibbon);
 
-/* — count-up stats — */
-function CountUp({ to, el }) {
-  useEffect(() => {
-    const controls = animate(0, to, {
-      duration: 1.4, ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => { el.textContent = Math.round(v); },
-    });
-    return () => controls.stop();
-  }, []);
-  return null;
-}
-const counters = document.querySelectorAll('.cnt');
-const seen = new Set();
-const io = new IntersectionObserver((entries) => {
-  entries.forEach((en) => {
-    if (en.isIntersecting && !seen.has(en.target)) {
-      seen.add(en.target);
-      const to = +en.target.dataset.to;
-      const root = document.createElement('span');
-      en.target.after(root);
-      createRoot(root).render(html`<${CountUp} to=${to} el=${en.target} />`);
-      root.remove();
-    }
-  });
-}, { threshold: 0.6 });
-counters.forEach((c) => io.observe(c));
-
-/* — story visuals (React islands, reveal on scroll) — */
-function Reveal({ children, delay = 0 }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  return html`
-    <${motion.div}
-      ref=${ref}
-      initial=${{ opacity: 0, y: 18 }}
-      animate=${inView ? { opacity: 1, y: 0 } : {}}
-      transition=${{ duration: 0.7, delay, ease: [0.22,1,0.36,1] }}
-    >${children}<//>
-  `;
-}
+/* — count-up stats (общий компонент) — */
+createRoot(document.getElementById('cntLangs')).render(html`<${CountUp} to=${4} />`);
+createRoot(document.getElementById('cntPrices')).render(html`<${CountUp} to=${100} />`);
+createRoot(document.getElementById('cntReply')).render(html`<${CountUp} to=${5} />`);
+createRoot(document.getElementById('cntDiscounts')).render(html`<${CountUp} to=${0} />`);
 
 function ProblemVisual() {
   const rows = [

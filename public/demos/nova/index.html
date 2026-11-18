@@ -17,10 +17,9 @@
     "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
     "react-dom": "https://esm.sh/react-dom@18.3.1",
     "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react",
+    "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
     "three": "https://esm.sh/three@0.169.0",
-    "htm": "https://esm.sh/htm@3.1.1",
-    "animejs": "https://esm.sh/animejs@3.2.2"
+    "htm": "https://esm.sh/htm@3.1.1"
   }
 }
 </script>
@@ -192,9 +191,9 @@ footer.bottom a{color:var(--grape); text-decoration:none; font-weight:700}
     <p class="hero-lead">A speculative brand for an AI copilot that doesn't hide its reasoning — it shows its orbit. Built to demonstrate range beyond restrained product UI, dressed up as a piece of art.</p>
     <div class="cta-row" id="ctaRow"></div>
     <div class="hero-stats">
-      <div class="hstat"><div class="hstat-val" id="statQ" data-target="2400000">0</div><div class="hstat-label">Queries routed / mo</div></div>
-      <div class="hstat"><div class="hstat-val" id="statMs" data-target="180">0</div><div class="hstat-label">P50 latency, ms</div></div>
-      <div class="hstat"><div class="hstat-val" id="statUp" data-target="99.98" data-decimals="2">0</div><div class="hstat-label">Uptime, %</div></div>
+      <div class="hstat"><div class="hstat-val" id="statQ"></div><div class="hstat-label">Queries routed / mo</div></div>
+      <div class="hstat"><div class="hstat-val" id="statMs"></div><div class="hstat-label">P50 latency, ms</div></div>
+      <div class="hstat"><div class="hstat-val" id="statUp"></div><div class="hstat-label">Uptime, %</div></div>
     </div>
   </div>
 </section>
@@ -249,7 +248,6 @@ confettiMount.innerHTML = CONFETTI_SHAPES.map(s => `
 
 /* ============ Three.js hero: candy-glass icosahedron + paper-halo orbit rings ============ */
 import * as THREE from 'three';
-import anime from 'animejs';
 
 const canvas = document.getElementById('heroCanvas');
 const heroSection = document.querySelector('.hero');
@@ -357,105 +355,37 @@ function onResize(){
 }
 window.addEventListener('resize', onResize);
 
-/* ============ anime.js — hero stat count-up on view ============ */
-function countUp(el){
-  const target = parseFloat(el.dataset.target);
-  const decimals = parseInt(el.dataset.decimals || '0', 10);
-  anime({
-    targets: { v: 0 }, v: target, easing: 'easeOutCubic', duration: 1800, round: decimals ? Math.pow(10, decimals) : 1,
-    update: a => { el.textContent = decimals ? a.animatables[0].target.v.toFixed(decimals) : Math.round(a.animatables[0].target.v).toLocaleString('en-US'); },
-  });
-}
-const statIO = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting){ countUp(e.target); statIO.unobserve(e.target); } });
-}, { threshold: .5 });
-document.querySelectorAll('.hstat-val').forEach(el => statIO.observe(el));
-
-/* ============ React islands: marquee, magnetic CTAs, tilt bento — bouncier "play" spring lens ============ */
+/* ============ React islands — механика из _shared/motion.js, кожа (классы/цвета) своя ============ */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { motion, useScroll, useVelocity, useTransform, useSpring, useMotionValue, useAnimationFrame } from 'framer-motion';
-import htm from 'htm';
-const html = htm.bind(React.createElement);
+import { MagneticCTA, TiltCard, VelocityMarquee, CountUp, html } from '../_shared/motion.js';
 
-function VelocityMarquee(){
-  const baseX = useMotionValue(0);
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
-  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], { clamp: false });
-  const dir = React.useRef(1);
+/* hero-статы: count-up, общий компонент, своя разметка/подписи */
+createRoot(document.getElementById('statQ')).render(html`<${CountUp} to=${2400000} locale=${true} />`);
+createRoot(document.getElementById('statMs')).render(html`<${CountUp} to=${180} />`);
+createRoot(document.getElementById('statUp')).render(html`<${CountUp} to=${99.98} decimals=${2} />`);
 
-  useAnimationFrame((_, delta) => {
-    let moveBy = dir.current * 4.2 * (delta / 1000);
-    if (velocityFactor.get() < 0) dir.current = -1; else if (velocityFactor.get() > 0) dir.current = 1;
-    moveBy += dir.current * moveBy * velocityFactor.get();
-    baseX.set(baseX.get() - moveBy);
-  });
+/* бегущая строка возможностей */
+const MARQUEE_ITEMS = ['Natural language', 'Real-time routing', 'Multi-agent', 'Context memory', 'Tool use', 'Guarded reasoning'];
+createRoot(document.getElementById('marqueeMount')).render(html`
+  <${VelocityMarquee} className="marquee-track" renderTrack=${() => MARQUEE_ITEMS.map((it, i) => html`
+    <span class="marquee-item" key=${i}><span class="marquee-dot"></span><b>${it}</b></span>
+  `)} />
+`);
 
-  const items = ['Natural language', 'Real-time routing', 'Multi-agent', 'Context memory', 'Tool use', 'Guarded reasoning'];
-  return html`
-    <div class="marquee-track">
-      ${[0,1,2,3].map(rep => html`
-        <${motion.div} key=${rep} style=${{ x: baseX, display: 'inline-flex' }}>
-          ${items.map((it, i) => html`
-            <span class="marquee-item" key=${i}><span class="marquee-dot"></span><b>${it}</b></span>
-          `)}
-        <//>
-      `)}
-    </div>
-  `;
-}
-createRoot(document.getElementById('marqueeMount')).render(html`<${VelocityMarquee} />`);
-
-function MagneticCTA({ label, href, variant }){
-  const x = useMotionValue(0), y = useMotionValue(0);
-  /* play-lens: ниже damping → заметный мягкий перехлёст, не резкий щелчок */
-  const sx = useSpring(x, { damping: 12, stiffness: 240 });
-  const sy = useSpring(y, { damping: 12, stiffness: 240 });
-  function onMove(e){
-    const r = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - r.left - r.width/2) * 0.3);
-    y.set((e.clientY - r.top - r.height/2) * 0.3);
-  }
-  function onLeave(){ x.set(0); y.set(0); }
-  return html`
-    <${motion.a} href=${href} class=${'mcta ' + variant} style=${{ x: sx, y: sy }}
-      whileHover=${{ scale: 1.04 }} whileTap=${{ scale: 0.96 }}
-      transition=${{ type: 'spring', stiffness: 300, damping: 14 }}
-      onMouseMove=${onMove} onMouseLeave=${onLeave}>
-      ${label}${variant === 'primary' ? html`<span aria-hidden="true">→</span>` : null}
-    <//>
-  `;
-}
+/* магнитные CTA — play-lens: ниже damping, заметный мягкий перехлёст */
 function CtaRow(){
   return html`<${React.Fragment}>
-    <${MagneticCTA} label="Start a project" href="/#contact" variant="primary" />
-    <${MagneticCTA} label="View the case" href="#work" variant="ghost" />
+    <${MagneticCTA} label="Start a project" href="/#contact" className="mcta primary" strength=${0.3} tapScale=${0.04} spring=${{ damping: 12, stiffness: 240 }}>
+      <span aria-hidden="true">→</span>
+    <//>
+    <${MagneticCTA} label="View the case" href="#work" className="mcta ghost" strength=${0.3} tapScale=${0.04} spring=${{ damping: 12, stiffness: 240 }} />
   <//>`;
 }
 createRoot(document.getElementById('ctaRow')).render(html`<${CtaRow} />`);
 createRoot(document.getElementById('ctaRow2')).render(html`<${CtaRow} />`);
 
-function TiltCard({ icon, title, desc }){
-  const x = useMotionValue(0), y = useMotionValue(0);
-  const rotateX = useSpring(useTransform(y, [-100, 100], [8, -8]), { damping: 16, stiffness: 200 });
-  const rotateY = useSpring(useTransform(x, [-100, 100], [-8, 8]), { damping: 16, stiffness: 200 });
-  function onMove(e){
-    const r = e.currentTarget.getBoundingClientRect();
-    x.set(e.clientX - r.left - r.width/2); y.set(e.clientY - r.top - r.height/2);
-  }
-  function onLeave(){ x.set(0); y.set(0); }
-  return html`
-    <${motion.div} class="bcard" style=${{ rotateX, rotateY, transformPerspective: 900 }}
-      whileHover=${{ y: -4 }} transition=${{ type: 'spring', stiffness: 260, damping: 16 }}
-      onMouseMove=${onMove} onMouseLeave=${onLeave}>
-      <div class="bicon">${icon}</div>
-      <h3>${title}</h3>
-      <p>${desc}</p>
-    <//>
-  `;
-}
+/* бенто — тилт-карточки, иконка/текст/акцент свои */
 const cards = [
   { icon: '◎', title: 'Reasoning you can see', desc: 'Every answer ships with the chain of thought that produced it — no black box, no blind trust.' },
   { icon: '⟡', title: 'Context that persists', desc: 'Memory survives the session. Nova remembers the shape of your problem, not just the last message.' },
@@ -464,7 +394,13 @@ const cards = [
   { icon: '✦', title: '180ms to first token', desc: 'Latency budget treated as a feature, not an afterthought.' },
 ];
 function Bento(){
-  return html`<div class="bento">${cards.map((c,i) => html`<${TiltCard} key=${i} ...${c} />`)}</div>`;
+  return html`<div class="bento">${cards.map((c,i) => html`
+    <${TiltCard} key=${i} className="bcard" maxTilt=${8} hoverY=${-4} spring=${{ damping: 16, stiffness: 200 }}>
+      <div class="bicon">${c.icon}</div>
+      <h3>${c.title}</h3>
+      <p>${c.desc}</p>
+    <//>
+  `)}</div>`;
 }
 createRoot(document.getElementById('bentoMount')).render(html`<${Bento} />`);
 </script>
