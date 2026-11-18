@@ -3,6 +3,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  // dev-сервер один на все воркеры — полный параллелизм (default = # CPU cores) иногда топит
+  // навигацию в таймаут под 2 движка × несколько тестов разом; 3 держит прогон быстрым и стабильным.
+  workers: 3,
   retries: 0,
   reporter: [['list']],
   use: {
