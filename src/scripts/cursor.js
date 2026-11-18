@@ -7,7 +7,11 @@ export function initCursor() {
   if (!fine || reduced) return;
 
   const root = document.documentElement;
-  root.classList.add('has-custom-cursor');
+  // НЕ прячем нативный курсор сразу: .cursor-dot до первого mousemove стоит в (0,0) (левый верхний угол) —
+  // если сразу дать cursor:none на <html>, между загрузкой страницы и первым движением мыши не видно НИЧЕГО
+  // (ни настоящего курсора, ни точки на месте мыши) — баг «пропадает курсор» на каждой полной навигации
+  // (сегодня особенно заметно — много переходов между главной и новыми кейсами). Прячем только ПОСЛЕ того,
+  // как точка впервые встала на реальную позицию мыши — подмена происходит бесшовно, в один кадр.
 
   const dot = document.createElement('div');
   dot.className = 'cursor-dot';
@@ -17,6 +21,7 @@ export function initCursor() {
   addEventListener('mousemove', (e) => {
     dot.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
   }, { passive: true });
+  addEventListener('mousemove', () => root.classList.add('has-custom-cursor'), { passive: true, once: true });
 
   // прячем точку, когда мышь ушла из окна
   const hide = (v) => root.classList.toggle('cursor-hidden', v);

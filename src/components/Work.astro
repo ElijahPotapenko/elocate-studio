@@ -4,7 +4,6 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
 // Тексты (title/desc) — в i18n-словаре по ключу work.<n>.*; здесь только структура/ассеты.
 // href — пока заглушка `#contact` (рабочая навигация); заменить на реальные кейс-URL/страницы.
 const projects = [
-  { n: '01', tags: ['Product', 'UI System'], img: '/assets/work/finance.webp', href: '#contact' },
   { n: '02', tags: ['Product', 'Data Viz'], img: '/assets/work/chat.webp', href: '#contact' },
   {
     n: '03',
@@ -95,23 +94,23 @@ const projects = [
     gap: clamp(1.2rem, 2.5vw, 2rem);
   }
 
-  /* БЕНТО на десктопе (6 колонок):
-     ряд1: [01 ·2][02 ·2][03 видео ·2] — три равные плитки
-     ряд2: [04 Travel видео ·6] — полноширинный баннер-фича (без «дыр» по высоте) */
+  /* БЕНТО на десктопе (6 колонок), 6 карточек после удаления «ChatGPT Mobile Concept» (2026-11-18):
+     ряд1: [02 ·3][03 видео ·3] — две равные плитки
+     ряд2: [04 Travel видео ·6] — полноширинный баннер-фича
+     ряд3: [05 Support Bot ·6] — ТОЖЕ полноширинный баннер (редизайн в аввардз-стиле со scroll-историей,
+           «витрина»-кейс заслуживает тот же вес, что и 04/07, не квадратик)
+     ряд4: [06 ·3][07 ·3] — две равные плитки, закрывают сетку */
   @media (min-width: 760px) {
     .work-list { grid-template-columns: repeat(6, 1fr); }
-    .work-item:nth-child(1) { grid-column: span 2; }
-    .work-item:nth-child(2) { grid-column: span 2; }
-    .work-item:nth-child(3) { grid-column: span 2; }
-    .work-item:nth-child(4) { grid-column: span 6; }
+    .work-item:nth-child(1) { grid-column: span 3; }
+    .work-item:nth-child(2) { grid-column: span 3; }
+    .work-item:nth-child(3) { grid-column: span 6; }
     /* широкий баннер — кинематографичный кроп 4:3-видео */
+    .work-item:nth-child(3) .work-media { aspect-ratio: 21 / 9; }
+    .work-item:nth-child(4) { grid-column: span 6; }
     .work-item:nth-child(4) .work-media { aspect-ratio: 21 / 9; }
-    /* ряд3: [05][06] — две равные плитки (без явного span сжимались бы в 1/6 ширины) */
     .work-item:nth-child(5) { grid-column: span 3; }
     .work-item:nth-child(6) { grid-column: span 3; }
-    /* ряд4: [07] — полноширинный баннер под wow-кейс, тот же приём, что и 04 */
-    .work-item:nth-child(7) { grid-column: span 6; }
-    .work-item:nth-child(7) .work-media { aspect-ratio: 21 / 9; }
   }
   .work-item {
     background: var(--bg-soft);

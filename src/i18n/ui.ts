@@ -38,9 +38,6 @@ export const ui = {
     'work.eyebrow': 'Selected work',
     'work.cta': 'View case',
     'work.heading': 'Projects where disciplines<br />work as one team', // [html]
-    'work.01.title': 'ChatGPT Mobile Concept',
-    'work.01.desc':
-      'An experimental conversational interface — dark theme, conversation memory, and tactile feedback.',
     'work.02.title': 'Finance Dashboard',
     'work.02.desc':
       'A colorful dashboard for managing expenses — branded widgets, insights, and a clear hierarchy.',
