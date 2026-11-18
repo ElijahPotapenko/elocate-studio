@@ -17,5 +17,8 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Элайджа сверяет вёрстку в Firefox, не в Chrome (feedback_prefer-firefox-screenshots) —
+    // курсор особенно: hide-native/show-dot может вести себя по-разному по движку.
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
   ],
 });

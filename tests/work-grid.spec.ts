@@ -22,13 +22,16 @@ test.describe('work grid', () => {
   });
 
   test('each live case (not the #contact placeholders) loads with no console errors', async ({ page }) => {
+    test.slow(); // три полных document-навигации на общий dev-сервер под нагрузкой параллельных воркеров
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
 
     for (const url of ['/demos/nova/index.html', '/demos/analytics-pulse/index.html', '/demos/support-bot/index.html']) {
-      await page.goto(url);
-      await page.waitForTimeout(500);
+      // support-bot embeds a live iframe (widget.html) — 'load' waits on it too and can be slow
+      // under parallel worker load; domcontentloaded is enough to catch the console errors we care about.
+      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(800);
     }
     expect(errors, errors.join('\n')).toEqual([]);
   });
