@@ -53,6 +53,9 @@ export const ui = {
     'work.05.title': 'AI Support Bot',
     'work.05.desc':
       'A multilingual customer-support assistant for a clinic: answers only from its knowledge base, books visits step by step, and hands over to a human when it should.',
+    'work.06.title': 'Analytics Pulse',
+    'work.06.desc':
+      'A product-analytics dashboard for a SaaS team — count-up metrics, a self-drawing revenue chart with live tooltips, and channel breakdowns that feel alive, not archived.',
 
     // — about —
     'about.eyebrow': 'About the studio',

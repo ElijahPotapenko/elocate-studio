@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics Pulse — product dashboard demo · Elocate Studio</title>
+<meta name="description" content="A live-feeling product analytics dashboard — case study demo by Elocate Studio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08080c; --bg-soft:#101019; --bg-elev:#16161f;
+  --text:#f3f3f7; --muted:#9aa0ac; --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.16);
+  --accent:#2b9f4c; --accent-lite:#3fc568; --accent-ink:#03250f; --accent-glow:rgba(43,159,76,.45); --accent-soft:rgba(43,159,76,.12);
+  --blue:#4d79d6; --amber:#c9821f;
+  --good:#3fc568; --bad:#e2685a;
+  --font-display:'Space Grotesk',system-ui,sans-serif; --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --radius:14px; --radius-lg:20px;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{
+  margin:0; background:var(--bg); color:var(--text); font:15px/1.5 var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(60vmax 40vmax at 15% -10%, var(--accent-soft), transparent 60%),
+    radial-gradient(50vmax 35vmax at 110% 10%, rgba(77,121,214,.08), transparent 55%);
+}
+.wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 24px}
+a{color:inherit}
+
+/* ── header ── */
+header.top{display:flex; align-items:center; justify-content:space-between; padding:22px 0}
+.back{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); text-decoration:none; transition:color .2s var(--ease)}
+.back:hover{color:var(--text)}
+.case-tag{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:5px 12px}
+
+/* ── hero ── */
+.hero{padding:48px 0 40px; display:flex; flex-direction:column; gap:16px}
+.pulse-badge{display:inline-flex; align-items:center; gap:8px; align-self:flex-start; font-size:12px; font-weight:600; color:var(--accent-lite); background:var(--accent-soft); border:1px solid rgba(63,197,104,.3); border-radius:999px; padding:6px 12px 6px 10px}
+.pulse-dot{position:relative; width:7px; height:7px; border-radius:50%; background:var(--accent-lite)}
+.pulse-dot::after{content:''; position:absolute; inset:-5px; border-radius:50%; border:1.5px solid var(--accent-lite); animation:pulse-ring 1.8s var(--ease) infinite}
+@keyframes pulse-ring{0%{transform:scale(.4); opacity:.9} 100%{transform:scale(2.1); opacity:0}}
+h1{font-family:var(--font-display); font-weight:600; font-size:clamp(2rem,4.2vw + .5rem,3.4rem); line-height:1.06; margin:0; max-width:18ch; letter-spacing:-.01em}
+h1 em{font-style:normal; color:var(--accent-lite)}
+.lead{color:var(--muted); font-size:clamp(1rem,.3vw + .95rem,1.15rem); max-width:52ch; margin:0}
+
+/* ── reveal ── */
+.reveal{opacity:0; transform:translateY(14px); transition:opacity .7s var(--ease), transform .7s var(--ease)}
+.reveal.in{opacity:1; transform:none}
+
+/* ── stat tiles ── */
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:36px 0 0}
+.stat{background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius); padding:18px 18px 16px; transition:border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease)}
+.stat:hover{border-color:var(--line-2); transform:translateY(-2px); box-shadow:0 10px 30px -14px rgba(0,0,0,.6)}
+.stat-label{font-size:12.5px; color:var(--muted)}
+.stat-value{font-family:var(--font-display); font-size:1.65rem; font-weight:600; margin-top:6px; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+.stat-delta{display:block; font-size:12.5px; font-weight:600; margin-top:6px; line-height:1.3}
+.stat-delta.up{color:var(--good)} .stat-delta.down{color:var(--bad)}
+.spark{display:block; margin-top:10px; width:100%; height:28px}
+
+/* ── cards ── */
+.grid-main{display:grid; grid-template-columns:1.6fr 1fr; gap:16px; margin-top:16px}
+.card{background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:22px 22px 18px}
+.card-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px}
+.card-title{font-family:var(--font-display); font-size:1.05rem; font-weight:600; margin:0}
+.card-sub{font-size:12.5px; color:var(--muted)}
+.range{display:flex; gap:6px}
+.range button{font:inherit; font-size:12px; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:999px; padding:4px 10px; cursor:pointer; transition:all .2s var(--ease)}
+.range button.on{color:var(--accent-ink); background:var(--accent-lite); border-color:var(--accent-lite); font-weight:600}
+
+/* ── line chart ── */
+.chart-wrap{position:relative}
+svg.chart{display:block; width:100%; height:auto; overflow:visible}
+.gridline{stroke:var(--line); stroke-width:1}
+.axis-label{fill:var(--muted); font:11px/1 var(--font-body)}
+.area-fill{fill:var(--accent); opacity:.1}
+.line-path{fill:none; stroke:var(--accent-lite); stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.end-dot{fill:var(--accent-lite); stroke:var(--bg-soft); stroke-width:2}
+.hover-dot{fill:var(--accent-lite); stroke:var(--bg-soft); stroke-width:2; opacity:0; pointer-events:none}
+.hover-line{stroke:var(--line-2); stroke-width:1; opacity:0; pointer-events:none}
+.tooltip{position:absolute; pointer-events:none; opacity:0; transition:opacity .12s; background:var(--bg-elev); border:1px solid var(--line-2); border-radius:10px; padding:8px 11px; font-size:12.5px; white-space:nowrap; transform:translate(-50%,-115%); box-shadow:0 12px 28px -12px rgba(0,0,0,.7)}
+.tooltip b{font-family:var(--font-display); font-variant-numeric:tabular-nums}
+.tooltip span{display:block; color:var(--muted); font-size:11px; margin-top:1px}
+.hit-layer{fill:transparent}
+
+/* ── channels (3-series) ── */
+.legend{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:16px}
+.legend-item{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--muted)}
+.swatch{width:9px; height:9px; border-radius:3px; flex:none}
+.chan{display:flex; flex-direction:column; gap:12px}
+.chan-row{display:grid; grid-template-columns:84px 1fr 48px; align-items:center; gap:10px}
+.chan-name{font-size:13px; color:var(--text)}
+.chan-track{position:relative; height:8px; background:var(--bg-elev); border-radius:999px; overflow:hidden}
+.chan-fill{position:absolute; inset:0 auto 0 0; width:0; border-radius:999px; transition:width 1s var(--ease)}
+.chan-val{font-size:12.5px; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums}
+
+/* ── top pages ── */
+.pages{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.pages li{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--line)}
+.pages li:last-child{border-bottom:0; padding-bottom:0}
+.page-name{font-size:13.5px}
+.page-path{color:var(--muted); font-size:12px; display:block; margin-top:1px}
+.page-views{font-family:var(--font-display); font-size:13.5px; font-variant-numeric:tabular-nums}
+
+.grid-secondary{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px}
+
+/* ── footer ── */
+footer{margin:48px 0 40px; padding-top:22px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:16px; color:var(--muted); font-size:13px}
+footer a{color:var(--accent-lite); text-decoration:none; font-weight:600}
+footer a:hover{text-decoration:underline}
+
+@media (max-width:860px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .grid-main{grid-template-columns:1fr}
+  .grid-secondary{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body data-palette="#2f9e55,#4d79d6,#c9821f">
+<div class="wrap">
+
+  <header class="top">
+    <a class="back" href="/#work">← Elocate Studio</a>
+    <span class="case-tag">Case 06 · Internal tool</span>
+  </header>
+
+  <section class="hero">
+    <span class="pulse-badge"><span class="pulse-dot"></span> Live demo data</span>
+    <h1>Analytics that feel <em>alive</em>, not archived</h1>
+    <p class="lead">A product-analytics dashboard built for a SaaS team that wanted their weekly review to stop feeling like a spreadsheet. Numbers count up, the chart draws itself in, and nothing waits for a page refresh.</p>
+  </section>
+
+  <section class="stats reveal" id="stats"></section>
+
+  <section class="grid-main">
+    <div class="card reveal">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Revenue</h2>
+          <p class="card-sub">Last 30 days, demo data</p>
+        </div>
+        <div class="range">
+          <button class="on" data-range="30">30d</button>
+          <button data-range="90">90d</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" id="revChart" viewBox="0 0 640 220" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="tooltip"><b id="ttVal">$0</b><span id="ttDate">—</span></div>
+      </div>
+    </div>
+
+    <div class="card reveal">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Traffic by channel</h2>
+          <p class="card-sub">Share of sessions</p>
+        </div>
+      </div>
+      <div class="legend" id="chanLegend"></div>
+      <div class="chan" id="chanList"></div>
+    </div>
+  </section>
+
+  <section class="grid-secondary">
+    <div class="card reveal">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Top pages</h2>
+          <p class="card-sub">By views this week</p>
+        </div>
+      </div>
+      <ul class="pages" id="pagesList"></ul>
+    </div>
+
+    <div class="card reveal">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Session quality</h2>
+          <p class="card-sub">Avg. duration vs. prior period</p>
+        </div>
+      </div>
+      <svg class="chart" id="sessChart" viewBox="0 0 560 160" preserveAspectRatio="none"></svg>
+    </div>
+  </section>
+
+  <footer>
+    <span>Demo case for a portfolio review — all data is synthetic.</span>
+    <a href="/#contact">Start a project ↗</a>
+  </footer>
+
+</div>
+
+<script>
+/* ===== demo data ===== */
+const DAYS = 30;
+function synth(seed, base, amp, noise){
+  const out = [];
+  let v = base;
+  for (let i = 0; i < DAYS; i++){
+    v += Math.sin(i / 4 + seed) * amp * 0.3 + (Math.random() - 0.5) * noise;
+    v = Math.max(base * 0.4, v);
+    out.push(Math.round(v));
+  }
+  return out;
+}
+const revenue = synth(1.3, 4200, 900, 420);
+revenue[revenue.length - 1] = revenue[revenue.length - 2] * 1.12; // живой финальный рывок
+
+const channels = [
+  { name: 'Organic search', val: 42, color: 'var(--accent-lite)' },
+  { name: 'Referral',       val: 31, color: 'var(--blue)' },
+  { name: 'Direct',         val: 27, color: 'var(--amber)' },
+];
+
+const pages = [
+  { name: 'Pricing',        path: '/pricing',        views: 12840 },
+  { name: 'Product tour',   path: '/product',        views: 9210 },
+  { name: 'Docs · Quickstart', path: '/docs/start',   views: 6530 },
+  { name: 'Changelog',      path: '/changelog',       views: 3180 },
+];
+
+/* ===== count-up stat tiles ===== */
+const stats = [
+  { label: 'MRR', value: 48200, prefix: '$', delta: '+8.4%', dir: 'up', spark: synth(0.4, 60, 18, 7) },
+  { label: 'Active users', value: 9840, prefix: '', delta: '+3.1%', dir: 'up', spark: synth(1.1, 60, 14, 8) },
+  { label: 'Conversion rate', value: 4.6, prefix: '', suffix: '%', delta: '-0.3%', dir: 'down', spark: synth(2.2, 60, 10, 9), decimals: 1 },
+  { label: 'Avg. session', value: 6.2, prefix: '', suffix: 'm', delta: '+0.9%', dir: 'up', spark: synth(0.2, 60, 12, 6), decimals: 1 },
+];
+
+function fmt(n, decimals){
+  if (decimals) return n.toFixed(decimals);
+  return Math.round(n).toLocaleString('en-US');
+}
+function sparkPath(vals, w, h){
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const span = (max - min) || 1;
+  return vals.map((v, i) => {
+    const x = (i / (vals.length - 1)) * w;
+    const y = h - ((v - min) / span) * h;
+    return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+}
+
+const statsEl = document.getElementById('stats');
+stats.forEach((s, idx) => {
+  const el = document.createElement('div');
+  el.className = 'stat';
+  el.innerHTML = `
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-value" data-target="${s.value}" data-decimals="${s.decimals || 0}" data-prefix="${s.prefix}" data-suffix="${s.suffix || ''}">${s.prefix}0${s.suffix || ''}</div>
+    <div class="stat-delta ${s.dir}">${s.dir === 'up' ? '↑' : '↓'} ${s.delta.replace(/^[+-]/, '')} <span style="color:var(--muted);font-weight:500">vs last month</span></div>
+    <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none"><path d="${sparkPath(s.spark, 120, 24)}" fill="none" stroke="${idx === 2 && s.dir === 'down' ? 'var(--bad)' : 'var(--accent-lite)'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/></svg>
+  `;
+  statsEl.appendChild(el);
+});
+
+function countUp(el){
+  const target = parseFloat(el.dataset.target);
+  const decimals = parseInt(el.dataset.decimals, 10);
+  const prefix = el.dataset.prefix, suffix = el.dataset.suffix;
+  const dur = 1100, t0 = performance.now();
+  function tick(now){
+    const p = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = prefix + fmt(target * eased, decimals) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ===== revenue line chart ===== */
+const chartEl = document.getElementById('revChart');
+const W = 640, H = 220, PAD_L = 36, PAD_B = 22, PAD_T = 10;
+function buildChart(data){
+  chartEl.innerHTML = '';
+  const min = Math.min(...data) * 0.92, max = Math.max(...data) * 1.05;
+  const x = i => PAD_L + (i / (data.length - 1)) * (W - PAD_L - 8);
+  const y = v => PAD_T + (1 - (v - min) / (max - min)) * (H - PAD_T - PAD_B);
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(ns, 'g');
+
+  // gridlines + axis labels (4 steps, clean rounding)
+  const steps = 4;
+  for (let i = 0; i <= steps; i++){
+    const v = min + (max - min) * (i / steps);
+    const gy = y(v);
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('class', 'gridline');
+    line.setAttribute('x1', PAD_L); line.setAttribute('x2', W);
+    line.setAttribute('y1', gy); line.setAttribute('y2', gy);
+    g.appendChild(line);
+    const label = document.createElementNS(ns, 'text');
+    label.setAttribute('class', 'axis-label');
+    label.setAttribute('x', 0); label.setAttribute('y', gy + 3.5);
+    label.textContent = '$' + Math.round(v / 100) / 10 + 'k';
+    g.appendChild(label);
+  }
+
+  // area + line path
+  let d = 'M' + x(0) + ',' + y(data[0]);
+  for (let i = 1; i < data.length; i++) d += ' L' + x(i) + ',' + y(data[i]);
+  const areaD = d + ` L${x(data.length - 1)},${H - PAD_B} L${x(0)},${H - PAD_B} Z`;
+
+  const area = document.createElementNS(ns, 'path');
+  area.setAttribute('class', 'area-fill'); area.setAttribute('d', areaD);
+  g.appendChild(area);
+
+  const line = document.createElementNS(ns, 'path');
+  line.setAttribute('class', 'line-path'); line.setAttribute('d', d);
+  g.appendChild(line);
+
+  const len = line.getTotalLength();
+  line.style.strokeDasharray = len; line.style.strokeDashoffset = len;
+  area.style.opacity = 0;
+
+  const dot = document.createElementNS(ns, 'circle');
+  dot.setAttribute('class', 'end-dot'); dot.setAttribute('r', 4);
+  dot.setAttribute('cx', x(data.length - 1)); dot.setAttribute('cy', y(data[data.length - 1]));
+  g.appendChild(dot);
+
+  const hoverLine = document.createElementNS(ns, 'line');
+  hoverLine.setAttribute('class', 'hover-line');
+  hoverLine.setAttribute('y1', PAD_T); hoverLine.setAttribute('y2', H - PAD_B);
+  g.appendChild(hoverLine);
+
+  const hoverDot = document.createElementNS(ns, 'circle');
+  hoverDot.setAttribute('class', 'hover-dot'); hoverDot.setAttribute('r', 4);
+  g.appendChild(hoverDot);
+
+  const hit = document.createElementNS(ns, 'rect');
+  hit.setAttribute('class', 'hit-layer');
+  hit.setAttribute('x', PAD_L); hit.setAttribute('y', 0);
+  hit.setAttribute('width', W - PAD_L); hit.setAttribute('height', H);
+  g.appendChild(hit);
+
+  chartEl.appendChild(g);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    line.style.transition = 'stroke-dashoffset 1.3s ' + 'cubic-bezier(.22,1,.36,1)';
+    line.style.strokeDashoffset = 0;
+    area.style.transition = 'opacity 1s ease .3s';
+    area.style.opacity = 1;
+  }));
+
+  const tooltip = document.getElementById('tooltip');
+  const ttVal = document.getElementById('ttVal'), ttDate = document.getElementById('ttDate');
+  const today = new Date();
+  hit.addEventListener('pointermove', e => {
+    const rect = chartEl.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width * W;
+    let i = Math.round((px - PAD_L) / (W - PAD_L - 8) * (data.length - 1));
+    i = Math.max(0, Math.min(data.length - 1, i));
+    const cx = x(i), cy = y(data[i]);
+    hoverLine.setAttribute('x1', cx); hoverLine.setAttribute('x2', cx);
+    hoverLine.style.opacity = 1;
+    hoverDot.setAttribute('cx', cx); hoverDot.setAttribute('cy', cy);
+    hoverDot.style.opacity = 1;
+    const d2 = new Date(today); d2.setDate(d2.getDate() - (data.length - 1 - i));
+    ttVal.textContent = '$' + data[i].toLocaleString('en-US');
+    ttDate.textContent = d2.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const px2 = cx / W * rect.width, py2 = cy / H * rect.height;
+    tooltip.style.left = px2 + 'px'; tooltip.style.top = py2 + 'px'; tooltip.style.opacity = 1;
+  });
+  hit.addEventListener('pointerleave', () => {
+    hoverLine.style.opacity = 0; hoverDot.style.opacity = 0; tooltip.style.opacity = 0;
+  });
+}
+buildChart(revenue);
+
+document.querySelectorAll('.range button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const n = parseInt(btn.dataset.range, 10);
+    buildChart(n === 90 ? synth(1.3, 3600, 1100, 520).concat(revenue).slice(-90) : revenue);
+  });
+});
+
+/* ===== channels (validated categorical) ===== */
+const legendEl = document.getElementById('chanLegend');
+const chanEl = document.getElementById('chanList');
+channels.forEach(c => {
+  const li = document.createElement('div');
+  li.className = 'legend-item';
+  li.innerHTML = `<span class="swatch" style="background:${c.color}"></span>${c.name}`;
+  legendEl.appendChild(li);
+
+  const row = document.createElement('div');
+  row.className = 'chan-row';
+  row.innerHTML = `
+    <span class="chan-name">${c.name}</span>
+    <div class="chan-track"><div class="chan-fill" data-w="${c.val}" style="background:${c.color}"></div></div>
+    <span class="chan-val">${c.val}%</span>
+  `;
+  chanEl.appendChild(row);
+});
+
+/* ===== top pages ===== */
+const pagesEl = document.getElementById('pagesList');
+pages.forEach(p => {
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <div><span class="page-name">${p.name}</span><span class="page-path">${p.path}</span></div>
+    <span class="page-views">${p.views.toLocaleString('en-US')}</span>
+  `;
+  pagesEl.appendChild(li);
+});
+
+/* ===== session quality mini chart (two periods, single hue intensity) ===== */
+(function(){
+  const el = document.getElementById('sessChart');
+  const cur = synth(0.7, 6.2, 1.6, 0.6).slice(0, 14);
+  const prev = synth(2.9, 5.3, 1.4, 0.5).slice(0, 14);
+  const w = 560, h = 160, padB = 20, padT = 10;
+  const all = cur.concat(prev);
+  const min = Math.min(...all) * 0.85, max = Math.max(...all) * 1.08;
+  const x = i => (i / (cur.length - 1)) * w;
+  const y = v => padT + (1 - (v - min) / (max - min)) * (h - padT - padB);
+  const ns = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(ns, 'g');
+  function path(vals, cls, col){
+    let d = 'M' + x(0) + ',' + y(vals[0]);
+    for (let i = 1; i < vals.length; i++) d += ' L' + x(i) + ',' + y(vals[i]);
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', d); p.setAttribute('class', cls);
+    p.style.fill = 'none'; p.style.stroke = col; p.style.strokeWidth = 2;
+    p.style.strokeLinecap = 'round'; p.style.strokeLinejoin = 'round';
+    g.appendChild(p);
+    return p;
+  }
+  path(prev, 'prev', 'var(--line-2)').style.strokeDasharray = '3,4';
+  const p2 = path(cur, 'cur', 'var(--accent-lite)');
+  const len = p2.getTotalLength();
+  p2.style.strokeDasharray = len; p2.style.strokeDashoffset = len;
+  el.appendChild(g);
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    p2.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.22,1,.36,1)';
+    p2.style.strokeDashoffset = 0;
+    io.disconnect();
+  }, { threshold: .4 });
+  io.observe(el);
+})();
+
+/* ===== reveal on scroll ===== */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    if (e.target.id === 'stats') {
+      document.querySelectorAll('.stat-value').forEach(countUp);
+    }
+    if (e.target.querySelector('.chan-fill')) {
+      e.target.querySelectorAll('.chan-fill').forEach(f => { f.style.width = f.dataset.w + '%'; });
+    }
+    io.unobserve(e.target);
+  });
+}, { threshold: .3 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* respect reduced motion: skip count-up/line-draw easing, show final state immediately */
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.style.setProperty('--ease', 'linear');
+}
+</script>
+</body>
+</html>

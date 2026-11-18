@@ -21,6 +21,7 @@ const projects = [
     href: '#contact',
   },
   { n: '05', tags: ['AI', 'Automation'], img: '/assets/work/support-bot.webp', href: '/demos/support-bot/' },
+  { n: '06', tags: ['Product', 'Data Viz'], img: '/assets/work/analytics-pulse.webp', href: '/demos/analytics-pulse/' },
 ];
 ---
 
@@ -104,6 +105,9 @@ const projects = [
     .work-item:nth-child(4) { grid-column: span 6; }
     /* широкий баннер — кинематографичный кроп 4:3-видео */
     .work-item:nth-child(4) .work-media { aspect-ratio: 21 / 9; }
+    /* ряд3: [05][06] — две равные плитки (без явного span сжимались бы в 1/6 ширины) */
+    .work-item:nth-child(5) { grid-column: span 3; }
+    .work-item:nth-child(6) { grid-column: span 3; }
   }
   .work-item {
     background: var(--bg-soft);
