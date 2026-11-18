@@ -20,6 +20,7 @@ export const ui = {
   en: {
     // — header / nav —
     'nav.work': 'Work',
+    'nav.lab': 'Lab',
     'nav.about': 'About',
     'nav.contact': 'Contact',
     'nav.cta': 'Let’s talk',

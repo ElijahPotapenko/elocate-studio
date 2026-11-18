@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Component Lab · Elocate Studio</title>
+<meta name="description" content="The shared motion primitives behind every Elocate Studio case study — live, interactive, source included.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
+    "htm": "https://esm.sh/htm@3.1.1"
+  }
+}
+</script>
+
+<style>
+/* Токены — те же значения, что в src/styles/global.css (тёмная тема elocate-studio).
+   Это НЕ отдельная дизайн-система кейса — это сам shell сайта, просто вне Astro-сборки,
+   поэтому значения продублированы руками, а не через var() из общего CSS. Меняешь тему
+   сайта — проверь и здесь. */
+:root{
+  --bg:#08080c; --bg-soft:#101019; --bg-elev:#16161f;
+  --text:#f3f3f7; --muted:#9aa0ac;
+  --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.16);
+  --accent:#2b9f4c; --accent-lite:#3fc568; --accent-ink:#03250f; --accent-soft:rgba(43,159,76,.12);
+  --font-display:'Space Grotesk','Helvetica Neue',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --radius:14px; --radius-lg:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0; background:var(--bg); color:var(--text); font:16px/1.55 var(--font-body); -webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px}
+
+nav.top{display:flex; align-items:center; justify-content:space-between; padding:26px 0}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:600; font-size:1.1rem; text-decoration:none}
+.brand .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 14px var(--accent-lite)}
+.back{color:var(--muted); text-decoration:none; font-size:13.5px; transition:color .2s var(--ease)}
+.back:hover{color:var(--text)}
+
+.hero{padding:70px 0 90px; text-align:center}
+.eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-lite)}
+h1{font-family:var(--font-display); font-weight:700; font-size:clamp(2.2rem,5vw,3.6rem); margin:18px 0 20px; letter-spacing:-.01em}
+.hero p{color:var(--muted); max-width:52ch; margin:0 auto; font-size:1.05rem; line-height:1.65}
+
+section.demo{padding:64px 0; border-top:1px solid var(--line)}
+.demo-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; margin-bottom:34px; flex-wrap:wrap}
+.demo-head h2{font-family:var(--font-display); font-weight:600; font-size:1.6rem; margin:0}
+.demo-head .used-in{font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.demo-head .used-in b{color:var(--accent-lite); font-weight:500}
+.demo-desc{color:var(--muted); font-size:14.5px; max-width:60ch; margin:0 0 30px}
+.stage{background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:40px; display:flex; flex-wrap:wrap; gap:16px; align-items:center}
+
+/* MagneticCTA */
+.lab-btn{
+  font-family:var(--font-display); font-weight:600; font-size:14.5px; text-decoration:none;
+  padding:13px 26px; border-radius:999px; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+}
+.lab-btn.primary{background:var(--accent); color:var(--accent-ink)}
+.lab-btn.ghost{border:1px solid var(--line-2); color:var(--text)}
+
+/* TiltCard */
+.lab-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; width:100%}
+.lab-card{background:var(--bg-elev); border:1px solid var(--line-2); border-radius:16px; padding:22px; text-align:left}
+.lab-card b{display:block; font-family:var(--font-display); font-size:1rem; margin-bottom:6px}
+.lab-card span{color:var(--muted); font-size:13px}
+
+/* Marquee */
+.lab-marquee-wrap{width:100%; overflow:hidden; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); padding:16px 0}
+.lab-marquee-track{display:inline-flex; white-space:nowrap; will-change:transform}
+.lab-marquee-item{display:inline-flex; align-items:center; gap:10px; padding:0 22px; font-family:var(--font-mono); font-size:13px; letter-spacing:.03em; color:var(--muted)}
+.lab-marquee-item b{color:var(--text); font-weight:500}
+.lab-dot{width:5px; height:5px; border-radius:50%; background:var(--accent-lite)}
+
+/* CountUp */
+.lab-stats{display:flex; gap:48px; flex-wrap:wrap}
+.lab-stat-v{font-family:var(--font-display); font-weight:700; font-size:2.1rem}
+.lab-stat-l{color:var(--muted); font-size:13px; margin-top:4px}
+
+/* Reveal */
+.lab-reveal-stack{display:flex; flex-direction:column; gap:14px; width:100%}
+.lab-reveal-row{background:var(--bg-elev); border:1px solid var(--line-2); border-radius:12px; padding:16px 20px; font-size:14px; color:var(--muted)}
+
+.code{font-family:var(--font-mono); font-size:12.5px; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:14px 16px; color:var(--accent-lite); white-space:pre; overflow-x:auto; margin-top:18px}
+
+.rule{padding:70px 0 100px; text-align:center}
+.rule-box{background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:40px; max-width:640px; margin:0 auto}
+.rule-box h3{font-family:var(--font-display); margin:0 0 12px}
+.rule-box p{color:var(--muted); font-size:14.5px; line-height:1.65; margin:0 0 20px}
+.rule-box a{color:var(--accent-lite); text-decoration:none; font-weight:500}
+
+footer.bottom{border-top:1px solid var(--line); padding:26px 0 40px; text-align:center; color:var(--muted); font-size:13px}
+
+@media (max-width:620px){
+  .stage{padding:26px}
+  .demo-head{flex-direction:column; align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top">
+    <a class="brand" href="/"><span class="dot"></span>elocate.lab</a>
+    <a class="back" href="/#work">← Elocate Studio</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Internal · _shared/motion.js</span>
+    <h1>The parts behind the cases.</h1>
+    <p>Every case study (Nova, the AI support bot, the dashboard) reuses the same five mechanics underneath its own skin — a magnetic button, a tilt card, a velocity marquee, a count-up, a scroll reveal. This is where they live, undressed.</p>
+  </div>
+</header>
+
+<section class="demo">
+  <div class="wrap">
+    <div class="demo-head"><h2>MagneticCTA</h2><div class="used-in">used in <b>Nova</b></div></div>
+    <p class="demo-desc">A button that leans toward the cursor on approach and snaps back on leave — spring physics, not a transition.</p>
+    <div class="stage" id="stageCta"></div>
+    <div class="code">&lt;MagneticCTA label="Start a project" href="/#contact" strength={0.3} tapScale={0.04} /&gt;</div>
+  </div>
+</section>
+
+<section class="demo">
+  <div class="wrap">
+    <div class="demo-head"><h2>TiltCard</h2><div class="used-in">used in <b>Nova</b></div></div>
+    <p class="demo-desc">3D tilt that tracks the cursor position inside the card. Content and color are entirely up to the caller.</p>
+    <div class="stage"><div class="lab-cards" id="stageCards"></div></div>
+    <div class="code">&lt;TiltCard maxTilt={8} hoverY={-4}&gt;...&lt;/TiltCard&gt;</div>
+  </div>
+</section>
+
+<section class="demo">
+  <div class="wrap">
+    <div class="demo-head"><h2>VelocityMarquee</h2><div class="used-in">used in <b>Nova</b></div></div>
+    <p class="demo-desc">Scroll this page — the strip below speeds up and even reverses direction with your scroll velocity.</p>
+    <div class="stage" style="padding:0"><div class="lab-marquee-wrap"><div id="stageMarquee"></div></div></div>
+  </div>
+</section>
+
+<section class="demo">
+  <div class="wrap">
+    <div class="demo-head"><h2>CountUp</h2><div class="used-in">used in <b>Nova</b> · <b>Support Bot</b></div></div>
+    <p class="demo-desc">Counts up from zero the first time it enters the viewport. Never replays.</p>
+    <div class="stage"><div class="lab-stats" id="stageStats"></div></div>
+  </div>
+</section>
+
+<section class="demo">
+  <div class="wrap">
+    <div class="demo-head"><h2>Reveal</h2><div class="used-in">used in <b>Support Bot</b></div></div>
+    <p class="demo-desc">Fade + slide-up when scrolled into view. Each row below reveals independently, once.</p>
+    <div class="stage"><div class="lab-reveal-stack" id="stageReveal"></div></div>
+  </div>
+</section>
+
+<section class="rule">
+  <div class="wrap">
+    <div class="rule-box">
+      <h3>Mechanics shared. Skin per case.</h3>
+      <p>Palette, typography and the one unforgettable element stay local to each case study — that variety is the point of a portfolio. Only the underlying mechanics (what's on this page) are shared, so a fix here reaches every case at once.</p>
+      <a href="/demos/_shared/README.md">Read the full house rule →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="bottom"><div class="wrap">Elocate Studio — internal component lab, not a public case study</div></footer>
+
+<script type="module">
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { MagneticCTA, TiltCard, VelocityMarquee, CountUp, Reveal, html } from '../demos/_shared/motion.js';
+
+createRoot(document.getElementById('stageCta')).render(html`
+  <${React.Fragment}>
+    <${MagneticCTA} label="Primary" href="#" className="lab-btn primary" strength=${0.3} tapScale=${0.04} spring=${{ damping: 12, stiffness: 240 }} />
+    <${MagneticCTA} label="Ghost" href="#" className="lab-btn ghost" strength=${0.3} spring=${{ damping: 18, stiffness: 260 }} />
+  <//>
+`);
+
+const CARDS = [
+  { t: 'Restraint', d: 'Low strength, high damping — barely moves.' },
+  { t: 'Polish', d: 'The default — measured, deliberate.' },
+  { t: 'Play', d: 'Low damping — visible soft overshoot.' },
+];
+createRoot(document.getElementById('stageCards')).render(html`
+  ${CARDS.map((c, i) => html`
+    <${TiltCard} key=${i} className="lab-card" maxTilt=${8} hoverY=${-4} spring=${{ damping: 16, stiffness: 200 }}>
+      <b>${c.t}</b><span>${c.d}</span>
+    <//>
+  `)}
+`);
+
+const MARQUEE_ITEMS = ['Spring physics', 'No CSS transitions', 'Scroll-velocity aware', 'One source of truth'];
+createRoot(document.getElementById('stageMarquee')).render(html`
+  <${VelocityMarquee} className="lab-marquee-track" renderTrack=${() => MARQUEE_ITEMS.map((it, i) => html`
+    <span class="lab-marquee-item" key=${i}><span class="lab-dot"></span><b>${it}</b></span>
+  `)} />
+`);
+
+function Stat({ label, to, decimals, suffix }) {
+  return html`<div><div class="lab-stat-v"><${CountUp} to=${to} decimals=${decimals} suffix=${suffix} /></div><div class="lab-stat-l">${label}</div></div>`;
+}
+createRoot(document.getElementById('stageStats')).render(html`
+  <${React.Fragment}>
+    <${Stat} label="Cases using it" to=${2} />
+    <${Stat} label="Lines saved per case" to=${180} suffix="+" />
+    <${Stat} label="Different count-up libraries before this" to=${1} suffix=" → 0" />
+  <//>
+`);
+
+const REVEAL_ROWS = ['First to reveal', 'Second — 0.1s later', 'Third — 0.2s later', 'Fourth — 0.3s later'];
+createRoot(document.getElementById('stageReveal')).render(html`
+  ${REVEAL_ROWS.map((r, i) => html`<${Reveal} key=${i} delay=${i * 0.1}><div class="lab-reveal-row">${r}</div><//>`)}
+`);
+</script>
+</body>
+</html>
