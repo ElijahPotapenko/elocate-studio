@@ -10,15 +10,21 @@ test.describe('page loader', () => {
   });
 
   test('never shows without confirmed JS (html.js gate)', async ({ page }) => {
-    test.slow(); // heavier bundle now (three.js) — can be slow to settle under parallel worker contention
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    // #loader существует в разметке ВСЕГДА, но виден только через правило `html.js #loader{display:flex}` —
-    // снимаем класс js (как если бы скрипты не выполнились) и проверяем, что оверлей схлопывается в display:none,
-    // а не остаётся висеть поверх сайта навсегда.
+    // Раньше ловил ЖИВОЙ #loader на domcontentloaded и снимал html.js — но под конкуренцией
+    // воркеров (общий dev-сервер, несколько тестов разом) навигация сама иногда занимала больше
+    // времени, чем полный жизненный цикл лоадера (450мс видимость + 600мс на удаление из DOM) —
+    // к моменту evaluate() элемент был УЖЕ удалён, тест падал не из-за бага, а из-за своего же
+    // тайминга. Проверяем правило `html.js #loader{display:flex}` напрямую: создаём изолированный
+    // div#loader, не зависим от реального таймера реального лоадера на странице вообще.
+    await page.goto('/');
     const displayWithoutJs = await page.evaluate(() => {
+      const probe = document.createElement('div');
+      probe.id = 'loader'; // правило в Layout.astro завязано на #loader — дубль id браузер не против для CSS-матчинга
+      document.body.appendChild(probe);
       document.documentElement.classList.remove('js');
-      const loader = document.getElementById('loader');
-      return loader ? getComputedStyle(loader).display : 'missing';
+      const display = getComputedStyle(probe).display;
+      probe.remove();
+      return display;
     });
     expect(displayWithoutJs).toBe('none');
   });

@@ -154,7 +154,9 @@ export function initCrystal() {
   composer.addPass(new RenderPass(scene, camera));
   // threshold высокий (0.25 давал bloom на ВСЮ белую поверхность стекла, не только на ядро —
   // отсюда «засвеченный шар» вместо чёткой огранки). radius выше (0.8) — мягче, шире ореол на рёбрах
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 1.1, 0.8, 0.78);
+  // radius ниже (0.8→0.4) — раньше bloom размывал весь силуэт в мутное облако, как виньетка в CSS
+  // (обе убраны по одной жалобе); теперь свечение держится у рёбер, не глушит форму кристалла
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.85, 0.4, 0.8);
   composer.addPass(bloom);
 
   function resize() {
