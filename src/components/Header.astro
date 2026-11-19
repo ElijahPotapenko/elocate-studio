@@ -51,7 +51,7 @@ const links = [
   });
   nav?.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
 
-  // Переключалка темы: тоггл data-theme + память в localStorage + событие для sphere.js
+  // Переключалка темы: тоггл data-theme + память в localStorage + событие для crystal.js
   const themeBtn = header?.querySelector('.theme-toggle');
   themeBtn?.addEventListener('click', () => {
     const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';

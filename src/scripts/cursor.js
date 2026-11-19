@@ -1,13 +1,15 @@
 /* Простой кастомный курсор: белая точка, следует за мышью МГНОВЕННО.
    Без rAF-цикла и без transition на transform → нулевой лаг.
    Включается только на fine-pointer без reduced-motion. Стили — в Layout (.cursor-dot). */
-export function initCursor() {
-  // ВЫКЛЮЧЕНО по слову Элайджи (2026-11-18): «ломается», несмотря на починенный зазор
-  // нативный/точка на навигации (см. комментарий ниже + tests/cursor.spec.ts, зелёные
-  // в Chromium И Firefox). Раз живьём всё ещё не ок — не гадать дальше, выключить целиком
-  // и вернуться отдельным заходом. Логика ниже не тронута, просто не запускается.
-  return;
-  // eslint-disable-next-line no-unreachable
+// ВЫКЛЮЧЕНО по слову Элайджи (2026-11-18): «ломается», несмотря на починенный зазор
+// нативный/точка на навигации (см. комментарий ниже + tests/cursor.spec.ts, зелёные
+// в Chromium И Firefox). Раз живьём всё ещё не ок — не гадать дальше, выключить целиком
+// и вернуться отдельным заходом. Логика ниже не тронута, просто вызов закомментирован —
+// вынесена в отдельную функцию, а не оставлена «insereachable code» (та версия давала
+// браузерный warning «unreachable code after return statement» на каждой загрузке).
+export function initCursor() {}
+
+function _initCursorImpl() {
   const fine = window.matchMedia?.('(hover: hover) and (pointer: fine)')?.matches;
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   if (!fine || reduced) return;
