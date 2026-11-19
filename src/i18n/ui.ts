@@ -82,7 +82,7 @@ export const ui = {
     'contact.eyebrow': 'Let’s connect',
     'contact.heading': 'Got a project at the intersection<br />of product and brand?', // [html]
     'contact.text.pre': 'Tell us in a line or two — we’ll reply within a couple of days. Or write directly at ',
-    'contact.email': 'hello@elocate.studio',
+    'contact.email': 'elocate.design@gmail.com',
     'contact.status': 'Currently open to new projects',
     'contact.meta.1.k': 'Response',
     'contact.meta.1.v': 'within ~2 days',
