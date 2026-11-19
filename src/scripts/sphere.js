@@ -1,10 +1,15 @@
 /* Вайрфрейм-сфера на canvas (#bg-sphere). Тёмная тема: неон-штрих + свечение,
-   лёгкое влияние курсора, fade задних граней. Уважает prefers-reduced-motion.
+   fade задних граней. Уважает prefers-reduced-motion.
    Происхождение: стеш elocate (sphere3d.js), перекрашен и оптимизирован под редизайн.
 
    Оптимизация: стиль ставится РАЗ НА ЛИНИЮ (а не на точку — раньше ~2500 смен
    состояния/кадр впустую), DPR кап 1.5, лёгкая геометрия, и анимация ПАУЗИТСЯ,
-   когда hero ушёл со скролла (IntersectionObserver). */
+   когда hero ушёл со скролла (IntersectionObserver).
+
+   Вращение НЕ следует за курсором (убрано 2026-11-19): lerp с коэффициентом 0.08
+   давал заметную задержку между движением мыши и откликом сферы — читалось как
+   лаг страницы, хотя FPS был в норме (замерено: 57-61 ровно). Чистое вращение по
+   времени устраняет саму причину ощущения, не маскирует её. */
 export function initSphere() {
   const canvas = document.getElementById('bg-sphere');
   if (!canvas) return;
@@ -17,9 +22,6 @@ export function initSphere() {
 
   const BASE_W = 1920, BASE_H = 1080;
   let dpr = 1, w = 0, h = 0;
-  let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
-  let mx = mouseX, my = mouseY;
-  const lerp = (a, b, t) => a + (b - a) * t;
 
   function resize() {
     dpr = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1)); // кап 1.5 — меньше пикселей чистить
@@ -73,18 +75,14 @@ export function initSphere() {
 
   function draw(ts) {
     const t = ts * 0.001;
-    mx = lerp(mx, mouseX, 0.08);
-    my = lerp(my, mouseY, 0.08);
     ctx.clearRect(0, 0, w, h);
 
     const scale = Math.min(w / BASE_W, h / BASE_H);
     const cx = w * 0.5, cy = h * 0.5;
     const radius = Math.max(150, 300 * Math.max(scale, 0.55));
 
-    const nx = (mx / Math.max(w, 1)) * 2 - 1;
-    const ny = (my / Math.max(h, 1)) * 2 - 1;
-    const ax = ny * 0.32 + Math.sin(t * 0.5) * 0.1;
-    const ay = nx * 0.5 + t * 0.28;
+    const ax = Math.sin(t * 0.5) * 0.14;
+    const ay = t * 0.28;
     const cyy = Math.cos(ay), syy = Math.sin(ay);
     const cxx = Math.cos(ax), sxx = Math.sin(ax);
     const depth = 2.8;
@@ -131,7 +129,6 @@ export function initSphere() {
   function start() { if (!running) { running = true; rafId = requestAnimationFrame(loop); } }
   function stop() { running = false; cancelAnimationFrame(rafId); }
 
-  addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
   addEventListener('resize', resize, { passive: true });
   resize();
 
