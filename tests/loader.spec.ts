@@ -10,6 +10,7 @@ test.describe('page loader', () => {
   });
 
   test('never shows without confirmed JS (html.js gate)', async ({ page }) => {
+    test.slow(); // heavier bundle now (three.js) — can be slow to settle under parallel worker contention
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     // #loader существует в разметке ВСЕГДА, но виден только через правило `html.js #loader{display:flex}` —
     // снимаем класс js (как если бы скрипты не выполнились) и проверяем, что оверлей схлопывается в display:none,

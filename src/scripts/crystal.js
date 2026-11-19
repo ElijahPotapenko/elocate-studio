@@ -30,7 +30,7 @@ export function initCrystal() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
-  camera.position.set(0, 0, 6.3); // камера БЕЗ вертикального сдвига — сдвигаем саму группу ниже (см. ниже)
+  camera.position.set(0, 0, 5.6); // камера БЕЗ вертикального сдвига — сдвигаем саму группу ниже (см. ниже)
 
   // ── процедурный envmap: тёмный фон → мятный акцент, для преломления в фасетах ──
   const envCanvas = document.createElement('canvas');
@@ -57,6 +57,33 @@ export function initCrystal() {
   pmrem.dispose();
   scene.environment = envMap;
 
+  // ── процедурный normal map: дешёвая «искристость/трещины» без настоящей трассировки лучей ──
+  // (Blender/офлайн-рендер дал бы настоящие внутренние каустики — для лёгкого WebGL-hero это
+  // overkill; шум-нормали дают похожий ПРИЗНАК «неровного стекла изнутри» почти бесплатно)
+  function makeSparkleNormalMap(size) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const cx = c.getContext('2d');
+    const img = cx.createImageData(size, size);
+    for (let i = 0; i < img.data.length; i += 4) {
+      // случайный наклон нормали в касательной плоскости (dx,dy малые, z доминирует — почти плоско,
+      // но достаточно шумно, чтобы блики ложились неровно, как грани внутренней трещины)
+      const dx = (Math.random() - 0.5) * 0.7;
+      const dy = (Math.random() - 0.5) * 0.7;
+      const len = Math.hypot(dx, dy, 1);
+      img.data[i] = ((dx / len) * 0.5 + 0.5) * 255;
+      img.data[i + 1] = ((dy / len) * 0.5 + 0.5) * 255;
+      img.data[i + 2] = ((1 / len) * 0.5 + 0.5) * 255;
+      img.data[i + 3] = 255;
+    }
+    cx.putImageData(img, 0, 0);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(5, 9); // мелкий повтор — «зерно», не растянутое пятно на всю грань
+    return tex;
+  }
+  const sparkleNormal = makeSparkleNormalMap(128);
+
   // цвет ядра/bloom — из токена темы (--crystal-glow), обновляем по themechange без чтения в кадре
   const glowColor = new THREE.Color(0x3fc568);
   const readGlow = () => {
@@ -65,28 +92,31 @@ export function initCrystal() {
   };
   readGlow();
 
-  // позиционирование теперь делает CSS (canvas — компактный квадрат в углу hero, не весь hero) —
-  // группа в своём канвасе просто по центру, сдвиг в 3D больше не нужен
+  // v2 (2026-11-19) — по центру hero, крупно, ЗА текстом (не в углу): позиция экрана теперь делает
+  // CSS (большой центрированный квадрат в Hero.astro), группа внутри своего канваса — по центру
   const crystalGroup = new THREE.Group();
   crystalGroup.rotation.z = -0.22; // лёгкий наклон — «парящий осколок», не ровно по стойке
-  // объект асимметричен по высоте (остриё только сверху) — визуальный центр призма+остриё сдвинут
-  // на +0.41 от локального нуля; опускаем группу на столько же, чтобы кадр был отцентрован честно,
-  // а не камерой (камеру трогать не стали — она просто смотрит вдоль -Z без наклона)
-  crystalGroup.position.y = -0.62;
+  // объект асимметричен по высоте (остриё только сверху) — опускаем группу на половину этой разницы,
+  // чтобы кадр был отцентрован честно (камеру не трогаем — она смотрит вдоль -Z без наклона)
+  crystalGroup.position.y = -0.6;
   scene.add(crystalGroup);
 
   // Настоящая форма кварца, не абстрактный гем: шестигранная призма (тело) + шестигранная
   // пирамида (остриё) на одном конце — силуэт натурального кристалла кварца, не икосаэдр-болванка.
+  // Материал почти ПРОЗРАЧНЫЙ (по референсу Элайджи — чистое стекло со свечением на РЁБРАХ,
+  // не тонированный шар): цвет ближе к белому, ниже roughness/intensity, упор на грань-highlight
+  // от rim-света (см. ниже), не на внутреннюю заливку.
   const gemMat = new THREE.MeshPhysicalMaterial({
-    color: 0x9fd6b4,   // приглушённый мятно-стеклянный тон, не слепящий белый — иначе весь объём уходил в bloom
-    metalness: 0, roughness: 0.22,
-    transmission: 1, thickness: 0.8, ior: 1.54,          // ior кварца в жизни ≈1.54-1.55 — взял настоящее значение
-    clearcoat: 0.6, clearcoatRoughness: 0.12,
-    envMap, envMapIntensity: 0.7,
+    color: 0xeefff5,
+    metalness: 0, roughness: 0.08,
+    transmission: 1, thickness: 0.6, ior: 1.54,          // ior кварца в жизни ≈1.54-1.55 — взял настоящее значение
+    clearcoat: 0.8, clearcoatRoughness: 0.06,
+    envMap, envMapIntensity: 0.5,
     flatShading: true,                                   // чёткие грани призмы/пирамиды, не сглаженные
+    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.45, 0.45), // искристость без каустик
   });
 
-  const RADIUS = 0.46, PRISM_H = 1.65, TIP_H = 0.82, SIDES = 6;
+  const RADIUS = 0.72, PRISM_H = 2.45, TIP_H = 1.2, SIDES = 6;
   const prismGeo = new THREE.CylinderGeometry(RADIUS, RADIUS * 0.94, PRISM_H, SIDES, 1, false);
   const prism = new THREE.Mesh(prismGeo, gemMat);
   crystalGroup.add(prism);
@@ -107,23 +137,24 @@ export function initCrystal() {
   const coreMat = new THREE.MeshBasicMaterial({ color: glowColor.clone().multiplyScalar(2.4) });
   const core = new THREE.Mesh(coreGeo, coreMat);
   crystalGroup.add(core);
-  const coreLight = new THREE.PointLight(glowColor, 4.5, 6, 2);
+  const coreLight = new THREE.PointLight(glowColor, 3.2, 7, 2);
   coreLight.position.set(0, 0, 0);
   crystalGroup.add(coreLight);
   addEventListener('themechange', () => { readGlow(); coreMat.color.copy(glowColor).multiplyScalar(2.4); coreLight.color.copy(glowColor); });
 
-  // два резких направленных света с разных сторон — грани должны спорить друг с другом яркостью,
-  // иначе плоское освещение смазывает огранку в один ровный блик (что и было: читалось как шар, не гем)
-  const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(3, 2.5, 4); scene.add(key);
-  const rim = new THREE.DirectionalLight(0x9fe8c0, 0.9); rim.position.set(-3, -1.5, 2); scene.add(rim);
-  scene.add(new THREE.AmbientLight(0x0e1a13, 0.35));
+  // key — лепит грани; rim — яркий контровой СЗАДИ объекта (по референсу: свечение на силуэте,
+  // не в заливке) — именно rim даёт тот «горящий край» эффект на фото, не внутренний шарик
+  const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(3, 2.5, 4); scene.add(key);
+  const rim = new THREE.DirectionalLight(glowColor, 2.6); rim.position.set(-2.2, 1.2, -3.5); scene.add(rim);
+  const rim2 = new THREE.DirectionalLight(glowColor, 1.6); rim2.position.set(2.4, -1.5, -3); scene.add(rim2);
+  scene.add(new THREE.AmbientLight(0x0e1a13, 0.3));
 
-  // ── bloom: «сильный блюр» свечения ядра сквозь грани ──
+  // ── bloom: «сильный блюр» свечения на гранях/рёбрах ──
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
   // threshold высокий (0.25 давал bloom на ВСЮ белую поверхность стекла, не только на ядро —
-  // отсюда «засвеченный шар» вместо чёткой огранки с одной светящейся точкой внутри)
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.9, 0.55, 0.82);
+  // отсюда «засвеченный шар» вместо чёткой огранки). radius выше (0.8) — мягче, шире ореол на рёбрах
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 1.1, 0.8, 0.78);
   composer.addPass(bloom);
 
   function resize() {
@@ -147,7 +178,7 @@ export function initCrystal() {
       crystalGroup.rotation.x = Math.sin(t * 0.4) * 0.12; // не только призму (иначе остриё «отрывалось»)
       const pulse = 1 + Math.sin(t * 1.6) * 0.06;         // ядро «дышит» — живой источник света, не статика
       core.scale.setScalar(pulse);
-      coreLight.intensity = 5.4 + Math.sin(t * 1.6) * 1.2;
+      coreLight.intensity = 3.2 + Math.sin(t * 1.6) * 0.8;
     }
     composer.render();
     rafId = requestAnimationFrame(animate);

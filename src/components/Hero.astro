@@ -28,17 +28,17 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
     isolation: isolate;
   }
   .hero-canvas {
-    /* компактный квадрат в углу, НЕ весь hero (2026-11-19, было inset:0 под вайрфрейм-сферу —
-       её линии покрывали всю сцену; кристалл — один объект в углу, полный canvas только жёг
-       fill-rate зря: живой замер показал просадку 60→33fps на full-hero холсте с bloom) */
+    /* по центру, крупно, ЗА текстом (2026-11-19 v2 — по референсу Элайджи) — квадрат, не весь hero
+       (full-hero canvas жёг fill-rate зря: живой замер показал просадку 60→33fps с bloom на нём) */
     position: absolute;
-    right: 4%;
-    bottom: 8%;
-    width: min(42vw, 520px);
-    height: min(42vw, 520px);
+    left: 50%;
+    top: 54%;
+    transform: translate(-50%, -50%);
+    width: min(62vw, 760px);
+    height: min(62vw, 760px);
     z-index: -1;
     opacity: 0.95;
-    mask-image: radial-gradient(closest-side, #000 70%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
   }
   .hero-grain {
     position: absolute; inset: 0; z-index: -1; pointer-events: none;
@@ -49,31 +49,36 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
      max-width здесь раньше сужал блок до 920px и центрировал его ЗАНОВО независимо от .container,
      из-за чего левый край героя (260px на 1440 вьюпорте) не совпадал с хедером/Work/About (100px).
      Узкий замер текста — на самих h1/.hero-lead (ch-юниты), не на всём контейнере. */
-  .hero-inner { padding-top: 96px; }
+  /* layout по центру целиком (2026-11-19 v2, по слову Элайджи) — раньше текст был левым (тот же
+     --maxw:1240px контейнер, что у хедера/Work/About — грид всё ещё совпадает, меняется только
+     text-align/alignment ВНУТРИ того же контейнера, не его границы) */
+  .hero-inner { padding-top: 96px; display: flex; flex-direction: column; align-items: center; text-align: center; }
   .hero-title {
     font-size: var(--fs-display);
     margin: 1.1rem 0 0;
+    /* кристалл теперь крупный и светлый ЗА текстом — тень держит контраст там, где грани светлее фона */
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
   }
   .hero-title .accent {
     color: var(--accent);
     text-shadow: 0 0 38px var(--accent-glow);
   }
   .hero-lead {
-    margin-top: 1.6rem;
+    margin: 1.6rem auto 0;
     max-width: 46ch;
     font-size: var(--fs-lead);
-    color: var(--muted);
+    color: var(--text);                 /* было --muted — серый тонул в светлых гранях кристалла за ним */
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
   }
-  .hero-actions { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: 0.9rem; }
+  .hero-actions { margin-top: 2.2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
 
   @media (max-width: 620px) {
-    /* на мобиле текст во всю ширину → кристалл мельче и ниже, чтобы не спорить с текстом */
+    /* на мобиле — меньше и чуть выше центра, чтобы не спорить с кнопками снизу */
     .hero-canvas {
-      width: min(58vw, 280px);
-      height: min(58vw, 280px);
-      right: 6%;
-      bottom: 4%;
-      opacity: 0.8;
+      width: min(84vw, 420px);
+      height: min(84vw, 420px);
+      top: 46%;
+      opacity: 0.85;
     }
   }
 </style>
