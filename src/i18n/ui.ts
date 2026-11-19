@@ -33,7 +33,6 @@ export const ui = {
       'Elocate is a small studio that brings product, interface, and brand into one coherent system. We think in strategy and ship in the details.',
     'hero.cta.primary': 'Let’s talk',
     'hero.cta.secondary': 'View work',
-    'hero.disciplines': 'Product,Interfaces,Brand,Motion,Systems', // через запятую — лента дисциплин
 
     // — work —
     'work.eyebrow': 'Selected work',

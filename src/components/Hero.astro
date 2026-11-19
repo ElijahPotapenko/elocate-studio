@@ -1,7 +1,6 @@
 ---
 import { useTranslations, resolveLang } from '../i18n/utils';
 const t = useTranslations(resolveLang(Astro.currentLocale));
-const disciplines = t('hero.disciplines').split(',');
 ---
 
 <section class="hero" id="top">
@@ -16,10 +15,6 @@ const disciplines = t('hero.disciplines').split(',');
       <a href="#contact" class="btn btn-primary">{t('hero.cta.primary')} <span aria-hidden="true">✦</span></a>
       <a href="#work" class="btn btn-ghost">{t('hero.cta.secondary')}</a>
     </div>
-
-    <ul class="hero-marquee" aria-hidden="true">
-      {disciplines.concat(disciplines).map((d) => <li>{d}<span>✦</span></li>)}
-    </ul>
   </div>
 </section>
 
@@ -67,28 +62,6 @@ const disciplines = t('hero.disciplines').split(',');
   }
   .hero-actions { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: 0.9rem; }
 
-  .hero-marquee {
-    list-style: none;
-    margin: 3.4rem 0 0;
-    padding: 0;
-    display: flex;
-    gap: 2.2rem;
-    width: max-content;
-    color: var(--muted);
-    font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 0.8rem;
-    animation: marquee 22s linear infinite;
-    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  }
-  .hero-marquee li { display: inline-flex; align-items: center; gap: 2.2rem; white-space: nowrap; }
-  .hero-marquee span { color: var(--accent); opacity: 0.7; }
-  @keyframes marquee { to { transform: translateX(-50%); } }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-marquee { animation: none; }
-  }
   @media (max-width: 620px) {
     /* на мобиле текст во всю ширину → сфера уезжает вниз-вправо и гаснет,
        чтобы линии не шли сквозь заголовок и лид (читаемость) */
