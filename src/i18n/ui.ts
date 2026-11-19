@@ -98,6 +98,7 @@ export const ui = {
     // — footer —
     'footer.github': 'GitHub',
     'footer.email': 'Email',
+    'footer.privacy': 'Privacy',
     'footer.top': 'Back to top ↑',
     'footer.copy': 'Elocate — Design collaboration across disciplines.',
   },

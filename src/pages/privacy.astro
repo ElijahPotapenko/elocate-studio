@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const updated = 'November 19, 2026';
+---
+
+<Layout title="Privacy Policy — Elocate Studio" description="What Elocate Studio collects, why, and what it doesn't do with it.">
+  <Header />
+  <main>
+    <section class="legal">
+      <div class="container legal-inner">
+        <p class="eyebrow">Legal</p>
+        <h1>Privacy Policy</h1>
+        <p class="legal-updated">Last updated {updated}</p>
+
+        <p class="legal-lead">Elocate is a small studio. This page says exactly what we collect, in plain language — no tracking pixels, no ad network, no data broker relationship to disclose.</p>
+
+        <h2>What we collect</h2>
+        <p>When you submit the contact form on this site, we receive the name, email address, and message you typed in. That's it — the form doesn't ask for anything else, and nothing is collected just by browsing the site.</p>
+        <p>Submissions are processed by <a href="https://www.netlify.com/privacy/" target="_blank" rel="noopener">Netlify</a> (our hosting provider, via Netlify Forms) and land in our dashboard there. We may forward them to our own inbox to reply. We don't sell, rent, or share this with anyone else.</p>
+
+        <h2>What we don't do</h2>
+        <ul>
+          <li>No analytics or tracking scripts — this site runs none. No Google Analytics, no pixels, no heatmaps.</li>
+          <li>No cookies set by anything we built.</li>
+          <li>No third-party advertising, retargeting, or data brokers.</li>
+        </ul>
+
+        <h2>Local storage</h2>
+        <p>Your light/dark theme choice is remembered in your browser's local storage so it sticks between visits. It never leaves your device and we never see it.</p>
+
+        <h2>Third-party requests</h2>
+        <p>Fonts are loaded from Google Fonts' servers (fonts.googleapis.com / fonts.gstatic.com), which — like any web request — sees your IP address and basic request metadata. That's standard for any site using a font CDN; see <a href="https://developers.google.com/fonts/faq/privacy" target="_blank" rel="noopener">Google's own note on this</a> if you want the detail. Hosting is on Netlify, whose own infrastructure logs requests per their policy linked above.</p>
+
+        <h2>How long we keep it</h2>
+        <p>Contact form submissions are kept for as long as useful to respond to your message, then cleared periodically. Email us if you'd like yours deleted sooner — see below.</p>
+
+        <h2>Your rights</h2>
+        <p>Ask us what we have on you, ask us to correct it, or ask us to delete it — write to <a href={`mailto:elocate.design@gmail.com`}>elocate.design@gmail.com</a> and we'll sort it out directly, no formal process needed for a studio this size.</p>
+
+        <h2>Children</h2>
+        <p>This site isn't directed at children and we don't knowingly collect anything from anyone under 16.</p>
+
+        <h2>Changes</h2>
+        <p>If this policy changes, we'll update the date at the top. Material changes (anything that actually affects what we collect or do with it) will be called out here, not buried in a diff.</p>
+
+        <h2>Contact</h2>
+        <p>Questions about any of this: <a href={`mailto:elocate.design@gmail.com`}>elocate.design@gmail.com</a>.</p>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .legal { padding-block: clamp(7rem, 12vw, 9rem) var(--space-6); }
+  .legal-inner { max-width: 720px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-display); font-size: var(--fs-eyebrow);
+    text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent);
+  }
+  h1 { font-size: var(--fs-h2); margin: 1rem 0 0.3rem; }
+  .legal-updated { color: var(--muted); font-size: 0.85rem; margin: 0 0 2rem; }
+  .legal-lead { font-size: var(--fs-lead); color: var(--text); max-width: 56ch; margin-bottom: 2.6rem; }
+  h2 { font-family: var(--font-display); font-size: 1.15rem; margin: 2.2rem 0 0.7rem; }
+  .legal p, .legal li { color: var(--muted); line-height: 1.7; max-width: 66ch; }
+  .legal ul { padding-left: 1.2rem; margin: 0.4rem 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .legal a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+</style>
