@@ -10,7 +10,7 @@ const {
 <!doctype html>
 <html lang={Astro.currentLocale ?? 'en'}>
   <head>
-    <!-- mark JS as alive early → CSS hides .reveal only then; without JS content stays visible.
+    <!-- mark JS as alive early (используется другими скриптами/стилями через html.js).
          Тема ставится ДО отрисовки (из localStorage / системной) — без вспышки. -->
     <script is:inline>
       document.documentElement.classList.add('js');
@@ -155,7 +155,6 @@ const {
 
     <script>
       import { initCursor } from '../scripts/cursor.js';
-      import { initReveal } from '../scripts/reveal.js';
       import { initTilt } from '../scripts/tilt.js';
       import { initLoader } from '../scripts/loader.js';
 
@@ -167,7 +166,6 @@ const {
         // проде именно это читалось как «долго грузится», не сам рендер страницы.
         import('../scripts/crystal.js').then(({ initCrystal }) => initCrystal());
         initCursor();
-        initReveal();
         initTilt();
 
         // прогресс скролла

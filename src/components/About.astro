@@ -7,7 +7,7 @@ const stats = [1, 2, 3].map((i) => ({ v: t(`about.stat.${i}.v`), l: t(`about.sta
 
 <section class="section about" id="about">
   <div class="container about-grid">
-    <div class="about-lead reveal">
+    <div class="about-lead">
       <p class="eyebrow">{t('about.eyebrow')}</p>
       <h2 set:html={t('about.heading')}></h2>
       <p class="about-text">{t('about.text')}</p>
@@ -22,7 +22,7 @@ const stats = [1, 2, 3].map((i) => ({ v: t(`about.stat.${i}.v`), l: t(`about.sta
       </ul>
     </div>
 
-    <aside class="about-caps reveal">
+    <aside class="about-caps">
       <h3>{t('about.caps.title')}</h3>
       <ul>
         {capabilities.map((c) => <li>{c}</li>)}

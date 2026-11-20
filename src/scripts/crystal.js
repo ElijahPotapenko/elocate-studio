@@ -21,10 +21,14 @@ export function initCrystal() {
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) { return; } // WebGL недоступен — просто нет кристалла, страница не ломается
-  // кап был 1 (жалоба «пикселизация, мыльная текстура» — на retina это рендерило в половину
-  // физических пикселей экрана). transmission давно выключен (0), внутренний core+PointLight убраны —
-  // то тяжёлое, что роняло fps до 33 при 1.5, больше не считается; подняли кап до 1.5.
-  const MAX_PR = Math.min(window.devicePixelRatio || 1, 1.5);
+  // кап был 1 (жалоба «пикселизация, мыльная текстура»), подняли до 1.5 — но это было ДО fullscreen-
+  // канваса (весь экран, не компактный квадрат). Проверка топологии: сам кристалл дешёвый (призма с
+  // фаской + остриё + fresnel-шелл — суммарно низкополигональная модель, сотни треугольников, не
+  // узкое место). Узкое место — fill-rate: RenderPass + UnrealBloomPass (несколько проходов блюра по
+  // мип-цепочке) + дисперсия, все на ПОЛНЫЙ экран × pixelRatio — отсюда просадка до 50fps, о которой
+  // жаловался Элайджа. Кап снижен 1.5→1.25 (меньше нагрузка по умолчанию), и адаптивная деградация
+  // ниже срабатывает раньше (<45→<55) и шагает крупнее, чтобы не ждать, пока станет совсем плохо.
+  const MAX_PR = Math.min(window.devicePixelRatio || 1, 1.25);
   let currentPR = MAX_PR;
   renderer.setPixelRatio(currentPR);
   renderer.transmissionResolutionScale = 0.25; // меньше внутренний render-target под transmission-стекло
@@ -222,27 +226,43 @@ export function initCrystal() {
   // ── фаска на вертикальных рёбрах призмы: идеально острое 90°-ребро читалось нереалистично
   // («прямо из рендера»). Настоящий bevel-модификатор в three.js из коробки есть только у
   // ExtrudeGeometry (и только на торцах), не на боковых рёбрах — поэтому фаска «запечена» прямо в
-  // 2D-контур: у шестиугольника каждый острый угол срезан на расстояние CHAMFER вдоль обеих
-  // смежных сторон → 12-угольник (6 широких граней + 6 узких fasciи-граней на месте бывших рёбер).
-  // Дёшево (один Shape + ExtrudeGeometry), работает на флэт-шейдинге как есть.
-  function makeChamferedHexShape(radius, chamfer) {
+  // 2D-контур. Первая версия резала угол ОДНОЙ прямой гранью (плоский скос) — по фидбеку «скругли
+  // именно бевел, приятный, не остро» заменено на настоящую дугу: геометрический fillet радиуса
+  // FILLET_R, разбитый на FILLET_SEGS мелких граней — не идеальная кривая (это по-прежнему
+  // flat-shading, низкополигональная эстетика), но угол меняется плавной серией мелких шагов, а не
+  // одним резким изломом, визуально читается как скруглённый край.
+  function makeRoundedHexShape(radius, filletR, segs) {
     const pts = [];
     for (let i = 0; i < SIDES; i++) {
       const a0 = (i / SIDES) * Math.PI * 2;
       const aPrev = ((i - 1 + SIDES) / SIDES) * Math.PI * 2;
       const aNext = ((i + 1) / SIDES) * Math.PI * 2;
-      const vx = Math.cos(a0) * radius, vy = Math.sin(a0) * radius;
-      const pvx = Math.cos(aPrev) * radius, pvy = Math.sin(aPrev) * radius;
-      const nvx = Math.cos(aNext) * radius, nvy = Math.sin(aNext) * radius;
-      const t1 = chamfer / Math.hypot(pvx - vx, pvy - vy);
-      const t2 = chamfer / Math.hypot(nvx - vx, nvy - vy);
-      pts.push(new THREE.Vector2(vx + (pvx - vx) * t1, vy + (pvy - vy) * t1));
-      pts.push(new THREE.Vector2(vx + (nvx - vx) * t2, vy + (nvy - vy) * t2));
+      const V = new THREE.Vector2(Math.cos(a0), Math.sin(a0)).multiplyScalar(radius);
+      const P = new THREE.Vector2(Math.cos(aPrev), Math.sin(aPrev)).multiplyScalar(radius);
+      const N = new THREE.Vector2(Math.cos(aNext), Math.sin(aNext)).multiplyScalar(radius);
+      const dirToPrev = P.clone().sub(V).normalize();
+      const dirToNext = N.clone().sub(V).normalize();
+      const bisector = dirToPrev.clone().add(dirToNext).normalize(); // внутрь, пополам между гранями
+      const halfInterior = dirToPrev.angleTo(dirToNext) / 2;         // половина внутреннего угла в V
+      const t = filletR / Math.tan(halfInterior); // отступ точек касания вдоль рёбер от вершины
+      const d = filletR / Math.sin(halfInterior);  // смещение центра дуги от вершины по биссектрисе
+      const T1 = V.clone().add(dirToPrev.clone().multiplyScalar(t));
+      const T2 = V.clone().add(dirToNext.clone().multiplyScalar(t));
+      const O = V.clone().add(bisector.clone().multiplyScalar(d)); // центр дуги
+      const a1 = Math.atan2(T1.y - O.y, T1.x - O.x);
+      let a2 = Math.atan2(T2.y - O.y, T2.x - O.x);
+      let delta = a2 - a1;
+      while (delta > Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      for (let s = 0; s <= segs; s++) {
+        const a = a1 + delta * (s / segs);
+        pts.push(new THREE.Vector2(O.x + filletR * Math.cos(a), O.y + filletR * Math.sin(a)));
+      }
     }
     return new THREE.Shape(pts);
   }
-  const CHAMFER = 0.05; // небольшая — именно «фаска», не гранёный болт
-  const prismGeo = new THREE.ExtrudeGeometry(makeChamferedHexShape(RADIUS, CHAMFER), {
+  const FILLET_R = 0.07, FILLET_SEGS = 4; // небольшой радиус, 4 сегмента дуги на угол — «приятно», не гранёный болт
+  const prismGeo = new THREE.ExtrudeGeometry(makeRoundedHexShape(RADIUS, FILLET_R, FILLET_SEGS), {
     depth: PRISM_H, bevelEnabled: false, curveSegments: 1,
   });
   prismGeo.rotateX(-Math.PI / 2);        // экструд идёт по Z по умолчанию — разворачиваем в вертикаль (Y)
@@ -373,9 +393,10 @@ export function initCrystal() {
   }
 
   // ── оптимизация: самоадаптивный pixelRatio — на fullscreen-канвасе (весь экран, не компактный
-  // квадрат как раньше) fill-rate вырос в разы; если держит < 45fps секунду подряд, тихо снижает
-  // плотность рендера шагами по 0.25 (не ниже 0.75) вместо жёсткого статичного капа на все устройства
-  // разом. Никогда не поднимает обратно — простая деградация, без осцилляции вверх-вниз.
+  // квадрат как раньше) fill-rate вырос в разы; порог и шаг подняты (было <45/-0.25) — жалоба «лагает,
+  // проседает до 50fps» показала, что 45 слишком поздний триггер (50 — уже заметно на глаз). Теперь
+  // реагирует на <55 и шагает крупнее (-0.3), не ниже 0.7. Никогда не поднимает обратно — простая
+  // деградация, без осцилляции вверх-вниз.
   let frameCount = 0, fpsWindowStart = performance.now(), liveFps = 60;
   function maybeDegrade(now) {
     frameCount++;
@@ -385,8 +406,8 @@ export function initCrystal() {
     frameCount = 0;
     fpsWindowStart = now;
     if (fpsEl) fpsEl.textContent = liveFps + ' fps';
-    if (liveFps < 45 && currentPR > 0.75) {
-      currentPR = Math.max(0.75, currentPR - 0.25);
+    if (liveFps < 55 && currentPR > 0.7) {
+      currentPR = Math.max(0.7, currentPR - 0.3);
       renderer.setPixelRatio(currentPR);
       composer.setPixelRatio(currentPR);
     }

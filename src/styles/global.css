@@ -184,13 +184,10 @@ img { max-width: 100%; display: block; }
 /* доступность фокуса */
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
-/* появление при скролле */
-/* Гард no-JS: прячем .reveal ТОЛЬКО когда есть класс `js` (ставится ранним инлайн-скриптом).
-   Без JS → класса нет → контент виден сразу (прогрессивное улучшение, не пропадает). */
-.js .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
-.reveal.in { opacity: 1; transform: none; }
+/* fade-in при скролле убран целиком (2026-11-20, по слову Элайджи) — на фоне потяжелевшего
+   fullscreen-кристалла просадки fps делали переход текста рваным, читалось как «буквы
+   полупрозрачные». Контент теперь виден сразу, без .reveal/opacity-анимации. */
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .js .reveal { opacity: 1; transform: none; transition: none; }
 }

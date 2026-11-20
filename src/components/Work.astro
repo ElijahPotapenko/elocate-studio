@@ -27,14 +27,14 @@ const projects = [
 
 <section class="section" id="work">
   <div class="container">
-    <header class="work-head reveal">
+    <header class="work-head">
       <p class="eyebrow">{t('work.eyebrow')}</p>
       <h2 set:html={t('work.heading')}></h2>
     </header>
 
     <ul class="work-list">
       {projects.map((p) => (
-        <li class="work-item reveal" data-tilt>
+        <li class="work-item" data-tilt>
           <a class="work-link" href={p.href}>
           <div class="work-media">
             {p.video
