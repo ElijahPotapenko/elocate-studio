@@ -21,9 +21,10 @@ export function initCrystal() {
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) { return; } // WebGL недоступен — просто нет кристалла, страница не ломается
-  // кап ниже, чем у прежней 2D-сферы (1.5): bloom+transmission кратно дороже на пиксель — живой замер
-  // показал просадку 60→33fps при 1.5, см. git history этого файла
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1));
+  // кап был 1 (жалоба «пикселизация, мыльная текстура» — на retina это рендерило в половину
+  // физических пикселей экрана). transmission давно выключен (0), внутренний core+PointLight убраны —
+  // то тяжёлое, что роняло fps до 33 при 1.5, больше не считается; подняли кап до 1.5.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.transmissionResolutionScale = 0.25; // меньше внутренний render-target под transmission-стекло
   // Firefox шлёт безобидный warning «generateMipmap: lazy initialization» на первом кадре —
   // источник найден (изолировано: исчезает только при transmission:0), это диагностика ВНУТРЕННЕГО
@@ -42,7 +43,7 @@ export function initCrystal() {
   eg.addColorStop(0, '#0e0e0e');
   eg.addColorStop(0.45, '#2a2a2a');
   eg.addColorStop(0.75, '#9a9a9a');
-  eg.addColorStop(1, '#ffffff');
+  eg.addColorStop(1, '#cfcfcf'); // не чистый белый — иначе envMap-отражение «пересвечивает» грань в блик-пятно
   ectx.fillStyle = eg; ectx.fillRect(0, 0, 256, 128);
   const envTex = new THREE.CanvasTexture(envCanvas);
   envTex.mapping = THREE.EquirectangularReflectionMapping;
@@ -84,7 +85,7 @@ export function initCrystal() {
     tex.repeat.set(5, 9); // мелкий повтор — «зерно», не растянутое пятно на всю грань
     return tex;
   }
-  const sparkleNormal = makeSparkleNormalMap(128);
+  const sparkleNormal = makeSparkleNormalMap(256); // 128→256 — на retina+pixelRatio 1.5 128 читался блочным/пиксельным
 
   // ── дешёвая карта высот («бомж-рельеф»): серый шум + несколько ломаных царапин-трещин ──
   // Не настоящий displacement (та же экономия, что и у normal map выше) — просто bumpMap поверх
@@ -122,7 +123,7 @@ export function initCrystal() {
     tex.repeat.set(5, 9);
     return tex;
   }
-  const heightMap = makeHeightMap(128);
+  const heightMap = makeHeightMap(256); // та же причина, что у sparkleNormal выше
 
   // чисто белый свет/стекло, без зелёного токена темы (--crystal-glow) — по просьбе Элайджи:
   // кристалл без цвета, целиком на белом свете
@@ -149,7 +150,9 @@ export function initCrystal() {
   // composer'а, и даёт именно ту полупрозрачность, что на референсе — фон ЧЕСТНО виден сквозь тело.
   const gemMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
-    metalness: 0, roughness: 0.05,
+    metalness: 0, roughness: 0.4,                         // 0.05→0.22→0.4 — нижняя грань (почти в упор к камере)
+                                                             // всё ещё выжигала сплошной белый купол даже на 0.22;
+                                                             // рассеивает блик сильнее
     transmission: 0,
     transparent: true, opacity: 0.4,
     depthWrite: false,                                    // полупрозрачные грани не должны перекрывать друг друга по глубине
@@ -157,7 +160,7 @@ export function initCrystal() {
     clearcoat: 0,                                          // убран (0.35→0) — глянцевая плёнка давала СВОЙ отдельный блик
                                                              // на каждой грани поверх уже существующих от key/back — лишний
                                                              // источник бликов, которых и так жаловались «слишком много»
-    envMap, envMapIntensity: 0.25,
+    envMap, envMapIntensity: 0.12,
     flatShading: true,                                   // чёткие грани призмы/пирамиды, не сглаженные
     normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.4, 0.4),   // искристость без каустик
     bumpMap: heightMap, bumpScale: 0.012,                                 // «бомж»-рельеф поверх — не идеально гладкое стекло
@@ -186,7 +189,7 @@ export function initCrystal() {
   // key — минимальный fill спереди, только чтобы грани не проваливались в черноту; back — основной,
   // на оси камеры позади объекта (кристалл между светом и наблюдателем).
   const key = new THREE.DirectionalLight(0xffffff, 0.22); key.position.set(3, 2.5, 4); scene.add(key);
-  const back = new THREE.DirectionalLight(glowColor, 0.9); back.position.set(0.3, 0.4, -6); scene.add(back);
+  const back = new THREE.DirectionalLight(glowColor, 0.3); back.position.set(0.3, 0.4, -6); scene.add(back);
   scene.add(new THREE.AmbientLight(0x1a1a1a, 0.22));
 
   // ── Fresnel-оболочка: «весь свет только в рёбра» ──────────────────────────────────────────────
@@ -195,7 +198,11 @@ export function initCrystal() {
   // «мощное разложение по кромке» (как на 3D-типографике text.design): дисперсия (post-процесс выше)
   // сильнее всего ложится именно там, где этот шелл ярче всего — т.е. ровно на рёбрах, а не вразброс.
   const fresnelMat = new THREE.ShaderMaterial({
-    uniforms: { power: { value: 1.8 }, glowCol: { value: new THREE.Color(0xffffff) } },
+    // power выше (1.8→2.4, уже резче падает к центру грани) + intensity-потолок (0.55) — у основания
+    // призмы кромка стоит почти РЕБРОМ к камере почти по всей окружности разом (не только на 1-2
+    // гранях, как на остальном теле), rim там легко упирался в 1.0 и заливал низ сплошной белой
+    // полосой («блики внизу слишком сильные»); clamp держит его видимым, но не выжигает в сплошняк.
+    uniforms: { power: { value: 2.4 }, intensity: { value: 0.55 }, glowCol: { value: new THREE.Color(0xffffff) } },
     vertexShader: `
       varying vec3 vN; varying vec3 vV;
       void main() {
@@ -206,10 +213,10 @@ export function initCrystal() {
       }
     `,
     fragmentShader: `
-      uniform float power; uniform vec3 glowCol;
+      uniform float power; uniform float intensity; uniform vec3 glowCol;
       varying vec3 vN; varying vec3 vV;
       void main() {
-        float rim = pow(1.0 - max(dot(normalize(vN), normalize(vV)), 0.0), power);
+        float rim = pow(1.0 - max(dot(normalize(vN), normalize(vV)), 0.0), power) * intensity;
         gl_FragColor = vec4(glowCol, rim);
       }
     `,
