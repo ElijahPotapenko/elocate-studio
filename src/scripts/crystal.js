@@ -218,9 +218,40 @@ export function initCrystal() {
   // ОДНА модель, не два отдельных меша: призма+остриё сливаются в единую геометрию
   // (BufferGeometryUtils.mergeGeometries) — честный цельный кристалл, без шва на стыке, одна draw call.
   const RADIUS = 0.72, PRISM_H = 2.45, TIP_H = 1.2, SIDES = 6;
-  const prismGeo = new THREE.CylinderGeometry(RADIUS, RADIUS * 0.94, PRISM_H, SIDES, 1, false);
-  const tipGeo = new THREE.ConeGeometry(RADIUS, TIP_H, SIDES);
+
+  // ── фаска на вертикальных рёбрах призмы: идеально острое 90°-ребро читалось нереалистично
+  // («прямо из рендера»). Настоящий bevel-модификатор в three.js из коробки есть только у
+  // ExtrudeGeometry (и только на торцах), не на боковых рёбрах — поэтому фаска «запечена» прямо в
+  // 2D-контур: у шестиугольника каждый острый угол срезан на расстояние CHAMFER вдоль обеих
+  // смежных сторон → 12-угольник (6 широких граней + 6 узких fasciи-граней на месте бывших рёбер).
+  // Дёшево (один Shape + ExtrudeGeometry), работает на флэт-шейдинге как есть.
+  function makeChamferedHexShape(radius, chamfer) {
+    const pts = [];
+    for (let i = 0; i < SIDES; i++) {
+      const a0 = (i / SIDES) * Math.PI * 2;
+      const aPrev = ((i - 1 + SIDES) / SIDES) * Math.PI * 2;
+      const aNext = ((i + 1) / SIDES) * Math.PI * 2;
+      const vx = Math.cos(a0) * radius, vy = Math.sin(a0) * radius;
+      const pvx = Math.cos(aPrev) * radius, pvy = Math.sin(aPrev) * radius;
+      const nvx = Math.cos(aNext) * radius, nvy = Math.sin(aNext) * radius;
+      const t1 = chamfer / Math.hypot(pvx - vx, pvy - vy);
+      const t2 = chamfer / Math.hypot(nvx - vx, nvy - vy);
+      pts.push(new THREE.Vector2(vx + (pvx - vx) * t1, vy + (pvy - vy) * t1));
+      pts.push(new THREE.Vector2(vx + (nvx - vx) * t2, vy + (nvy - vy) * t2));
+    }
+    return new THREE.Shape(pts);
+  }
+  const CHAMFER = 0.05; // небольшая — именно «фаска», не гранёный болт
+  const prismGeo = new THREE.ExtrudeGeometry(makeChamferedHexShape(RADIUS, CHAMFER), {
+    depth: PRISM_H, bevelEnabled: false, curveSegments: 1,
+  });
+  prismGeo.rotateX(-Math.PI / 2);        // экструд идёт по Z по умолчанию — разворачиваем в вертикаль (Y)
+  prismGeo.translate(0, -PRISM_H / 2, 0); // центрируем, как раньше центровал CylinderGeometry
+  let tipGeo = new THREE.ConeGeometry(RADIUS, TIP_H, SIDES);
   tipGeo.translate(0, PRISM_H / 2 + TIP_H / 2, 0);
+  // ExtrudeGeometry (призма) НЕ индексируется, ConeGeometry (остриё) индексируется по умолчанию —
+  // mergeGeometries требует одинаковый формат у всех входов, падал с «must have compatible attributes».
+  tipGeo = tipGeo.toNonIndexed();
   const crystalGeo = mergeGeometries([prismGeo, tipGeo]);
   prismGeo.dispose();
   tipGeo.dispose();
