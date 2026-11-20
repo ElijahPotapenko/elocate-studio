@@ -34,15 +34,15 @@ export function initCrystal() {
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
   camera.position.set(0, 0, 5.6); // камера БЕЗ вертикального сдвига — сдвигаем саму группу ниже (см. ниже)
 
-  // ── процедурный envmap: тёмный фон → мятный акцент, для преломления в фасетах ──
+  // ── процедурный envmap: тёмный фон → белый, для преломления в фасетах (белый свет, без цвета) ──
   const envCanvas = document.createElement('canvas');
   envCanvas.width = 256; envCanvas.height = 128;
   const ectx = envCanvas.getContext('2d');
   const eg = ectx.createLinearGradient(0, 0, 0, 128);
-  eg.addColorStop(0, '#0d1812');
-  eg.addColorStop(0.45, '#163524');
-  eg.addColorStop(0.75, '#2b9f4c');
-  eg.addColorStop(1, '#bdf5cf');
+  eg.addColorStop(0, '#0e0e0e');
+  eg.addColorStop(0.45, '#2a2a2a');
+  eg.addColorStop(0.75, '#9a9a9a');
+  eg.addColorStop(1, '#ffffff');
   ectx.fillStyle = eg; ectx.fillRect(0, 0, 256, 128);
   const envTex = new THREE.CanvasTexture(envCanvas);
   envTex.mapping = THREE.EquirectangularReflectionMapping;
@@ -124,13 +124,9 @@ export function initCrystal() {
   }
   const heightMap = makeHeightMap(128);
 
-  // цвет ядра/bloom — из токена темы (--crystal-glow), обновляем по themechange без чтения в кадре
-  const glowColor = new THREE.Color(0x3fc568);
-  const readGlow = () => {
-    const v = getComputedStyle(document.documentElement).getPropertyValue('--crystal-glow').trim();
-    if (v) glowColor.set(v);
-  };
-  readGlow();
+  // чисто белый свет/стекло, без зелёного токена темы (--crystal-glow) — по просьбе Элайджи:
+  // кристалл без цвета, целиком на белом свете
+  const glowColor = new THREE.Color(0xffffff);
 
   // v2 (2026-11-19) — по центру hero, крупно, ЗА текстом (не в углу): позиция экрана теперь делает
   // CSS (большой центрированный квадрат в Hero.astro), группа внутри своего канваса — по центру
@@ -152,7 +148,7 @@ export function initCrystal() {
   // обычный alpha-blend (transparent+opacity) вместо transmission: предсказуемо, без сюрпризов
   // composer'а, и даёт именно ту полупрозрачность, что на референсе — фон ЧЕСТНО виден сквозь тело.
   const gemMat = new THREE.MeshPhysicalMaterial({
-    color: 0xcdf0da,
+    color: 0xffffff,
     metalness: 0, roughness: 0.05,
     transmission: 0,
     transparent: true, opacity: 0.4,
@@ -195,15 +191,16 @@ export function initCrystal() {
   const coreLight = new THREE.PointLight(glowColor, 1.1, 4.5, 2);
   coreLight.position.set(0, 0, 0);
   crystalGroup.add(coreLight);
-  addEventListener('themechange', () => { readGlow(); coreMat.color.copy(glowColor).multiplyScalar(2.4); coreLight.color.copy(glowColor); });
 
-  // key — лепит грани; rim — яркий контровой СЗАДИ объекта (по референсу: свечение на силуэте,
-  // не в заливке) — именно rim даёт тот «горящий край» эффект на фото, не внутренний шарик
-  // key тоже приглушен (1.3→0.6) — на полной яркости белый directional заливал всю лицевую грань
-  const key = new THREE.DirectionalLight(0xffffff, 0.6); key.position.set(3, 2.5, 4); scene.add(key);
-  const rim = new THREE.DirectionalLight(glowColor, 2.6); rim.position.set(-2.2, 1.2, -3.5); scene.add(rim);
-  const rim2 = new THREE.DirectionalLight(glowColor, 1.6); rim2.position.set(2.4, -1.5, -3); scene.add(rim2);
-  scene.add(new THREE.AmbientLight(0x0e1a13, 0.3));
+  // key — лепит грани (минимально, чтобы форма читалась, не главный источник); back — ГЛАВНЫЙ свет,
+  // строго НА ОСИ камеры позади объекта (кристалл между светом и наблюдателем — как просил Элайджа):
+  // максимум контрового просвета по всему силуэту разом, не только по двум бокам, как раньше у rim/rim2.
+  // rim/rim2 остаются вторичными боковыми бликами — добавляют объём силуэту, back держит драму.
+  const key = new THREE.DirectionalLight(0xffffff, 0.35); key.position.set(3, 2.5, 4); scene.add(key);
+  const back = new THREE.DirectionalLight(glowColor, 0.9); back.position.set(0.3, 0.4, -6); scene.add(back);
+  const rim = new THREE.DirectionalLight(glowColor, 1.6); rim.position.set(-2.2, 1.2, -3.5); scene.add(rim);
+  const rim2 = new THREE.DirectionalLight(glowColor, 1.1); rim2.position.set(2.4, -1.5, -3); scene.add(rim2);
+  scene.add(new THREE.AmbientLight(0x1a1a1a, 0.3));
 
   // ── bloom: «сильный блюр» свечения на гранях/рёбрах ──
   const composer = new EffectComposer(renderer);
