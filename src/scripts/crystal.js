@@ -24,7 +24,9 @@ export function initCrystal() {
   // кап был 1 (жалоба «пикселизация, мыльная текстура» — на retina это рендерило в половину
   // физических пикселей экрана). transmission давно выключен (0), внутренний core+PointLight убраны —
   // то тяжёлое, что роняло fps до 33 при 1.5, больше не считается; подняли кап до 1.5.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  const MAX_PR = Math.min(window.devicePixelRatio || 1, 1.5);
+  let currentPR = MAX_PR;
+  renderer.setPixelRatio(currentPR);
   renderer.transmissionResolutionScale = 0.25; // меньше внутренний render-target под transmission-стекло
   // Firefox шлёт безобидный warning «generateMipmap: lazy initialization» на первом кадре —
   // источник найден (изолировано: исчезает только при transmission:0), это диагностика ВНУТРЕННЕГО
@@ -103,6 +105,21 @@ export function initCrystal() {
       img.data[i + 3] = 255;
     }
     cx.putImageData(img, 0, 0);
+    // крупные мутные пятна — отдельный, БОЛЬШЕГО масштаба слой шума поверх мелкого зерна (разная
+    // частота = больше похоже на настоящий необработанный кристалл, не на один повторяющийся паттерн).
+    // Это bumpMap, не roughnessMap — сюда крупные пятна можно, они просто гнут нормали локально,
+    // не «полируют» грань целиком и не могут собраться в новый спекулярный хотспот, как было с
+    // roughness (см. комментарий у makeRoughnessMap ниже).
+    for (let k = 0; k < 14; k++) {
+      const x = Math.random() * size, y = Math.random() * size;
+      const r = size * (0.15 + Math.random() * 0.3);
+      const v = Math.random() < 0.5 ? 0 : 255;
+      const grad = cx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, `rgba(${v},${v},${v},0.22)`);
+      grad.addColorStop(1, 'rgba(128,128,128,0)');
+      cx.fillStyle = grad;
+      cx.fillRect(0, 0, size, size);
+    }
     // несколько случайных ломаных линий-трещин — светлая/тёмная пара рядом даёт иллюзию грани скола
     cx.lineWidth = 1;
     for (let k = 0; k < 6; k++) {
@@ -324,6 +341,51 @@ export function initCrystal() {
     bloom.resolution.set(w, h);
   }
 
+  // ── оптимизация: самоадаптивный pixelRatio — на fullscreen-канвасе (весь экран, не компактный
+  // квадрат как раньше) fill-rate вырос в разы; если держит < 45fps секунду подряд, тихо снижает
+  // плотность рендера шагами по 0.25 (не ниже 0.75) вместо жёсткого статичного капа на все устройства
+  // разом. Никогда не поднимает обратно — простая деградация, без осцилляции вверх-вниз.
+  let frameCount = 0, fpsWindowStart = performance.now(), liveFps = 60;
+  function maybeDegrade(now) {
+    frameCount++;
+    const elapsed = now - fpsWindowStart;
+    if (elapsed < 1000) return;
+    liveFps = Math.round((frameCount * 1000) / elapsed);
+    frameCount = 0;
+    fpsWindowStart = now;
+    if (fpsEl) fpsEl.textContent = liveFps + ' fps';
+    if (liveFps < 45 && currentPR > 0.75) {
+      currentPR = Math.max(0.75, currentPR - 0.25);
+      renderer.setPixelRatio(currentPR);
+      composer.setPixelRatio(currentPR);
+    }
+  }
+
+  // ── FPS-метка возле курсора — чисто по приколу (Элайджа: «курсор не кастомный, но пусть будет»).
+  // Кастомного курсора на сайте нет (см. cursor.js — отключён), поэтому просто плавающая подпись,
+  // которая идёт за системным курсором; на тач-устройствах pointermove от мыши не приходит — там
+  // элемент просто никогда не появляется, ничего не ломает.
+  let fpsEl = null;
+  if (!reduced) {
+    fpsEl = document.createElement('div');
+    fpsEl.textContent = '… fps';
+    Object.assign(fpsEl.style, {
+      position: 'fixed', left: '0', top: '0', zIndex: '9999',
+      font: '11px/1 ui-monospace, "SF Mono", Menlo, monospace',
+      color: 'var(--accent, #2b9f4c)',
+      background: 'rgba(0,0,0,.45)',
+      padding: '2px 5px', borderRadius: '4px',
+      pointerEvents: 'none', transform: 'translate(14px, 14px)',
+      opacity: '0', transition: 'opacity .2s',
+    });
+    document.body.appendChild(fpsEl);
+    addEventListener('pointermove', (e) => {
+      fpsEl.style.opacity = '1';
+      fpsEl.style.left = e.clientX + 'px';
+      fpsEl.style.top = e.clientY + 'px';
+    }, { passive: true });
+  }
+
   let running = false, rafId = 0;
   function animate(ts) {
     if (!running) return;
@@ -333,6 +395,7 @@ export function initCrystal() {
       crystalGroup.rotation.x = Math.sin(t * 0.4) * 0.12; // не только призму (иначе остриё «отрывалось»)
     }
     composer.render();
+    maybeDegrade(performance.now());
     rafId = requestAnimationFrame(animate);
   }
   function start() { if (!running) { running = true; rafId = requestAnimationFrame(animate); } }
