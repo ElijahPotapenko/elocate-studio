@@ -178,21 +178,8 @@ export function initCrystal() {
   // нижний конец чуть сужен и закрыт плоской гранью (openEnded:false у цилиндра) — natural quartz
   // «обломан» у основания, не отполирован в точку с обеих сторон сразу
 
-  // ── внутренний источник света: яркое emissive-ядро (ГЛАДКАЯ сфера — гранёная давала крапинки
-  // при преломлении сквозь внешние грани, смотрелось как пятна, а не мягкий свет) + PointLight ──
-  const coreGeo = new THREE.SphereGeometry(0.09, 16, 16);
-  // цвет ядра «передержан» (×2.4, выше 1.0) — bloom видит яркость ДО тонмаппинга, нужно реально
-  // перешагнуть новый высокий threshold (0.82), иначе при обычной насыщенности ядро bloom не ловит
-  const coreMat = new THREE.MeshBasicMaterial({ color: glowColor.clone().multiplyScalar(2.4) });
-  const core = new THREE.Mesh(coreGeo, coreMat);
-  crystalGroup.add(core);
-  // light слабее, чем раньше (3.2→1.1) — PointLight стоит ВНУТРИ толщи стекла, в упор освещая
-  // стенки изнутри; на полной яркости вся призма заливалась ровным молочным светом, из-за чего
-  // стекло читалось как матовая пластиковая болванка, а не прозрачный кристалл. bloom по-прежнему
-  // ловит ядро по собственной (передержанной) яркости — независимо от того, как светит PointLight.
-  const coreLight = new THREE.PointLight(glowColor, 1.1, 4.5, 2);
-  coreLight.position.set(0, 0, 0);
-  crystalGroup.add(coreLight);
+  // внутренний источник убран целиком (emissive-ядро + PointLight) — по просьбе Элайджи: никакого
+  // свечения ИЗНУТРИ, весь свет только СЗАДИ (back, ниже). Кристалл читается чисто контровым/rim-светом.
 
   // ТОЛЬКО ДВА направленных источника (было 4: key+back+rim+rim2) — жалоба «слишком много бликов»:
   // каждый direct light даёт СВОЙ отдельный специк-блик на гранях, 4 источника = 4 пятна россыпью.
@@ -293,9 +280,6 @@ export function initCrystal() {
     if (!reduced) {
       crystalGroup.rotation.y = t * 0.22;         // вращаем ВСЮ группу — призма+остриё как единое тело,
       crystalGroup.rotation.x = Math.sin(t * 0.4) * 0.12; // не только призму (иначе остриё «отрывалось»)
-      const pulse = 1 + Math.sin(t * 1.6) * 0.06;         // ядро «дышит» — живой источник света, не статика
-      core.scale.setScalar(pulse);
-      coreLight.intensity = 1.1 + Math.sin(t * 1.6) * 0.3;
     }
     composer.render();
     rafId = requestAnimationFrame(animate);
