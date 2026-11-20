@@ -125,6 +125,31 @@ export function initCrystal() {
   }
   const heightMap = makeHeightMap(256); // та же причина, что у sparkleNormal выше
 
+  // ── карта шероховатости: только МЕЛКОЕ зерно, без крупных пятен — убирает «рендерную» идеально
+  // ровную гладь (жалоба «прямо как из рендера»). Первая версия добавляла крупные размытые блобы,
+  // которые МЕСТАМИ делали поверхность глаже базы — случайно совпав с направлением back-света, такой
+  // блоб давал ещё более яркий зеркальный хотспот (хуже, чем без карты). Эта версия только повышает
+  // шероховатость зерном (никогда не делает площадь глаже базовой) — рассеивает блик в мелкую
+  // неровную «соль», а не в один чистый овал, и не может случайно собраться в новый хотспот.
+  function makeRoughnessMap(size) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#b4b4b4'; // база — зерно только ДОБАВЛЯЕТ (вверх к 255), никогда не полирует ниже базы
+    cx.fillRect(0, 0, size, size);
+    const img = cx.getImageData(0, 0, size, size);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = Math.min(255, img.data[i] + Math.random() * 75); // только вверх от базы
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    }
+    cx.putImageData(img, 0, 0);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(5, 9);
+    return tex;
+  }
+  const roughnessMap = makeRoughnessMap(256);
+
   // чисто белый свет/стекло, без зелёного токена темы (--crystal-glow) — по просьбе Элайджи:
   // кристалл без цвета, целиком на белом свете
   const glowColor = new THREE.Color(0xffffff);
@@ -162,8 +187,10 @@ export function initCrystal() {
                                                              // источник бликов, которых и так жаловались «слишком много»
     envMap, envMapIntensity: 0.12,
     flatShading: true,                                   // чёткие грани призмы/пирамиды, не сглаженные
-    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.4, 0.4),   // искристость без каустик
-    bumpMap: heightMap, bumpScale: 0.012,                                 // «бомж»-рельеф поверх — не идеально гладкое стекло
+    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.6, 0.6),   // 0.4→0.6 — заметнее неровность
+    bumpMap: heightMap, bumpScale: 0.02,                                  // 0.012→0.02 — рельеф читается сильнее
+    roughnessMap,                                                        // гуляющая шероховатость — не идеально
+                                                                           // ровный блик «как из рендера» (жалоба)
   });
 
   // ОДНА модель, не два отдельных меша: призма+остриё сливаются в единую геометрию
