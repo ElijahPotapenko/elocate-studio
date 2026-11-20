@@ -154,8 +154,10 @@ export function initCrystal() {
     transparent: true, opacity: 0.4,
     depthWrite: false,                                    // полупрозрачные грани не должны перекрывать друг друга по глубине
     side: THREE.DoubleSide,                                // сквозь переднюю грань видно заднюю (толщина тела), не пустоту
-    clearcoat: 0.35, clearcoatRoughness: 0.08,              // тонкая глянцевая плёнка — блик на ребре, не заливка
-    envMap, envMapIntensity: 0.4,
+    clearcoat: 0,                                          // убран (0.35→0) — глянцевая плёнка давала СВОЙ отдельный блик
+                                                             // на каждой грани поверх уже существующих от key/back — лишний
+                                                             // источник бликов, которых и так жаловались «слишком много»
+    envMap, envMapIntensity: 0.25,
     flatShading: true,                                   // чёткие грани призмы/пирамиды, не сглаженные
     normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.4, 0.4),   // искристость без каустик
     bumpMap: heightMap, bumpScale: 0.012,                                 // «бомж»-рельеф поверх — не идеально гладкое стекло
@@ -192,15 +194,45 @@ export function initCrystal() {
   coreLight.position.set(0, 0, 0);
   crystalGroup.add(coreLight);
 
-  // key — лепит грани (минимально, чтобы форма читалась, не главный источник); back — ГЛАВНЫЙ свет,
-  // строго НА ОСИ камеры позади объекта (кристалл между светом и наблюдателем — как просил Элайджа):
-  // максимум контрового просвета по всему силуэту разом, не только по двум бокам, как раньше у rim/rim2.
-  // rim/rim2 остаются вторичными боковыми бликами — добавляют объём силуэту, back держит драму.
-  const key = new THREE.DirectionalLight(0xffffff, 0.35); key.position.set(3, 2.5, 4); scene.add(key);
+  // ТОЛЬКО ДВА направленных источника (было 4: key+back+rim+rim2) — жалоба «слишком много бликов»:
+  // каждый direct light даёт СВОЙ отдельный специк-блик на гранях, 4 источника = 4 пятна россыпью.
+  // key — минимальный fill спереди, только чтобы грани не проваливались в черноту; back — основной,
+  // на оси камеры позади объекта (кристалл между светом и наблюдателем).
+  const key = new THREE.DirectionalLight(0xffffff, 0.22); key.position.set(3, 2.5, 4); scene.add(key);
   const back = new THREE.DirectionalLight(glowColor, 0.9); back.position.set(0.3, 0.4, -6); scene.add(back);
-  const rim = new THREE.DirectionalLight(glowColor, 1.6); rim.position.set(-2.2, 1.2, -3.5); scene.add(rim);
-  const rim2 = new THREE.DirectionalLight(glowColor, 1.1); rim2.position.set(2.4, -1.5, -3); scene.add(rim2);
-  scene.add(new THREE.AmbientLight(0x1a1a1a, 0.3));
+  scene.add(new THREE.AmbientLight(0x1a1a1a, 0.22));
+
+  // ── Fresnel-оболочка: «весь свет только в рёбра» ──────────────────────────────────────────────
+  // Не завязана на лампы вообще — чисто геометрический rim (1 − |N·V|)^p, ярче там, где грань стоит
+  // РЕБРОМ к камере (силуэт), и почти невидима в центре фасета. Именно это даёт референсный эффект
+  // «мощное разложение по кромке» (как на 3D-типографике text.design): дисперсия (post-процесс выше)
+  // сильнее всего ложится именно там, где этот шелл ярче всего — т.е. ровно на рёбрах, а не вразброс.
+  const fresnelMat = new THREE.ShaderMaterial({
+    uniforms: { power: { value: 1.8 }, glowCol: { value: new THREE.Color(0xffffff) } },
+    vertexShader: `
+      varying vec3 vN; varying vec3 vV;
+      void main() {
+        vN = normalize(normalMatrix * normal);
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vV = normalize(-mv.xyz);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      uniform float power; uniform vec3 glowCol;
+      varying vec3 vN; varying vec3 vV;
+      void main() {
+        float rim = pow(1.0 - max(dot(normalize(vN), normalize(vV)), 0.0), power);
+        gl_FragColor = vec4(glowCol, rim);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const fresnelShell = new THREE.Mesh(crystalGeo, fresnelMat);
+  fresnelShell.scale.setScalar(1.015); // чуть крупнее тела — оболочка СНАРУЖИ, не z-fighting с гранями
+  crystalGroup.add(fresnelShell);
 
   // ── bloom: «сильный блюр» свечения на гранях/рёбрах ──
   const composer = new EffectComposer(renderer);
@@ -218,7 +250,7 @@ export function initCrystal() {
   // комментарий у gemMat) — этот шейдер даёт тот же ВИЗУАЛЬНЫЙ признак (цветная окантовка на силуэте)
   // одним дешёвым fullscreen-пассом, без зависимости от хрупкого transmission.
   const dispersion = new ShaderPass({
-    uniforms: { tDiffuse: { value: null }, amount: { value: 0.045 } },
+    uniforms: { tDiffuse: { value: null }, amount: { value: 0.07 } },
     vertexShader: `
       varying vec2 vUv;
       void main() {
