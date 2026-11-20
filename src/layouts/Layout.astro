@@ -55,6 +55,7 @@ const {
         <circle class="loader-dot" cx="32" cy="32" r="5"></circle>
       </svg>
       <div class="loader-bar"><span></span></div>
+      <div class="loader-pct">0%</div>
     </div>
 
     <!-- scroll progress indicator -->
@@ -99,6 +100,14 @@ const {
         display: block; height: 100%; width: 0%;
         background: var(--accent); box-shadow: 0 0 10px var(--accent-glow);
         transition: width .3s var(--ease);
+      }
+      .loader-pct {
+        font-family: var(--font-body);
+        font-size: 12px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        color: var(--muted);
+        letter-spacing: .02em;
       }
       @media (prefers-reduced-motion: reduce) {
         .loader-ring { animation: none; stroke-dashoffset: 0; }
@@ -145,7 +154,6 @@ const {
     </style>
 
     <script>
-      import { initCrystal } from '../scripts/crystal.js';
       import { initCursor } from '../scripts/cursor.js';
       import { initReveal } from '../scripts/reveal.js';
       import { initTilt } from '../scripts/tilt.js';
@@ -154,7 +162,10 @@ const {
       initLoader();
 
       const start = () => {
-        initCrystal();
+        // three.js/crystal.js — 492Кб, отдельный динамический чанк: без статического импорта
+        // браузер ждал ВЕСЬ этот граф модулей ДО выполнения даже initLoader() — на медленном
+        // проде именно это читалось как «долго грузится», не сам рендер страницы.
+        import('../scripts/crystal.js').then(({ initCrystal }) => initCrystal());
         initCursor();
         initReveal();
         initTilt();
