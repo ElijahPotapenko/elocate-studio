@@ -100,7 +100,9 @@ const links = [
   /* контролы справа (тема + бургер) */
   .bar-controls { display: flex; align-items: center; gap: 0.6rem; }
   .theme-toggle {
-    display: grid; place-items: center;
+    display: none; /* временно скрыта по слову Элайджи (2026-11-20) — код/тоггл-логика не тронуты,
+                       просто спрятана; вернуть: display: grid */
+    place-items: center;
     width: 42px; height: 42px;
     color: var(--text);
     background: transparent;
