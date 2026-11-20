@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 export function initCrystal() {
@@ -213,6 +214,36 @@ export function initCrystal() {
   // (обе убраны по одной жалобе); теперь свечение держится у рёбер, не глушит форму кристалла
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.85, 0.4, 0.8);
   composer.addPass(bloom);
+
+  // ── дисперсия на краях: трендовый «сочный» эффект стекла (как liquid-glass UI) — канал R/G/B
+  // расходятся радиально от центра кадра, сильнее к углам. Настоящая физическая дисперсия в three.js
+  // (dispersion на MeshPhysicalMaterial) завязана на transmission, который здесь не работает (см.
+  // комментарий у gemMat) — этот шейдер даёт тот же ВИЗУАЛЬНЫЙ признак (цветная окантовка на силуэте)
+  // одним дешёвым fullscreen-пассом, без зависимости от хрупкого transmission.
+  const dispersion = new ShaderPass({
+    uniforms: { tDiffuse: { value: null }, amount: { value: 0.045 } },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D tDiffuse;
+      uniform float amount;
+      varying vec2 vUv;
+      void main() {
+        vec2 d = vUv - 0.5;
+        vec2 offset = d * dot(d, d) * amount; // растёт как quadratic от расстояния до центра — у центра почти 0
+        float r = texture2D(tDiffuse, vUv - offset).r;
+        vec4 mid = texture2D(tDiffuse, vUv);
+        float b = texture2D(tDiffuse, vUv + offset).b;
+        gl_FragColor = vec4(r, mid.g, b, mid.a);
+      }
+    `,
+  });
+  composer.addPass(dispersion);
 
   function resize() {
     // канвас — свой компактный квадрат (CSS в Hero.astro), не весь hero: читаем ЕГО размер,
