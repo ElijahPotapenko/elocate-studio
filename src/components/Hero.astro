@@ -28,19 +28,15 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
     isolation: isolate;
   }
   .hero-canvas {
-    /* по центру, крупно, ЗА текстом (2026-11-19 v2 — по референсу Элайджи) — квадрат, не весь hero
-       (full-hero canvas жёг fill-rate зря: живой замер показал просадку 60→33fps с bloom на нём) */
-    position: absolute;
-    left: 50%;
-    top: 54%;
-    transform: translate(-50%, -50%);
-    width: min(62vw, 760px);
-    height: min(62vw, 760px);
+    /* ВРЕМЕННЫЙ ЭКСПЕРИМЕНТ (по слову Элайджи, 2026-11-20) — на весь экран и зафиксирован (не внутри
+       .hero), чтобы посмотреть, как кристалл смотрится фоном на весь скролл. Было: квадрат min(62vw,760px)
+       по центру hero, position:absolute — см. git history, если решение откатят. */
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100svh;
     z-index: -1;
     opacity: 0.95;
-    /* БЕЗ маски — решение Элайджи: чистый тёмный квадрат-панель под кристалл, минимализм.
-       Перебрали маски (виньетка/узкая/эллипс) пытаясь спрятать его — оказалось, сам квадрат
-       и есть то, что нужно, не баг для сокрытия. */
   }
   .hero-grain {
     position: absolute; inset: 0; z-index: -1; pointer-events: none;
@@ -75,12 +71,6 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
   .hero-actions { margin-top: 2.2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
 
   @media (max-width: 620px) {
-    /* на мобиле — меньше и чуть выше центра, чтобы не спорить с кнопками снизу */
-    .hero-canvas {
-      width: min(84vw, 420px);
-      height: min(84vw, 420px);
-      top: 46%;
-      opacity: 0.85;
-    }
+    .hero-canvas { opacity: 0.85; }
   }
 </style>
