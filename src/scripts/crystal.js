@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 export function initCrystal() {
   const canvas = document.getElementById('bg-sphere');
@@ -84,6 +85,44 @@ export function initCrystal() {
   }
   const sparkleNormal = makeSparkleNormalMap(128);
 
+  // ── дешёвая карта высот («бомж-рельеф»): серый шум + несколько ломаных царапин-трещин ──
+  // Не настоящий displacement (та же экономия, что и у normal map выше) — просто bumpMap поверх
+  // стекла, чтобы блик на грани не был идеально гладким пятном, а ловил мелкие изломы, как на фото.
+  function makeHeightMap(size) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#808080';
+    cx.fillRect(0, 0, size, size);
+    const img = cx.getImageData(0, 0, size, size);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = 128 + (Math.random() - 0.5) * 60;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+      img.data[i + 3] = 255;
+    }
+    cx.putImageData(img, 0, 0);
+    // несколько случайных ломаных линий-трещин — светлая/тёмная пара рядом даёт иллюзию грани скола
+    cx.lineWidth = 1;
+    for (let k = 0; k < 6; k++) {
+      cx.strokeStyle = Math.random() < 0.5 ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
+      cx.beginPath();
+      let x = Math.random() * size, y = Math.random() * size;
+      cx.moveTo(x, y);
+      const segs = 3 + Math.floor(Math.random() * 3);
+      for (let s = 0; s < segs; s++) {
+        x += (Math.random() - 0.5) * size * 0.5;
+        y += (Math.random() - 0.5) * size * 0.5;
+        cx.lineTo(x, y);
+      }
+      cx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(5, 9);
+    return tex;
+  }
+  const heightMap = makeHeightMap(128);
+
   // цвет ядра/bloom — из токена темы (--crystal-glow), обновляем по themechange без чтения в кадре
   const glowColor = new THREE.Color(0x3fc568);
   const readGlow = () => {
@@ -106,25 +145,36 @@ export function initCrystal() {
   // Материал почти ПРОЗРАЧНЫЙ (по референсу Элайджи — чистое стекло со свечением на РЁБРАХ,
   // не тонированный шар): цвет ближе к белому, ниже roughness/intensity, упор на грань-highlight
   // от rim-света (см. ниже), не на внутреннюю заливку.
+  // physically-point-correct `transmission` в связке с EffectComposer оказался хрупким: вместо
+  // чистого стекла давал ровную серую заливку на весь силуэт (измерено readPixels — цвет менялся
+  // от lighting, но оставался плоским без «просвета» фона сквозь грани). Дешёвый обходной путь —
+  // обычный alpha-blend (transparent+opacity) вместо transmission: предсказуемо, без сюрпризов
+  // composer'а, и даёт именно ту полупрозрачность, что на референсе — фон ЧЕСТНО виден сквозь тело.
   const gemMat = new THREE.MeshPhysicalMaterial({
-    color: 0xeefff5,
-    metalness: 0, roughness: 0.08,
-    transmission: 1, thickness: 0.6, ior: 1.54,          // ior кварца в жизни ≈1.54-1.55 — взял настоящее значение
-    clearcoat: 0.8, clearcoatRoughness: 0.06,
-    envMap, envMapIntensity: 0.5,
+    color: 0xcdf0da,
+    metalness: 0, roughness: 0.05,
+    transmission: 0,
+    transparent: true, opacity: 0.4,
+    depthWrite: false,                                    // полупрозрачные грани не должны перекрывать друг друга по глубине
+    side: THREE.DoubleSide,                                // сквозь переднюю грань видно заднюю (толщина тела), не пустоту
+    clearcoat: 0.35, clearcoatRoughness: 0.08,              // тонкая глянцевая плёнка — блик на ребре, не заливка
+    envMap, envMapIntensity: 0.4,
     flatShading: true,                                   // чёткие грани призмы/пирамиды, не сглаженные
-    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.45, 0.45), // искристость без каустик
+    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.4, 0.4),   // искристость без каустик
+    bumpMap: heightMap, bumpScale: 0.012,                                 // «бомж»-рельеф поверх — не идеально гладкое стекло
   });
 
+  // ОДНА модель, не два отдельных меша: призма+остриё сливаются в единую геометрию
+  // (BufferGeometryUtils.mergeGeometries) — честный цельный кристалл, без шва на стыке, одна draw call.
   const RADIUS = 0.72, PRISM_H = 2.45, TIP_H = 1.2, SIDES = 6;
   const prismGeo = new THREE.CylinderGeometry(RADIUS, RADIUS * 0.94, PRISM_H, SIDES, 1, false);
-  const prism = new THREE.Mesh(prismGeo, gemMat);
-  crystalGroup.add(prism);
-
   const tipGeo = new THREE.ConeGeometry(RADIUS, TIP_H, SIDES);
-  const tip = new THREE.Mesh(tipGeo, gemMat);
-  tip.position.y = PRISM_H / 2 + TIP_H / 2;
-  crystalGroup.add(tip);
+  tipGeo.translate(0, PRISM_H / 2 + TIP_H / 2, 0);
+  const crystalGeo = mergeGeometries([prismGeo, tipGeo]);
+  prismGeo.dispose();
+  tipGeo.dispose();
+  const crystalMesh = new THREE.Mesh(crystalGeo, gemMat);
+  crystalGroup.add(crystalMesh);
 
   // нижний конец чуть сужен и закрыт плоской гранью (openEnded:false у цилиндра) — natural quartz
   // «обломан» у основания, не отполирован в точку с обеих сторон сразу
@@ -137,14 +187,19 @@ export function initCrystal() {
   const coreMat = new THREE.MeshBasicMaterial({ color: glowColor.clone().multiplyScalar(2.4) });
   const core = new THREE.Mesh(coreGeo, coreMat);
   crystalGroup.add(core);
-  const coreLight = new THREE.PointLight(glowColor, 3.2, 7, 2);
+  // light слабее, чем раньше (3.2→1.1) — PointLight стоит ВНУТРИ толщи стекла, в упор освещая
+  // стенки изнутри; на полной яркости вся призма заливалась ровным молочным светом, из-за чего
+  // стекло читалось как матовая пластиковая болванка, а не прозрачный кристалл. bloom по-прежнему
+  // ловит ядро по собственной (передержанной) яркости — независимо от того, как светит PointLight.
+  const coreLight = new THREE.PointLight(glowColor, 1.1, 4.5, 2);
   coreLight.position.set(0, 0, 0);
   crystalGroup.add(coreLight);
   addEventListener('themechange', () => { readGlow(); coreMat.color.copy(glowColor).multiplyScalar(2.4); coreLight.color.copy(glowColor); });
 
   // key — лепит грани; rim — яркий контровой СЗАДИ объекта (по референсу: свечение на силуэте,
   // не в заливке) — именно rim даёт тот «горящий край» эффект на фото, не внутренний шарик
-  const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(3, 2.5, 4); scene.add(key);
+  // key тоже приглушен (1.3→0.6) — на полной яркости белый directional заливал всю лицевую грань
+  const key = new THREE.DirectionalLight(0xffffff, 0.6); key.position.set(3, 2.5, 4); scene.add(key);
   const rim = new THREE.DirectionalLight(glowColor, 2.6); rim.position.set(-2.2, 1.2, -3.5); scene.add(rim);
   const rim2 = new THREE.DirectionalLight(glowColor, 1.6); rim2.position.set(2.4, -1.5, -3); scene.add(rim2);
   scene.add(new THREE.AmbientLight(0x0e1a13, 0.3));
@@ -180,7 +235,7 @@ export function initCrystal() {
       crystalGroup.rotation.x = Math.sin(t * 0.4) * 0.12; // не только призму (иначе остриё «отрывалось»)
       const pulse = 1 + Math.sin(t * 1.6) * 0.06;         // ядро «дышит» — живой источник света, не статика
       core.scale.setScalar(pulse);
-      coreLight.intensity = 3.2 + Math.sin(t * 1.6) * 0.8;
+      coreLight.intensity = 1.1 + Math.sin(t * 1.6) * 0.3;
     }
     composer.render();
     rafId = requestAnimationFrame(animate);
