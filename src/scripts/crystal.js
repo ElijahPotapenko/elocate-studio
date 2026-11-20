@@ -205,7 +205,7 @@ export function initCrystal() {
                                                              // всё ещё выжигала сплошной белый купол даже на 0.22;
                                                              // рассеивает блик сильнее
     transmission: 0,
-    transparent: true, opacity: 0.4,
+    transparent: true, opacity: 0.55,
     depthWrite: false,                                    // полупрозрачные грани не должны перекрывать друг друга по глубине
     side: THREE.DoubleSide,                                // сквозь переднюю грань видно заднюю (толщина тела), не пустоту
     clearcoat: 0,                                          // убран (0.35→0) — глянцевая плёнка давала СВОЙ отдельный блик
@@ -291,9 +291,15 @@ export function initCrystal() {
   // каждый direct light даёт СВОЙ отдельный специк-блик на гранях, 4 источника = 4 пятна россыпью.
   // key — минимальный fill спереди, только чтобы грани не проваливались в черноту; back — основной,
   // на оси камеры позади объекта (кристалл между светом и наблюдателем).
-  const key = new THREE.DirectionalLight(0xffffff, 0.22); key.position.set(3, 2.5, 4); scene.add(key);
-  const back = new THREE.DirectionalLight(glowColor, 0.3); back.position.set(0.3, 0.4, -6); scene.add(back);
-  scene.add(new THREE.AmbientLight(0x1a1a1a, 0.22));
+  // ВАЖНО: в погоне за бликами (0.9→0.3, ambient 0.22) занизили яркость НАСТОЛЬКО, что на развороте
+  // без прямого хайлайта тело рендерилось почти чёрным (замер readPixels: 15-26/255 — на глаз
+  // неотличимо от фона) — кристалл «пропадал» не из-за бага камеры/геометрии, а потому что ему
+  // буквально нечем было светиться. Подняты обратно: key/back/ambient + opacity 0.4→0.55 — плоская
+  // база теперь видна всегда, а блики остаются ручными (Fresnel-intensity clamp + roughness держат
+  // их не-перегоревшими).
+  const key = new THREE.DirectionalLight(0xffffff, 0.4); key.position.set(3, 2.5, 4); scene.add(key);
+  const back = new THREE.DirectionalLight(glowColor, 0.45); back.position.set(0.3, 0.4, -6); scene.add(back);
+  scene.add(new THREE.AmbientLight(0x383838, 0.5));
 
   // ── Fresnel-оболочка: «весь свет только в рёбра» ──────────────────────────────────────────────
   // Не завязана на лампы вообще — чисто геометрический rim (1 − |N·V|)^p, ярче там, где грань стоит
