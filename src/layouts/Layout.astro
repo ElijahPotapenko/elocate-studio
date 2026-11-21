@@ -14,15 +14,9 @@ const {
          Тема ставится ДО отрисовки (из localStorage / системной) — без вспышки. -->
     <script is:inline>
       document.documentElement.classList.add('js');
-      (function () {
-        try {
-          var t = localStorage.getItem('theme');
-          if (t !== 'light' && t !== 'dark') t = 'dark'; // тёмная по умолчанию (бренд), светлая — по выбору
-          document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
-      })();
+      // тема отключена (2026-11-21, по слову Элайджи): всегда тёмная, запомненный когда-то выбор светлой игнорируется.
+      // Вернуть выбор: читать localStorage.getItem('theme') ('light'|'dark') + показать .theme-toggle в Header.astro.
+      document.documentElement.setAttribute('data-theme', 'dark');
     </script>
     <meta charset="UTF-8" />
     <!-- без вспышки голого HTML: до прихода CSS — тёмный фон бренда и скрытое тело; global.css открывает body сам,

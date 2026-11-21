@@ -377,10 +377,15 @@ export function initCrystal() {
   });
   composer.addPass(dispersion);
 
+  let lastW = 0, lastH = 0;
   function resize() {
     // канвас на весь экран (fullscreen fixed background, см. Hero.astro) — читаем размер окна.
     const w = Math.max(1, canvas.clientWidth || innerWidth);
     const h = Math.max(1, canvas.clientHeight || innerHeight);
+    // размер не изменился — ничего не трогаем: на телефоне resize летит при каждом показе/скрытии адресной
+    // строки, а высота канваса (100svh) при этом та же; setSize всё равно стирал буфер — кристалл дёргался (2026-11-21)
+    if (w === lastW && h === lastH) return;
+    lastW = w; lastH = h;
     const aspect = w / h;
     camera.aspect = aspect;
     // дистанция камеры ОБРАТНО пропорциональна aspect — держит горизонтальный охват кадра примерно
@@ -411,16 +416,19 @@ export function initCrystal() {
   // проседает до 50fps» показала, что 45 слишком поздний триггер (50 — уже заметно на глаз). Теперь
   // реагирует на <55 и шагает крупнее (-0.3), не ниже 0.7. Никогда не поднимает обратно — простая
   // деградация, без осцилляции вверх-вниз.
+  // Подбор разрешения — ТОЛЬКО первые 2,5 с (пока висит лоадер): смена pixelRatio пересоздаёт буферы, и на глазах
+  // кристалл дёргался и мутнел ступенькой посреди просмотра (2026-11-21). Дальше разрешение не трогаем никогда.
+  const TUNE_UNTIL = performance.now() + 2500;
   let frameCount = 0, fpsWindowStart = performance.now(), liveFps = 60;
   function maybeDegrade(now) {
     frameCount++;
     const elapsed = now - fpsWindowStart;
-    if (elapsed < 1000) return;
+    if (elapsed < (now < TUNE_UNTIL ? 500 : 1000)) return;   // во время подбора меряем чаще — успеть до конца лоадера
     liveFps = Math.round((frameCount * 1000) / elapsed);
     frameCount = 0;
     fpsWindowStart = now;
     if (fpsEl) fpsEl.textContent = liveFps + ' fps';
-    if (liveFps < 55 && currentPR > 0.7) {
+    if (now < TUNE_UNTIL && liveFps < 55 && currentPR > 0.7) {
       currentPR = Math.max(0.7, currentPR - 0.3);
       renderer.setPixelRatio(currentPR);
       composer.setPixelRatio(currentPR);
