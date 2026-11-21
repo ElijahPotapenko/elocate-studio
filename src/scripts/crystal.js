@@ -36,6 +36,9 @@ export function initCrystal() {
   const MAX_PR = Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 1.25);
   let currentPR = MAX_PR;
   renderer.setPixelRatio(currentPR);
+  // фон сцены — цвет сайта (--bg): с bloom-проходом холст терял прозрачность и заливал фон чёрным, без него (телефон) —
+  // просвечивал фон страницы; теперь одинаково везде — наш фон (2026-11-21)
+  renderer.setClearColor(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#08080c'), 1);
   renderer.transmissionResolutionScale = 0.25; // меньше внутренний render-target под transmission-стекло
   // Firefox шлёт безобидный warning «generateMipmap: lazy initialization» на первом кадре —
   // источник найден (изолировано: исчезает только при transmission:0), это диагностика ВНУТРЕННЕГО
@@ -249,6 +252,41 @@ export function initCrystal() {
   // FILLET_R, разбитый на FILLET_SEGS мелких граней — не идеальная кривая (это по-прежнему
   // flat-shading, низкополигональная эстетика), но угол меняется плавной серией мелких шагов, а не
   // одним резким изломом, визуально читается как скруглённый край.
+  // треугольники, у которых ВСЕ три вершины на высоте yTop (крышка), — выкинуть; остальное как есть
+  function dropTopCap(geo, yTop) {
+    const src = geo.attributes, n = src.position.count, keep = [];
+    for (let i = 0; i < n; i += 3) {
+      const top = [0, 1, 2].every(k => Math.abs(src.position.getY(i + k) - yTop) < 1e-4);
+      if (!top) keep.push(i);
+    }
+    const out = new THREE.BufferGeometry();
+    for (const name of ['position', 'normal', 'uv']) {
+      const a = src[name], sz = a.itemSize, arr = new Float32Array(keep.length * 3 * sz);
+      keep.forEach((i, t) => { for (let k = 0; k < 3 * sz; k++) arr[t * 3 * sz + k] = a.array[i * sz + k]; });
+      out.setAttribute(name, new THREE.BufferAttribute(arr, sz));
+    }
+    geo.dispose();
+    return out;
+  }
+  // остриё-пирамида над контуром призмы: контур шейпа (sx, sy) после rotateX(-π/2) лежит на (sx, y, -sy)
+  function makeTipFromOutline(pts, yBase, yApex) {
+    const pos = [], uv = [], n = pts.length;
+    const apex = new THREE.Vector3(0, yApex, 0);
+    for (let i = 0; i < n; i++) {
+      const p = pts[i], q = pts[(i + 1) % n];
+      let a = new THREE.Vector3(p.x, yBase, -p.y), b = new THREE.Vector3(q.x, yBase, -q.y);
+      const nrm = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(apex, a));
+      const mid = a.clone().add(b).multiplyScalar(0.5); mid.y = 0;
+      if (nrm.dot(mid) < 0) [a, b] = [b, a];           // грань смотрит наружу
+      pos.push(a.x, a.y, a.z, b.x, b.y, b.z, apex.x, apex.y, apex.z);
+      uv.push(i / n, 0, (i + 1) / n, 0, (i + 0.5) / n, 1);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals();
+    return g;
+  }
   function makeRoundedHexShape(radius, filletR, segs) {
     const pts = [];
     for (let i = 0; i < SIDES; i++) {
@@ -283,16 +321,17 @@ export function initCrystal() {
   // (призма ~900 треугольников даже с запасом, проверено — fps не узкое место тут, см. комментарий
   // у pixelRatio ниже), а дуга читается гладкой кривой, а не ломаной линией из пары граней.
   const FILLET_R = 0.07, FILLET_SEGS = 12;
-  const prismGeo = new THREE.ExtrudeGeometry(makeRoundedHexShape(RADIUS, FILLET_R, FILLET_SEGS), {
+  const hexShape = makeRoundedHexShape(RADIUS, FILLET_R, FILLET_SEGS);
+  let prismGeo = new THREE.ExtrudeGeometry(hexShape, {
     depth: PRISM_H, bevelEnabled: false, curveSegments: 1,
   });
   prismGeo.rotateX(-Math.PI / 2);        // экструд идёт по Z по умолчанию — разворачиваем в вертикаль (Y)
   prismGeo.translate(0, -PRISM_H / 2, 0); // центрируем, как раньше центровал CylinderGeometry
-  let tipGeo = new THREE.ConeGeometry(RADIUS, TIP_H, SIDES);
-  tipGeo.translate(0, PRISM_H / 2 + TIP_H / 2, 0);
-  // ExtrudeGeometry (призма) НЕ индексируется, ConeGeometry (остриё) индексируется по умолчанию —
-  // mergeGeometries требует одинаковый формат у всех входов, падал с «must have compatible attributes».
-  tipGeo = tipGeo.toNonIndexed();
+  // «Шляпка» (2026-11-21): верхняя крышка призмы и донце конуса лежали ВНУТРИ кристалла — сквозь полупрозрачное стекло
+  // рисовались тёмным эллипсом-перемычкой; а острый конус не совпадал со СКРУГЛЁННЫМ контуром призмы — ступенька на стыке.
+  // Теперь: верхняя крышка призмы выкинута, остриё — пирамида из ТОГО ЖЕ скруглённого контура (стык точка в точку), без донца.
+  prismGeo = dropTopCap(prismGeo, PRISM_H / 2);
+  const tipGeo = makeTipFromOutline(hexShape.extractPoints(1).shape, PRISM_H / 2, PRISM_H / 2 + TIP_H);
   const crystalGeo = mergeGeometries([prismGeo, tipGeo]);
   prismGeo.dispose();
   tipGeo.dispose();
