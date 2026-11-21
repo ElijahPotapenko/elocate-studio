@@ -126,6 +126,10 @@ img { max-width: 100%; display: block; }
 }
 
 .section { padding-block: clamp(4rem, 9vw, var(--space-6)); }
+/* Секции и футер — свой слой НАД героем. .hero — позиционирован и isolation:isolate, кристалл (position:fixed на весь
+   экран, фоном на весь скролл) живёт в его слое — и этот слой рисовался ПОВЕРХ обычных секций ниже: стекло кристалла
+   ложилось на About/Contact/футер, текст выглядел «прозрачным» (2026-11-21). Кристалл остаётся фоном, текст — сверху. */
+.section:not(.hero), .site-footer { position: relative; z-index: 1; }
 
 .eyebrow {
   display: inline-flex;
