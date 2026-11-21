@@ -481,21 +481,36 @@ export function initCrystal() {
   // деградация, без осцилляции вверх-вниз.
   // Подбор разрешения — ТОЛЬКО первые 2,5 с (пока висит лоадер): смена pixelRatio пересоздаёт буферы, и на глазах
   // кристалл дёргался и мутнел ступенькой посреди просмотра (2026-11-21). Дальше разрешение не трогаем никогда.
+  // Блинк на ~3,5 с после входа (2026-11-21): подбор мерил СРЕДНИЙ fps, а первые кадры — компиляция шейдеров
+  // (133–183 мс) — роняли среднее ниже 55 даже на быстром железе; разрешение падало (1440→1007) уже ПОСЛЕ лоадера,
+  // буферы пересоздавались на глазах. Теперь: копим интервалы кадров, решаем ОДИН раз по МЕДИАНЕ (разовые подвисания
+  // её не сдвигают), снижаем максимум одной ступенью и ДО отрисовки кадра (иначе кадр стёрт → пустой кадр = блинк).
   const TUNE_UNTIL = performance.now() + 2500;
+  let tuned = false, prevTs = 0;
+  const tuneDts = [];
   let frameCount = 0, fpsWindowStart = performance.now(), liveFps = 60;
   function maybeDegrade(now) {
+    if (!tuned) {
+      if (prevTs) tuneDts.push(now - prevTs);
+      prevTs = now;
+      if (now >= TUNE_UNTIL) {
+        tuned = true;
+        const s = tuneDts.sort((a, b) => a - b), med = s.length ? s[s.length >> 1] : 16.7;
+        if (med > 1000 / 55 && currentPR > MIN_PR) {
+          currentPR = Math.max(MIN_PR, currentPR - 0.3);
+          renderer.setPixelRatio(currentPR);
+          composer.setPixelRatio(currentPR);
+        }
+      }
+    }
+    if (!fpsEl) return;
     frameCount++;
     const elapsed = now - fpsWindowStart;
-    if (elapsed < (now < TUNE_UNTIL ? 500 : 1000)) return;   // во время подбора меряем чаще — успеть до конца лоадера
+    if (elapsed < 1000) return;
     liveFps = Math.round((frameCount * 1000) / elapsed);
     frameCount = 0;
     fpsWindowStart = now;
-    if (fpsEl) fpsEl.textContent = liveFps + ' fps';
-    if (now < TUNE_UNTIL && liveFps < 55 && currentPR > MIN_PR) {
-      currentPR = Math.max(MIN_PR, currentPR - 0.3);
-      renderer.setPixelRatio(currentPR);
-      composer.setPixelRatio(currentPR);
-    }
+    fpsEl.textContent = liveFps + ' fps';
   }
 
   // ── FPS-метка возле курсора — чисто по приколу (Элайджа: «курсор не кастомный, но пусть будет»).
@@ -532,8 +547,8 @@ export function initCrystal() {
       crystalGroup.rotation.y = t * 0.22;         // вращаем ВСЮ группу — призма+остриё как единое тело,
       crystalGroup.rotation.x = Math.sin(t * 0.4) * 0.12; // не только призму (иначе остриё «отрывалось»)
     }
+    maybeDegrade(performance.now());   // до render: смена разрешения стирает холст — рисуем кадр уже в новом
     composer.render();
-    maybeDegrade(performance.now());
     rafId = requestAnimationFrame(animate);
   }
   function start() { if (!running) { running = true; rafId = requestAnimationFrame(animate); } }
