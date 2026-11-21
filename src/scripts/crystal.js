@@ -109,14 +109,24 @@ export function initCrystal() {
       img.data[i + 3] = 255;
     }
     cx.putImageData(img, 0, 0);
+    // второй слой: средние пятна-«облака» разного размера и силы — фактура хаотичнее, без одного масштаба (2026-11-21)
+    for (let k = 0; k < 60; k++) {
+      const x = Math.random() * size, y = Math.random() * size, r = size * (0.02 + Math.random() * 0.08);
+      const v = Math.random() < 0.5 ? 0 : 255, a = 0.08 + Math.random() * 0.22;
+      const g = cx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(${v},${v},${v},${a})`);
+      g.addColorStop(1, 'rgba(128,128,128,0)');
+      cx.fillStyle = g;
+      cx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
     // крупные мутные пятна — отдельный, БОЛЬШЕГО масштаба слой шума поверх мелкого зерна (разная
     // частота = больше похоже на настоящий необработанный кристалл, не на один повторяющийся паттерн).
     // Это bumpMap, не roughnessMap — сюда крупные пятна можно, они просто гнут нормали локально,
     // не «полируют» грань целиком и не могут собраться в новый спекулярный хотспот, как было с
     // roughness (см. комментарий у makeRoughnessMap ниже).
-    for (let k = 0; k < 14; k++) {
+    for (let k = 0; k < 40; k++) {                                // 14→40 крупных пятен
       const x = Math.random() * size, y = Math.random() * size;
-      const r = size * (0.15 + Math.random() * 0.3);
+      const r = size * (0.08 + Math.random() * 0.32);
       const v = Math.random() < 0.5 ? 0 : 255;
       const grad = cx.createRadialGradient(x, y, 0, x, y, r);
       grad.addColorStop(0, `rgba(${v},${v},${v},0.22)`);
@@ -126,7 +136,8 @@ export function initCrystal() {
     }
     // несколько случайных ломаных линий-трещин — светлая/тёмная пара рядом даёт иллюзию грани скола
     cx.lineWidth = 1;
-    for (let k = 0; k < 6; k++) {
+    for (let k = 0; k < 16; k++) {                                // 6→16 трещин, разной толщины
+      cx.lineWidth = Math.random() < 0.3 ? 2 : 1;
       cx.strokeStyle = Math.random() < 0.5 ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.5)';
       cx.beginPath();
       let x = Math.random() * size, y = Math.random() * size;
@@ -141,10 +152,10 @@ export function initCrystal() {
     }
     const tex = new THREE.CanvasTexture(c);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(5, 9);
+    tex.repeat.set(1.7, 3.1);                                     // было 5×9 на 256 — плитка читалась; 512 и нецелый повтор — хаос
     return tex;
   }
-  const heightMap = makeHeightMap(256); // та же причина, что у sparkleNormal выше
+  const heightMap = makeHeightMap(512); // та же причина, что у sparkleNormal выше
 
   // ── карта шероховатости: только МЕЛКОЕ зерно, без крупных пятен — убирает «рендерную» идеально
   // ровную гладь (жалоба «прямо как из рендера»). Первая версия добавляла крупные размытые блобы,
@@ -201,7 +212,9 @@ export function initCrystal() {
   // composer'а, и даёт именно ту полупрозрачность, что на референсе — фон ЧЕСТНО виден сквозь тело.
   const gemMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
-    metalness: 0, roughness: 0.4,                         // 0.05→0.22→0.4 — нижняя грань (почти в упор к камере)
+    metalness: 0, roughness: 0.4,
+    specularIntensity: 0.45,                              // мягче блик: с flatShading вся грань вспыхивала разом на развороте,
+                                                            // bloom раздувал вспышку в белое пятно — «рывок» каждые 60° (2026-11-21)                         // 0.05→0.22→0.4 — нижняя грань (почти в упор к камере)
                                                              // всё ещё выжигала сплошной белый купол даже на 0.22;
                                                              // рассеивает блик сильнее
     transmission: 0,
@@ -213,8 +226,8 @@ export function initCrystal() {
                                                              // источник бликов, которых и так жаловались «слишком много»
     envMap, envMapIntensity: 0.12,
     flatShading: true,                                   // чёткие грани призмы/пирамиды, не сглаженные
-    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.6, 0.6),   // 0.4→0.6 — заметнее неровность
-    bumpMap: heightMap, bumpScale: 0.02,                                  // 0.012→0.02 — рельеф читается сильнее
+    normalMap: sparkleNormal, normalScale: new THREE.Vector2(0.75, 0.75), // 0.6→0.75 — больше хаоса в фактуре (2026-11-21)
+    bumpMap: heightMap, bumpScale: 0.03,                                  // 0.02→0.03 — рельеф сильнее
     roughnessMap,                                                        // гуляющая шероховатость — не идеально
                                                                            // ровный блик «как из рендера» (жалоба)
   });
@@ -344,7 +357,7 @@ export function initCrystal() {
   // отсюда «засвеченный шар» вместо чёткой огранки). radius выше (0.8) — мягче, шире ореол на рёбрах
   // radius ниже (0.8→0.4) — раньше bloom размывал весь силуэт в мутное облако, как виньетка в CSS
   // (обе убраны по одной жалобе); теперь свечение держится у рёбер, не глушит форму кристалла
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.85, 0.4, 0.8);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.6, 0.4, 0.9);   // 0.85/0.8 → 0.6/0.9: вспышка грани не раздувается в белое пятно (2026-11-21)
   composer.addPass(bloom);
 
   // ── дисперсия на краях: трендовый «сочный» эффект стекла (как liquid-glass UI) — канал R/G/B
