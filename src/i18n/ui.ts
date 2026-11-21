@@ -93,6 +93,10 @@ export const ui = {
     'contact.form.message': 'Message',
     'contact.form.message.ph': 'A few words about the project',
     'contact.form.submit': 'Send message',
+    'contact.form.sending': 'Sending…',
+    'contact.form.sent.title': 'Message sent — thank you.',
+    'contact.form.sent.text': 'We’ll reply within a couple of days.',
+    'contact.form.error': 'Couldn’t send right now. Please write to us directly at',
 
     // — footer —
     'footer.github': 'GitHub',

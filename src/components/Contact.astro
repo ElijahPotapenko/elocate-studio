@@ -48,8 +48,16 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
         <label for="message">{t('contact.form.message')}</label>
         <textarea id="message" name="message" rows="4" placeholder={t('contact.form.message.ph')} required></textarea>
       </div>
-      <button type="submit" class="btn btn-primary">{t('contact.form.submit')} <span aria-hidden="true">→</span></button>
+      <button type="submit" class="btn btn-primary" data-sending={t('contact.form.sending')}>{t('contact.form.submit')} <span aria-hidden="true">→</span></button>
+      <p class="form-error" role="alert" hidden>
+        {t('contact.form.error')} <a href={`mailto:${t('contact.email')}`} class="mail">{t('contact.email')}</a>.
+      </p>
       <p class="form-privacy">By sending this, you agree to our <a href="/privacy">privacy policy</a>.</p>
+      <div class="form-sent" role="status" hidden>
+        <span class="sent-mark" aria-hidden="true">✓</span>
+        <p class="sent-title">{t('contact.form.sent.title')}</p>
+        <p class="sent-text">{t('contact.form.sent.text')}</p>
+      </div>
     </form>
   </div>
 </section>
@@ -116,4 +124,51 @@ const t = useTranslations(resolveLang(Astro.currentLocale));
   @media (max-width: 760px) {
     .contact-grid { grid-template-columns: 1fr; }
   }
+  /* состояния отправки: ошибка — строкой под кнопкой (с почтой как запасным путём); успех — заменяет поля формы */
+  .contact-form .btn[disabled] { opacity: 0.6; cursor: progress; }
+  .form-error { margin: 0; font-size: 0.9rem; color: var(--muted); }
+  .contact-form.is-sent > :not(.form-sent) { display: none; }
+  .form-sent {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    padding: 2rem; border: 1px solid var(--accent-soft); border-radius: var(--radius);
+    background: var(--accent-soft);
+  }
+  .form-sent[hidden] { display: none; }
+  .sent-mark {
+    width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink); font-weight: 700;
+  }
+  .sent-title { margin: 0.4rem 0 0; font-family: var(--font-display); font-size: 1.25rem; }
+  .sent-text { margin: 0; color: var(--muted); }
 </style>
+
+<script>
+  // Отправка без перезагрузки: тот же POST, что ждёт Netlify Forms (form-name + поля, urlencoded), но через fetch —
+  // посетитель остаётся на странице и видит итог. Без JS форма уходит обычным POST (запасной путь Netlify).
+  const form = document.querySelector<HTMLFormElement>('form.contact-form');
+  if (form) {
+    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const err = form.querySelector<HTMLElement>('.form-error')!;
+    const sent = form.querySelector<HTMLElement>('.form-sent')!;
+    const label = btn.innerHTML;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.hidden = true;
+      btn.disabled = true;
+      btn.textContent = btn.dataset.sending || 'Sending…';
+      try {
+        const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
+        const r = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        form.classList.add('is-sent');
+        sent.hidden = false;
+        sent.focus?.();
+      } catch {
+        err.hidden = false;   // не дошло — честно говорим и даём почту, введённый текст остаётся в полях
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = label;
+      }
+    });
+  }
+</script>
