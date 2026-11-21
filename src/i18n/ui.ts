@@ -36,7 +36,6 @@ export const ui = {
 
     // — work —
     'work.eyebrow': 'Selected work',
-    'work.cta': 'View case',
     'work.heading': 'Projects where disciplines<br />work as one team', // [html]
     'work.02.title': 'Finance Dashboard',
     'work.02.desc':

@@ -58,7 +58,6 @@ const projects = [
             <h3>{t(`work.${p.n}.title`)}</h3>
             <p class="work-desc">{t(`work.${p.n}.desc`)}</p>
             <ul class="work-tags">{p.tags.map((tag) => <li>{tag}</li>)}</ul>
-            <span class="work-cta">{t('work.cta')} <span aria-hidden="true">↗</span></span>
           </div>
           </a>
         </li>
@@ -125,17 +124,7 @@ const projects = [
   }
   .work-link { display: block; color: inherit; text-decoration: none; }
 
-  /* affordance «View case ↗» — карточка теперь честная ссылка */
-  .work-cta {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    margin-top: 1.1rem;
-    font-family: var(--font-display); font-size: 0.85rem; font-weight: 500;
-    color: var(--accent);
-    opacity: 0; transform: translateX(-4px);
-    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
-  }
-  .work-item:hover .work-cta { opacity: 1; transform: none; }
-  @media (hover: none) { .work-cta { opacity: 1; transform: none; } } /* тач — affordance всегда видна */
+  /* подпись «View case ↗» убрана (2026-11-21, по слову Элайджи) — карточка целиком ссылка, кликабельна сама */
 
   /* 3-я карточка (видео, тёмная) — лёгкий акцент-вес, чтобы не проваливалась в ряду */
   .work-media:has(.work-video) {
