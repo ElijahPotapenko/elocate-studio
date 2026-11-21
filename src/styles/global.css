@@ -86,6 +86,7 @@
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
 body {
+  visibility: visible;   /* Layout прячет body до прихода CSS (без вспышки голого HTML) — открываем здесь */
   margin: 0;
   background: var(--bg);
   color: var(--text);

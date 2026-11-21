@@ -25,6 +25,10 @@ const {
       })();
     </script>
     <meta charset="UTF-8" />
+    <!-- без вспышки голого HTML: до прихода CSS — тёмный фон бренда и скрытое тело; global.css открывает body сам,
+         а если CSS так и не пришёл — через 4 с открываем принудительно (защита не запирает сайт) -->
+    <style is:inline>html{background:#08080c}body{visibility:hidden}html.css-timeout body{visibility:visible}</style>
+    <script is:inline>setTimeout(function(){document.documentElement.classList.add('css-timeout')},4000)</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <title>{title}</title>
@@ -76,25 +80,9 @@ const {
       html.loading { overflow: hidden; }   /* не даём скроллить под оверлеем, пока он виден */
       #loader.loader-hide { opacity: 0; visibility: hidden; pointer-events: none; }
       .loader-mark { overflow: visible }
-      .loader-ring {
-        stroke: var(--accent);
-        stroke-linecap: round;
-        stroke-dasharray: 164;           /* ≈ 2π·26 */
-        stroke-dashoffset: 164;
-        transform-origin: 32px 32px;
-        transform: rotate(-90deg);
-        animation: loader-draw 1.1s var(--ease) forwards;
-      }
-      .loader-dot {
-        fill: var(--accent);
-        transform-origin: 32px 32px;
-        animation: loader-pulse 1.1s ease-in-out infinite;
-      }
-      @keyframes loader-draw { to { stroke-dashoffset: 0; } }
-      @keyframes loader-pulse {
-        0%, 100% { transform: scale(.82); opacity: .7; }
-        50% { transform: scale(1.14); opacity: 1; }
-      }
+      /* знак статичный — анимацию кольца и пульс точки убрали (2026-11-21, по слову Элайджи) */
+      .loader-ring { stroke: var(--accent); stroke-linecap: round; }
+      .loader-dot { fill: var(--accent); }
       .loader-bar { width: 120px; height: 2px; background: var(--line-2); border-radius: 2px; overflow: hidden; }
       .loader-bar span {
         display: block; height: 100%; width: 0%;
@@ -108,10 +96,6 @@ const {
         font-variant-numeric: tabular-nums;
         color: var(--muted);
         letter-spacing: .02em;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .loader-ring { animation: none; stroke-dashoffset: 0; }
-        .loader-dot { animation: none; }
       }
 
       /* — кастомный курсор: простая белая точка — */
