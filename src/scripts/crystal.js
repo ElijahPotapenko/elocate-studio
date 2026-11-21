@@ -28,7 +28,12 @@ export function initCrystal() {
   // мип-цепочке) + дисперсия, все на ПОЛНЫЙ экран × pixelRatio — отсюда просадка до 50fps, о которой
   // жаловался Элайджа. Кап снижен 1.5→1.25 (меньше нагрузка по умолчанию), и адаптивная деградация
   // ниже срабатывает раньше (<45→<55) и шагает крупнее, чтобы не ждать, пока станет совсем плохо.
-  const MAX_PR = Math.min(window.devicePixelRatio || 1, 1.25);
+  // Телефон (палец, узкий экран): полноэкранный bloom ему не по силам — подстройка роняла pixelRatio до 0.7, и на экране ×3
+  // кристалл рисовался в 273×464 и растягивался вчетверо (мыло, цветная бахрома). На телефоне bloom выключен,
+  // а разрешение не ниже 1.0 (обычно 1.5) — картинка в 2–3 раза чётче (2026-11-21).
+  const MOBILE = window.matchMedia?.('(pointer: coarse)')?.matches || innerWidth < 760;
+  const MIN_PR = MOBILE ? 1 : 0.7;
+  const MAX_PR = Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 1.25);
   let currentPR = MAX_PR;
   renderer.setPixelRatio(currentPR);
   renderer.transmissionResolutionScale = 0.25; // меньше внутренний render-target под transmission-стекло
@@ -358,7 +363,7 @@ export function initCrystal() {
   // radius ниже (0.8→0.4) — раньше bloom размывал весь силуэт в мутное облако, как виньетка в CSS
   // (обе убраны по одной жалобе); теперь свечение держится у рёбер, не глушит форму кристалла
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.6, 0.4, 0.9);   // 0.85/0.8 → 0.6/0.9: вспышка грани не раздувается в белое пятно (2026-11-21)
-  composer.addPass(bloom);
+  if (!MOBILE) composer.addPass(bloom);   // на телефоне без bloom — см. MOBILE выше
 
   // ── дисперсия на краях: трендовый «сочный» эффект стекла (как liquid-glass UI) — канал R/G/B
   // расходятся радиально от центра кадра, сильнее к углам. Настоящая физическая дисперсия в three.js
@@ -441,8 +446,8 @@ export function initCrystal() {
     frameCount = 0;
     fpsWindowStart = now;
     if (fpsEl) fpsEl.textContent = liveFps + ' fps';
-    if (now < TUNE_UNTIL && liveFps < 55 && currentPR > 0.7) {
-      currentPR = Math.max(0.7, currentPR - 0.3);
+    if (now < TUNE_UNTIL && liveFps < 55 && currentPR > MIN_PR) {
+      currentPR = Math.max(MIN_PR, currentPR - 0.3);
       renderer.setPixelRatio(currentPR);
       composer.setPixelRatio(currentPR);
     }
@@ -467,6 +472,7 @@ export function initCrystal() {
     });
     document.body.appendChild(fpsEl);
     addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;   // палец на телефоне тоже шлёт pointermove — метка fps только для мыши
       fpsEl.style.opacity = '1';
       fpsEl.style.left = e.clientX + 'px';
       fpsEl.style.top = e.clientY + 'px';
