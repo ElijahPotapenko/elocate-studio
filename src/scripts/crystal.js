@@ -392,6 +392,12 @@ export function initCrystal() {
   });
   const fresnelShell = new THREE.Mesh(crystalGeo, fresnelMat);
   fresnelShell.scale.setScalar(1.015); // чуть крупнее тела — оболочка СНАРУЖИ, не z-fighting с гранями
+  // Порядок отрисовки — ЯВНО (2026-11-21, «в конце оборота дёргается»): оба меша прозрачные, three.js сортирует их по
+  // центру bounding sphere; у оболочки он из-за scale 1.015 чуть смещён, и на наклонённом вращающемся теле глубины
+  // центров дважды за оборот менялись местами (~189° и ~332°) → порядок смешивания (alpha vs additive) переворачивался,
+  // и грань за один кадр вспыхивала/гасла. Тело всегда первым, оболочка — поверх.
+  crystalMesh.renderOrder = 0;
+  fresnelShell.renderOrder = 1;
   crystalGroup.add(fresnelShell);
 
   // ── bloom: «сильный блюр» свечения на гранях/рёбрах ──
