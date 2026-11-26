@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-theme="royal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regnum Lab — design system · Elocate Studio</title>
+<meta name="description" content="Regnum design system lab: tokens, themes and every component of the royal casino UI case study.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
+    "htm": "https://esm.sh/htm@3.1.1"
+  }
+}
+</script>
+<script>try{var L=JSON.parse(localStorage.getItem('regnum-ds-look'));if(L){document.documentElement.dataset.theme=L.theme||'royal';for(var k in(L.vars||{}))document.documentElement.style.setProperty(k,L.vars[k]);}}catch(e){}</script>
+<link rel="stylesheet" href="../ds/tokens.css">
+<link rel="stylesheet" href="../ds/components.css">
+<style>
+/* Лаба сама собрана на токенах — переключил тему, перекрасилась и лаба. */
+#root{position:relative; z-index:1}
+.lab{display:grid; grid-template-columns:240px 1fr; gap:28px; max-width:1440px; margin:0 auto; padding:18px 22px 80px}
+.lab-top{grid-column:1 / -1; position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:12px 0;
+  background:linear-gradient(180deg, var(--bg) 70%, transparent)}
+.lab-top .logo{font-size:24px}
+.lab-top .tag{font:700 11px/1 var(--f-head); letter-spacing:.22em; color:var(--faint); text-transform:uppercase}
+.lab-top .sp{flex:1}
+.lab-top .ghost{font-size:12px; font-weight:700; color:var(--muted); padding:8px 12px; border-radius:var(--radius-sm); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 40%, transparent)}
+.lab-top .ghost:hover{color:var(--ink); box-shadow:inset 0 0 0 1px var(--metal)}
+.toc{position:sticky; top:84px; align-self:start; display:flex; flex-direction:column; gap:2px; max-height:calc(100vh - 100px); overflow:auto; padding-right:6px}
+.toc h6{margin:16px 10px 6px; font:700 11px/1 var(--f-head); letter-spacing:.2em; color:var(--metal); text-transform:uppercase}
+.toc a{padding:7px 10px; font-size:13px; font-weight:600; color:var(--muted); border-radius:6px}
+.toc a:hover{background:var(--panel-hi); color:var(--ink)}
+.body{display:flex; flex-direction:column; gap:44px; min-width:0}
+.intro h1{margin:6px 0 8px; font:800 clamp(28px,3.4vw,42px)/1.1 var(--f-head)}
+.intro p{margin:0; max-width:720px; color:var(--muted)}
+.intro code, .story code{font:600 12px/1.4 ui-monospace, Menlo, monospace; color:var(--metal); background:var(--bg-2); padding:2px 6px; border-radius:4px}
+.grp > h2{display:flex; align-items:center; gap:10px; margin:0 0 6px; font:800 22px/1 var(--f-head); letter-spacing:.04em}
+.grp > p{margin:0 0 18px; color:var(--muted); max-width:760px; font-size:14px}
+.story{margin-bottom:18px}
+.story > .ornw > .orn > .in{padding:0}
+.story-h{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; padding:16px 20px 0}
+.story-h h3{margin:0; font:700 17px/1 var(--f-head)}
+.story-h span{font-size:13px; color:var(--muted)}
+.stage{display:flex; flex-wrap:wrap; align-items:center; gap:20px; padding:22px 20px; min-height:90px}
+.stage.col{flex-direction:column; align-items:stretch}
+.stage .lbl{display:block; margin-top:8px; font-size:11px; color:var(--faint); text-align:center}
+.code{position:relative; margin:0; padding:12px 76px 12px 20px; border-top:1px solid color-mix(in oklch, var(--metal-dim) 22%, transparent); background:color-mix(in oklch, var(--well) 70%, transparent);
+  font:500 12px/1.6 ui-monospace, Menlo, monospace; color:var(--muted); white-space:pre-wrap; overflow-wrap:anywhere}
+.code button{position:absolute; top:8px; right:10px; font:700 11px/1 var(--f-body); color:var(--faint); padding:5px 8px; border-radius:4px; box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent)}
+.code button:hover{color:var(--metal)}
+/* пульт */
+.board{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:20px}
+.knobs .in{padding:18px 20px}
+.kg{margin-bottom:14px} .kg h4{margin:0 0 8px; font:700 12px/1 var(--f-head); letter-spacing:.18em; color:var(--metal); text-transform:uppercase}
+.knob{display:grid; grid-template-columns:130px 1fr 52px; align-items:center; gap:12px; padding:5px 0; font-size:13px; color:var(--muted)}
+.knob b{font:700 12px/1 ui-monospace, Menlo, monospace; color:var(--ink); text-align:right}
+.knob.changed span{color:var(--metal)}
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:3px; background:var(--well); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; transform:rotate(45deg); border-radius:3px; background:var(--metal-grad); box-shadow:0 0 10px var(--glow-metal); cursor:pointer}
+input[type=range]::-moz-range-thumb{width:14px; height:14px; border:0; border-radius:3px; background:var(--metal); box-shadow:0 0 10px var(--glow-metal); cursor:pointer}
+.hue input[type=range]{background:linear-gradient(90deg, oklch(65% .15 0), oklch(65% .15 60), oklch(65% .15 120), oklch(65% .15 180), oklch(65% .15 240), oklch(65% .15 300), oklch(65% .15 360))}
+.board-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+.preview .in{padding:22px; display:grid; gap:18px}
+.pv-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.pv-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center}
+.pv-grid .wheel{width:min(220px,90%)}
+/* темы рядом */
+.themes{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.tcard{position:relative; padding:18px; border-radius:14px; background:radial-gradient(80% 60% at 70% 0%, var(--amb-1), transparent 70%), var(--bg); color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); display:grid; gap:14px; cursor:pointer; transition:box-shadow var(--dur) var(--ease)}
+.tcard:hover, .tcard.on{box-shadow:inset 0 0 0 1px var(--metal), 0 0 30px var(--glow-metal-soft)}
+.tcard .nm{display:flex; align-items:center; gap:10px; font:800 22px/1 var(--f-logo)}
+.tcard .nt{font-size:12px; color:var(--muted)}
+.tcard .row2{display:grid; grid-template-columns:90px 1fr; gap:14px; align-items:center}
+/* палитра */
+.sw-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px}
+.sw{border-radius:10px; overflow:hidden; background:var(--panel); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 25%, transparent)}
+.sw i{display:block; height:64px}
+.sw div{padding:8px 10px; font:600 12px/1.3 ui-monospace, Menlo, monospace; color:var(--muted)}
+.sw.wide{grid-column:span 2}
+.type-row{display:grid; grid-template-columns:160px 1fr; gap:20px; align-items:baseline; padding:14px 0; border-bottom:1px solid color-mix(in oklch, var(--metal-dim) 15%, transparent)}
+.type-row small{font:600 12px/1.4 ui-monospace, Menlo, monospace; color:var(--faint)}
+.icons{display:grid; grid-template-columns:repeat(auto-fill, minmax(96px,1fr)); gap:12px; width:100%}
+.icons figure{margin:0; text-align:center}
+.icons .art{border-radius:10px} .icons .art .emb{width:64%}
+.icons figcaption{margin-top:6px; font:600 10px/1.3 ui-monospace, Menlo, monospace; color:var(--faint)}
+.w-280{width:280px} .w-360{width:min(360px,100%)} .w-full{width:100%}
+.vip-demo{width:min(720px,100%)}
+.mini-games{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px; width:100%}
+footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px; color:var(--faint)} footer.foot a{text-decoration:underline}
+@media (max-width: 1000px){ .lab{grid-template-columns:1fr} .toc{display:none} .board{grid-template-columns:1fr} .themes{grid-template-columns:1fr} }
+@media (max-width: 560px){ .knob{grid-template-columns:96px 1fr 44px} .pv-grid{grid-template-columns:1fr} .lab-top .tag{display:none} }
+</style>
+</head>
+<body class="ambient">
+<div id="root"></div>
+<script type="module">
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import { html, GI, LINE, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS,
+  Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
+  GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust } from '../ds/components.js';
+
+const G = { name: "Dragon's Hoard", k: 'dragon-head', hue: 30, rtp: '96.4%', badge: 'new' };
+const GAMES = [G, { name: 'Moon Oracle', k: 'crystal-ball', hue: 280, rtp: '97.0%', badge: 'hot' }, { name: 'Unicorn Glade', k: 'unicorn', hue: 165, rtp: '96.2%' }, { name: 'Wyvern Gold', k: 'wyvern', hue: 45, rtp: '95.9%', badge: 'new' }];
+const RUNGS = [['V', 'Baroness'], ['VI', 'Countess'], ['VII', 'Duchess'], ['VIII', 'Princess'], ['IX', 'Queen']];
+const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label: 'Crown points boost' }, { value: 'Royal chest', label: 'Unlocks at Princess', lock: 'LV 8' }];
+const copy = (t) => { try { navigator.clipboard.writeText(t); } catch { /* без буфера — текст виден на экране */ } };
+
+// ── История: заголовок, сцена, код ──
+function Story({ id, title, note, code, col, children }) {
+  const [ok, setOk] = useState(false);
+  return html`<div class="story" id=${id}><${Orn} flat>
+    <div class="story-h"><h3>${title}</h3>${note && html`<span>${note}</span>`}</div>
+    <div class=${'stage' + (col ? ' col' : '')}>${children}</div>
+    ${code && html`<pre class="code">${code}<button onClick=${() => { copy(code); setOk(true); setTimeout(() => setOk(false), 1200); }}>${ok ? 'Copied' : 'Copy'}</button></pre>`}
+  <//></div>`;
+}
+const Lbl = ({ t, children }) => html`<div>${children}<span class="lbl">${t}</span></div>`;
+
+// ── Пульт: ручки токенов ──
+function readKnob(v) { const x = getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return parseFloat(x); }
+function Board({ look, setLook }) {
+  const [vals, setVals] = useState({});
+  useEffect(() => { const o = {}; KNOBS.forEach(({ v }) => o[v] = readKnob(v)); setVals(o); }, [look.theme, JSON.stringify(look.vars)]);
+  const set = (k, x) => setLook({ ...look, vars: { ...look.vars, [k.v]: x + (k.unit || '') } });
+  const groups = [...new Set(KNOBS.map((k) => k.group))];
+  const [ok, setOk] = useState(false);
+  const css = lookCSS(look);
+  return html`<div class="board">
+    <${Orn} className="knobs" deco>
+      ${groups.map((g) => html`<div key=${g} class="kg"><h4>${g}</h4>${KNOBS.filter((k) => k.group === g).map((k) => html`<label key=${k.v} class=${'knob' + (k.v.endsWith('-h') ? ' hue' : '') + (look.vars[k.v] != null ? ' changed' : '')}>
+        <span>${k.label}</span><input type="range" min=${k.min} max=${k.max} step=${k.step} value=${vals[k.v] ?? 0} onChange=${(e) => set(k, e.target.value)}/><b>${vals[k.v] ?? ''}${k.unit || ''}</b></label>`)}</div>`)}
+      <div class="board-actions">
+        <${Gem} label=${ok ? 'Copied' : 'Copy theme CSS'} tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); copy(css); setOk(true); setTimeout(() => setOk(false), 1200); }}/>
+        <button class="ghost" style=${{ fontSize: '12px', color: 'var(--muted)', padding: '8px 12px' }} onClick=${() => setLook({ ...look, vars: {} })}>Reset to ${look.theme}</button>
+      </div>
+      <pre class="code" style=${{ marginTop: '14px', borderRadius: '8px' }}>${css}</pre>
+    <//>
+    <${Orn} className="preview" lit sheen deco>
+      <div class="pv-row"><${Logo}/><${Badge} kind="new"/><${Badge} kind="hot"/><${Badge} kind="metal">VIP<//></div>
+      <div class="pv-grid"><div style=${{ display: 'grid', gap: '16px', justifyItems: 'start' }}>
+          <div class="eyebrow">Welcome to the court</div>
+          <h2 style=${{ margin: 0, font: '800 30px/1.05 var(--f-head)' }}>200 <span class="metal-text">free spins</span></h2>
+          <div class="pv-row"><${Gem} label="Join now" magnetic/><${Gem} label="Join" tone="metal" size="sm"/></div>
+        </div><${CrownWheel}/></div>
+      <div class="pv-grid"><${GameCard} game=${GAMES[1]}/><${GameCard} game=${GAMES[2]}/></div>
+      <${Ladder} rungs=${RUNGS} cur=${2}/>
+    <//>
+  </div>`;
+}
+
+const TOC = [
+  ['Start', [['playground', 'Playground'], ['themes', 'Themes']]],
+  ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['iconography', 'Iconography']]],
+  ['Components', [['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
+    ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['section', 'Section head']]],
+];
+const SW = [
+  ['Surface', ['bg', 'bg-2', 'well', 'panel', 'panel-2', 'panel-hi']],
+  ['Text', ['ink', 'muted', 'faint', 'on-metal']],
+  ['Metal', ['metal-hi', 'metal', 'metal-2', 'metal-mid', 'metal-deep', 'metal-shade']],
+  ['Accent', ['accent-2', 'accent', 'accent-deep', 'accent-dark', 'gem']],
+  ['Signals', ['pos', 'info', 'magic']],
+  ['Gradients', ['metal-grad', 'frame-grad', 'accent-grad', 'gem-grad']],
+];
+
+function App() {
+  const [look, setLookRaw] = useState(loadLook);
+  const setLook = (l) => { setLookRaw(l); applyLook(l); saveLook(l); };
+  useEffect(() => { applyLook(look); }, []);
+  const [seg, setSeg] = useState('casino'), [tab, setTab] = useState('dash');
+  return html`<${React.Fragment}>
+    <${Dust} n=${12}/>
+    <div class="lab">
+      <header class="lab-top">
+        <${Logo} name="Regnum"/><span class="tag">Design system · Lab</span><span class="sp"></span>
+        <${Seg} items=${THEMES.map((t) => t.id)} value=${look.theme} onChange=${(id) => setLook({ theme: id, vars: {} })}/>
+        <a class="ghost" href="../index.html">Open demo →</a>
+        <a class="ghost" href="/#work">← Elocate</a>
+      </header>
+      <nav class="toc">${TOC.map(([h, items]) => html`<${React.Fragment} key=${h}><h6>${h}</h6>${items.map(([id, t]) => html`<a key=${id} href=${'#' + id}>${t}</a>`)}<//>`)}</nav>
+      <main class="body">
+        <section class="intro">
+          <div class="eyebrow">Regnum · design system</div>
+          <h1>Change the <span class="metal-text">whole look</span> with a few knobs.</h1>
+          <p>Three layers: <code>tokens.css</code> — knobs (metal, accent and surface hues, glow, cut) and everything derived from them;
+            <code>components.css</code> — only <code>var(--tokens)</code>, no raw colours; <code>components.js</code> — React components that never know a concrete colour.
+            Tweaks here are remembered and the demo opens with them.</p>
+        </section>
+
+        <section class="grp" id="playground"><h2><${Diamond}/>Playground</h2>
+          <p>Move a knob — every component repaints: frames, icons, the wheel, glows. When a look feels right, copy its CSS into <code>ds/tokens.css</code> as a new theme.</p>
+          <${Board} look=${look} setLook=${setLook}/>
+        </section>
+
+        <section class="grp" id="themes"><h2><${Diamond}/>Themes</h2>
+          <p>Presets side by side. Each card sets <code>data-theme</code> on itself — tokens recompute locally. Click to apply.</p>
+          <div class="themes">${THEMES.map((t) => html`<div key=${t.id} data-theme=${t.id} class=${'tcard' + (look.theme === t.id ? ' on' : '')} onClick=${() => setLook({ theme: t.id, vars: {} })}>
+            <div class="nm"><${Crown} size=${30}/><span class="metal-text">${t.name}</span></div><div class="nt">${t.note}</div>
+            <div class="row2"><${Art} hue=${t.id === 'royal' ? 30 : t.id === 'elven' ? 165 : 285} framed><${Emblem} k=${t.id === 'royal' ? 'dragon-head' : t.id === 'elven' ? 'unicorn' : 'crystal-ball'}/><//>
+              <div style=${{ display: 'grid', gap: '10px', justifyItems: 'start' }}><${Gem} label="Play" size="sm"/><div style=${{ display: 'flex', gap: '6px' }}><${Badge} kind="new"/><${Badge} kind="hot"/></div></div></div>
+            <${VipBar} pct=${70}/>
+          </div>`)}</div>
+        </section>
+
+        <section class="grp" id="colors"><h2><${Diamond}/>Colors</h2>
+          <p>Derived tokens — never edited by hand, they follow the knobs. Components may use only these.</p>
+          ${SW.map(([g, list]) => html`<div key=${g} style=${{ marginBottom: '18px' }}><div class="sub-h" style=${{ margin: '0 0 10px' }}>${g}</div>
+            <div class="sw-grid">${list.map((v) => html`<div key=${v} class=${'sw' + (g === 'Gradients' ? ' wide' : '')}><i style=${{ background: `var(--${v})` }}></i><div>--${v}</div></div>`)}</div></div>`)}
+        </section>
+
+        <section class="grp" id="type"><h2><${Diamond}/>Typography</h2>
+          <p>Three roles: <code>--f-logo</code>, <code>--f-head</code>, <code>--f-body</code>. Themes may swap them (Elven → Uncial Antiqua + Cormorant SC, Arcane → Almendra SC).</p>
+          <${Orn} flat><div style=${{ padding: '8px 20px' }}>
+            <div class="type-row"><small>--f-logo · 900</small><div class="metal-text" style=${{ font: '900 44px/1 var(--f-logo)' }}>Regnum</div></div>
+            <div class="type-row"><small>--f-head · 800</small><div style=${{ font: '800 32px/1.1 var(--f-head)' }}>100% up to €500</div></div>
+            <div class="type-row"><small>--f-head · eyebrow</small><div class="eyebrow">Welcome to the court</div></div>
+            <div class="type-row"><small>--f-body · 15/1.5</small><div style=${{ color: 'var(--muted)' }}>Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift.</div></div>
+          </div><//>
+        </section>
+
+        <section class="grp" id="iconography"><h2><${Diamond}/>Iconography</h2>
+          <p>Emblems — <a href="https://game-icons.net" style=${{ textDecoration: 'underline' }}>game-icons.net</a> (CC BY 3.0), painted as metal from tokens. Line icons — 24×24 stroke in <code>--metal</code>.</p>
+          <${Story} id="icons-gi" title="Emblem" note=${Object.keys(GI).length + ' icons'} code=${"<${Emblem} k=\"dragon-head\"/>   // keys: " + Object.keys(GI).join(', ')}>
+            <div class="icons">${Object.keys(GI).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption>${k}</figcaption></figure>`)}</div>
+          <//>
+          <${Story} id="icons-line" title="Icon (line)" code=${'<${Icon} n="casino" w={20}/>'}>
+            ${Object.keys(LINE).map((k) => html`<${Lbl} key=${k} t=${k}><${Icon} n=${k} w=${24}/><//>`)}
+          <//>
+        </section>
+
+        <section class="grp"><h2><${Diamond}/>Components</h2>
+          <p>Each story is the real component from <code>ds/components.js</code> — the same one the demo renders.</p>
+
+          <${Story} id="orn" title="Orn" note="notched panel: frame gradient + body. lit · sheen · deco · flat"
+            code=${'<${Orn} lit sheen deco>…<//>\n// lit — halo (box-shadow on ::before, drawn once) · sheen — light sweep · deco — corner filigree (mask, recolours with --metal) · flat — plain body'}>
+            ${[['plain', {}], ['lit', { lit: true }], ['sheen', { sheen: true }], ['deco', { deco: true }], ['lit + sheen + deco', { lit: true, sheen: true, deco: true }]].map(([t, p]) => html`<${Lbl} key=${t} t=${t}><${Orn} ...${p} style=${{ width: '170px', height: '110px' }}><div style=${{ padding: '18px', color: 'var(--muted)', fontSize: '13px' }}>Panel</div><//><//>`)}
+          <//>
+
+          <${Story} id="gem" title="Gem" note="gem button. tone: accent | metal · size: sm | md | lg · magnetic"
+            code=${'<${Gem} label="Join now" magnetic/>\n<${Gem} label="Join" tone="metal" size="sm"/>'}>
+            <${Lbl} t="accent · sm"><${Gem} label="Play" size="sm"/><//>
+            <${Lbl} t="accent · md"><${Gem} label="Join now"/><//>
+            <${Lbl} t="accent · lg · magnetic"><${Gem} label="Claim" size="lg" magnetic/><//>
+            <${Lbl} t="metal · sm"><${Gem} label="Join" tone="metal" size="sm"/><//>
+            <${Lbl} t="metal · md"><${Gem} label="Deposit" tone="metal"/><//>
+          <//>
+
+          <${Story} id="badge" title="Badge" note="kind: new | hot | metal" code=${'<${Badge} kind="hot"/>\n<${Badge} kind="metal">VIP<//>'}>
+            <${Badge} kind="new"/><${Badge} kind="hot"/><${Badge} kind="metal">VIP<//><${Badge}>LV 8<//>
+          <//>
+
+          <${Story} id="seg" title="Seg · Field · Tabs" code=${'<${Seg} items={[\'sport\',\'casino\']} value={tab} onChange={setTab}/>\n<${Field} placeholder="Search…"/>\n<${Tabs} items={[[\'dash\',\'Dashboard\'],…]} value={t} onChange={setT}/>'}>
+            <${Seg} items=${['sport', 'casino']} value=${seg} onChange=${setSeg}/>
+            <div class="w-360" style=${{ display: 'flex' }}><${Field} placeholder="Search the royal library of games…"/></div>
+            <div class="w-360"><${Tabs} items=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]} value=${tab} onChange=${setTab}/></div>
+          <//>
+
+          <${Story} id="nav" title="NavItem · GameRow · SubHead" note="sidebar rows with chevron cut" code=${'<${NavItem} icon="casino" label="Casino" on/>\n<${GameRow} game={g} kind="new"/>'}>
+            <div class="w-280"><nav class="nav"><${NavItem} icon="home" label="Main hall"/><${NavItem} icon="casino" label="Casino" on/><${NavItem} icon="live" label="Live casino"/></nav></div>
+            <div class="w-280"><${SubHead}>New games<//><div class="glist"><${GameRow} game=${GAMES[0]} kind="new"/><${GameRow} game=${GAMES[3]} kind="new"/></div>
+              <${SubHead}>Popular<//><div class="glist"><${GameRow} game=${GAMES[1]} kind="hot"/></div></div>
+          <//>
+
+          <${Story} id="art" title="Art · Emblem" note="art background takes a hue from data; brightness comes from the theme" code=${'<${Art} hue={280} framed><${Emblem} k="crystal-ball"/><//>'}>
+            ${[0, 45, 120, 165, 210, 250, 285, 330].map((h) => html`<${Lbl} key=${h} t=${'hue ' + h}><div style=${{ width: '120px' }}><${Art} hue=${h} framed><${Emblem} k="magic-swirl"/><//></div><//>`)}
+          <//>
+
+          <${Story} id="gamecard" title="GameCard" note="Orn + Art + Emblem + TiltCard" code=${'<${GameCard} game={{ name, k, hue, rtp, badge }}/>'}>
+            <div class="mini-games">${GAMES.map((g) => html`<${GameCard} key=${g.name} game=${g}/>`)}</div>
+          <//>
+
+          <${Story} id="stat" title="Stat · Meter" code=${'<${Stat} k="Balance" to={12480} prefix="€" delta="▲ €1,240 today"/>\n<${Meter} title="Royal multiplier" value={3.4}/>'}>
+            <div class="w-280"><${Stat} k="Balance" to=${12480} prefix="€" delta="▲ €1,240 today"/></div>
+            <div class="w-280"><${Stat} k="Crown points" to=${4820} delta="+320 this week"/></div>
+            <div class="w-full"><${Meter} title="Royal multiplier" value=${3.4}/></div>
+          <//>
+
+          <${Story} id="vip" title="VipBar · Ladder · Perk · VipCard" col code=${'<${VipCard} level={7} next="Princess" points={4820} goal={6000} rungs={RUNGS} cur={2} perks={PERKS}/>'}>
+            <${VipBar} pct=${45}/>
+            <${Ladder} rungs=${RUNGS.slice(0, 4)} cur=${1}/>
+            <div class="perks" style=${{ maxWidth: '560px' }}>${PERKS.map((p) => html`<${Perk} key=${p.label} ...${p}/>`)}</div>
+            <div class="vip-demo"><${VipCard} className="" level=${7} next="Princess" points=${4820} goal=${6000} rungs=${RUNGS} cur=${2} perks=${PERKS}/></div>
+          <//>
+
+          <${Story} id="crest" title="Crest · Avatar" code=${'<${Crest}><${Avatar} k="woman-elf-face"/><//>'}>
+            ${['woman-elf-face', 'owl', 'griffin-symbol'].map((k) => html`<${Lbl} key=${k} t=${k}><${Crest}><${Avatar} k=${k}/><//><//>`)}
+          <//>
+
+          <${Story} id="wallet" title="Wallet" note="coin hue from data" code=${'<${Wallet} sym="₿" hue={65} amount="0.0425 BTC" sub="≈ €2,610"/>'}>
+            <div class="w-280"><${Wallet} sym="₿" hue=${65} amount="0.0425 BTC" sub="≈ €2,610"/></div>
+            <div class="w-280"><${Wallet} sym="✦" hue=${290} amount="1,200 Mana" sub="Arcane wallet"/></div>
+          <//>
+
+          <${Story} id="wheel" title="CrownWheel" note="lights are pure CSS; spin lands exactly on the prize" code=${'<${CrownWheel} prizes={[\'50 FS\', \'€25\', …]} onWin={(p) => …}/>'}>
+            <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel}/></div>
+            <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel} prizes=${['Mana', 'Elixir', 'Rune', 'Scroll', 'Relic', 'Wish']}/></div>
+          <//>
+
+          <${Story} id="section" title="SectionHead · Diamond · MetalText" code=${'<${SectionHead} title="Royal games"/>'}>
+            <div class="w-full"><${SectionHead} title="Royal games"/></div>
+          <//>
+        </section>
+      </main>
+    </div>
+    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll) · CC BY 3.0.</footer>
+  <//>`;
+}
+
+createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>

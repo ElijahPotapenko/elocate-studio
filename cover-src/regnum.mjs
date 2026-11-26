@@ -47,8 +47,8 @@ h1 b{display:block;margin-top:6px;background:linear-gradient(135deg,oklch(82% 0.
 <div class="eb">GAMEDEV · ROYAL CASINO UI</div>
 <h1>Rule the<b>game.</b></h1>
 <div class="chips"><span>REACT</span><span>DESIGN SYSTEM</span><span>CROWN WHEEL</span></div>
-<img class="pc" src="${img('profile')}" style="left:470px;top:58px;width:200px;transform:rotate(-7deg)">
-<img class="pc" src="${img('game2')}" style="left:600px;top:250px;width:160px;transform:rotate(-3deg)">
+<img class="pc" src="${img('profile')}" style="left:470px;top:30px;width:200px;transform:rotate(-7deg)">
+<img class="pc" src="${img('game2')}" style="left:604px;top:282px;width:156px;transform:rotate(-3deg)">
 <img class="pc" src="${img('game1')}" style="left:430px;top:300px;width:150px;transform:rotate(-11deg)">
 <img class="pc" src="${img('mult')}" style="left:610px;top:34px;width:240px;transform:rotate(4deg);opacity:.95">
 <img class="pc" src="${img('wheel')}" style="left:735px;top:72px;width:320px;transform:rotate(5deg)">

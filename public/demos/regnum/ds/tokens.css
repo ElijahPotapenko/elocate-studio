@@ -1,0 +1,107 @@
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   Regnum DS — токены. ДВА слоя:
+   1) РУЧКИ (knobs) — несколько чисел, которые задают весь стиль: оттенок металла, акцента, фона,
+      сила свечения, срезы углов, шрифты. Тема = набор ручек. Лаба (lab/) крутит именно их.
+   2) ВЫВОДЫ — все цвета/градиенты/свечения вычисляются из ручек. Компоненты (components.css)
+      берут ТОЛЬКО выводы: ни одного «голого» oklch в компонентах.
+   Новая тема = блок [data-theme="…"] с ручками. Ничего больше трогать не нужно.
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&family=Uncial+Antiqua&family=Almendra+SC&family=Cormorant+SC:wght@600;700&display=swap');
+
+/* ── 1. РУЧКИ: тема по умолчанию — Royal (королевская ночь: золото, рубин, шоколадно-чёрный) ── */
+:root, [data-theme="royal"]{
+  --metal-h: 82;   --metal-c: .11;     /* металл рамок/текста: 82 = золото, 210 = серебро-лёд, 95 = лунное золото */
+  --accent-h: 27;  --accent-c: .22;    /* действие (кнопки, NEW, сектора колеса): 27 = рубин */
+  --fire-h: 45;                        /* второй тон акцента (низ→верх кнопки) */
+  --gem-h: 15;                         /* камушки на концах кнопки */
+  --surface-h: 32; --surface-c: .013;  /* тон фона/панелей: почти чёрный с подтоном */
+  --pos-h: 158;    --info-h: 250;      --magic-h: 300;   /* сигналы: «горячее/плюс», «инфо», «магия» */
+  --glow: 1;                           /* общая сила свечений: 0 — матово, 1 — как задумано, 1.6 — неон */
+  --cut: 12px;                         /* срез углов у панелей */
+  --ornament: .8;                      /* видимость золотых завитков в углах */
+  --f-logo: 'Cinzel Decorative', serif;
+  --f-head: 'Cinzel', serif;
+  --f-body: 'Manrope', system-ui, sans-serif;
+  --ease: cubic-bezier(.22,1,.36,1);
+  --dur-fast: .2s; --dur: .35s; --dur-slow: .6s;
+}
+
+/* ── Темы-черновики для фэнтези-поиска (крутить в лабе, лучшее — закрепить здесь) ── */
+[data-theme="elven"]{   /* Эльфийский лес: лунное серебро-золото, изумруд, глубокая хвоя */
+  --metal-h: 100; --metal-c: .06;
+  --accent-h: 155; --accent-c: .16; --fire-h: 130; --gem-h: 200;
+  --surface-h: 165; --surface-c: .02;
+  --pos-h: 85; --info-h: 210; --magic-h: 280;
+  --glow: 1.1; --cut: 16px; --ornament: .9;
+  --f-logo: 'Uncial Antiqua', serif; --f-head: 'Cormorant SC', serif;
+}
+[data-theme="arcane"]{  /* Тайная магия: серебро-лёд, аметист, индиго-ночь */
+  --metal-h: 215; --metal-c: .05;
+  --accent-h: 300; --accent-c: .2; --fire-h: 330; --gem-h: 195;
+  --surface-h: 285; --surface-c: .025;
+  --pos-h: 190; --info-h: 250; --magic-h: 330;
+  --glow: 1.25; --cut: 10px; --ornament: .7;
+  --f-logo: 'Almendra SC', serif; --f-head: 'Cinzel', serif;
+}
+
+/* ── 2. ВЫВОДЫ (из ручек). Объявлены на :root И на любом [data-theme] — поэтому тему можно
+   включить и на отдельном блоке (лаба ставит темы рядом), выводы пересчитаются на месте ── */
+:root, [data-theme]{
+  /* поверхности */
+  --bg:        oklch(8.5% var(--surface-c) var(--surface-h));
+  --bg-2:      oklch(12% calc(var(--surface-c) * 1.1) var(--surface-h));
+  --well:      oklch(7% var(--surface-c) var(--surface-h));
+  --panel:     oklch(11.5% var(--surface-c) calc(var(--surface-h) + 3));
+  --panel-2:   oklch(15% calc(var(--surface-c) * 1.25) calc(var(--surface-h) + 6));
+  --panel-hi:  oklch(20% calc(var(--surface-c) * 1.5) calc(var(--surface-h) + 8));
+  --panel-tint:oklch(20% calc(var(--surface-c) * 2.3) calc(var(--surface-h) + 13) / .9);
+  /* текст */
+  --ink:   oklch(95% .02 var(--metal-h));
+  --muted: oklch(72% .03 calc(var(--metal-h) - 12));
+  --faint: oklch(52% .03 calc(var(--metal-h) - 22));
+  /* металл */
+  --metal:       oklch(82% var(--metal-c) var(--metal-h));
+  --metal-hi:    oklch(95% calc(var(--metal-c) * .55) calc(var(--metal-h) + 8));
+  --metal-2:     oklch(68% var(--metal-c) calc(var(--metal-h) - 10));
+  --metal-mid:   oklch(60% var(--metal-c) calc(var(--metal-h) - 16));
+  --metal-deep:  oklch(52% calc(var(--metal-c) * .82) calc(var(--metal-h) - 20));
+  --metal-shade: oklch(40% calc(var(--metal-c) * .55) calc(var(--metal-h) - 27));
+  --metal-dim:   oklch(60% calc(var(--metal-c) * .8) calc(var(--metal-h) - 12));
+  --on-metal:    oklch(22% .04 calc(var(--metal-h) - 32));       /* тёмный текст НА металле */
+  --metal-grad:  linear-gradient(135deg, var(--metal) 0%, var(--metal-hi) 38%, var(--metal-2) 62%, var(--metal-deep) 100%);
+  --metal-v:     linear-gradient(180deg, var(--metal), var(--metal-deep));
+  --frame-grad:  linear-gradient(160deg, oklch(86% calc(var(--metal-c) * .9) calc(var(--metal-h) + 3)), oklch(42% calc(var(--metal-c) * .55) calc(var(--metal-h) - 22)) 32%,
+                 oklch(28% calc(var(--metal-c) * .3) calc(var(--metal-h) - 32)) 55%, oklch(72% calc(var(--metal-c) * .9) calc(var(--metal-h) - 4)) 100%);
+  /* акцент (действие) */
+  --accent:      oklch(58% var(--accent-c) var(--accent-h));
+  --accent-2:    oklch(69% calc(var(--accent-c) * .9) var(--fire-h));
+  --accent-deep: oklch(46% calc(var(--accent-c) * .86) var(--accent-h));
+  --accent-dark: oklch(22% calc(var(--accent-c) * .4) var(--accent-h));
+  --accent-grad: linear-gradient(180deg, var(--accent-2), var(--accent) 70%);
+  --gem:         oklch(74% .1 var(--gem-h));
+  --gem-grad:    radial-gradient(circle at 30% 30%, oklch(98% .03 var(--gem-h)), var(--gem) 45%, oklch(45% .15 var(--gem-h)));
+  /* сигналы */
+  --pos:   oklch(70% .16 var(--pos-h));   --on-pos: oklch(20% .05 var(--pos-h));
+  --info:  oklch(64% .14 var(--info-h));
+  --magic: oklch(60% .14 var(--magic-h));
+  /* свечения — все через одну ручку --glow */
+  --glow-metal:        color-mix(in oklch, var(--metal) calc(45% * var(--glow)), transparent);
+  --glow-metal-soft:   color-mix(in oklch, var(--metal) calc(20% * var(--glow)), transparent);
+  --glow-metal-strong: color-mix(in oklch, var(--metal) calc(75% * var(--glow)), transparent);
+  --glow-accent:       color-mix(in oklch, var(--accent) calc(60% * var(--glow)), transparent);
+  --glow-accent-strong:color-mix(in oklch, var(--accent) calc(95% * var(--glow)), transparent);
+  --glow-pos:          color-mix(in oklch, var(--pos) calc(65% * var(--glow)), transparent);
+  --glow-gem:          color-mix(in oklch, var(--gem) calc(90% * var(--glow)), transparent);
+  --shade:   oklch(0% 0 0 / .7);
+  --shade-2: oklch(0% 0 0 / .45);
+  /* фоновый свет страницы */
+  --amb-1: color-mix(in oklch, oklch(55% .2 var(--accent-h)) calc(22% * var(--glow)), transparent);
+  --amb-2: color-mix(in oklch, oklch(78% .13 var(--metal-h)) calc(14% * var(--glow)), transparent);
+  --amb-3: color-mix(in oklch, oklch(50% .16 var(--magic-h)) calc(14% * var(--glow)), transparent);
+  --amb-4: color-mix(in oklch, oklch(55% .13 var(--pos-h)) calc(10% * var(--glow)), transparent);
+  /* форма */
+  --notch: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+  --radius: 10px; --radius-sm: 4px;
+  /* завиток угла — маска (цвет даёт фон = металл, поэтому он перекрашивается вместе с темой) */
+  --corner: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><g fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'><path d='M4 24 V10 Q4 4 10 4 H24'/><path d='M9 32 C 9 18, 18 9, 32 9'/><path d='M15 10 C 10 10, 10 15, 15 15 C 18 15, 18 12, 16 12'/></g><path d='M2 2 L8 2 L2 8 Z'/></svg>");
+}

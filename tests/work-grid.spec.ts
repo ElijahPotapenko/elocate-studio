@@ -27,7 +27,7 @@ test.describe('work grid', () => {
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
 
-    for (const url of ['/demos/nova/index.html', '/demos/analytics-pulse/index.html', '/demos/support-bot/index.html', '/demos/regnum/index.html']) {
+    for (const url of ['/demos/nova/index.html', '/demos/analytics-pulse/index.html', '/demos/support-bot/index.html', '/demos/regnum/index.html', '/demos/regnum/lab/index.html']) {
       // support-bot embeds a live iframe (widget.html) — 'load' waits on it too and can be slow
       // under parallel worker load; domcontentloaded is enough to catch the console errors we care about.
       await page.goto(url, { waitUntil: 'domcontentloaded' });
