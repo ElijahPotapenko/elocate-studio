@@ -7,9 +7,9 @@
 import React, { useState, useRef, useId, useMemo } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, VelocityMarquee, html } from '../../_shared/motion.js';
-import { GI, LINE, SUITS } from './icons.js';
+import { GI, LINE, SUITS, PH } from './icons.js';
 
-export { GI, LINE, SUITS, html };
+export { GI, LINE, SUITS, PH, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -88,6 +88,13 @@ export const Icon = ({ n, w = 16 }) => html`<svg class="ico" width=${w} height=$
 export function Emblem({ k, halo = true }) {
   const id = uid();
   const st = (c) => ({ stopColor: c });
+  if (PH[k]) return html`<svg class="emb ph" viewBox="-30 -30 316 316" aria-hidden="true">   ${'' /* Phosphor duotone: мягкая металлическая заливка + полированный контур */}
+    <defs><linearGradient id=${'g' + id} x1="0" y1="0" x2=".4" y2="1"><stop offset="0" style=${st('var(--metal-hi)')}/><stop offset=".5" style=${st('var(--metal)')}/><stop offset="1" style=${st('var(--metal-2)')}/></linearGradient>
+      <radialGradient id=${'r' + id}><stop offset="0" style=${st('var(--glow-metal)')}/><stop offset="1" style=${{ stopColor: 'var(--metal)', stopOpacity: 0 }}/></radialGradient></defs>
+    ${halo && html`<circle cx="128" cy="128" r="150" fill=${`url(#r${id})`}/>`}
+    <path d=${PH[k][0]} fill=${`url(#g${id})`} style=${{ opacity: 0.32 }}/>
+    <path d=${PH[k][1]} fill=${`url(#g${id})`}/>
+  </svg>`;
   return html`<svg class="emb" viewBox="-24 -24 560 560" aria-hidden="true">
     <defs>
       <linearGradient id=${'g' + id} x1="0" y1="0" x2=".35" y2="1"><stop offset="0" style=${st('var(--metal-hi)')}/><stop offset=".38" style=${st('var(--metal)')}/><stop offset=".66" style=${st('var(--metal-mid)')}/><stop offset="1" style=${st('var(--metal)')}/></linearGradient>

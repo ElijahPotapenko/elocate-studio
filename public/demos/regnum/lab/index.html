@@ -109,12 +109,12 @@ footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
-import { html, GI, LINE, SUITS, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, GI, PH, LINE, SUITS, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
-const G = { name: "Dragon's Hoard", k: 'dragon-head', hue: 30, rtp: '96.4%', badge: 'new' };
-const GAMES = [G, { name: "Joker's Court", k: 'card-joker', hue: 300, rtp: '97.0%', badge: 'hot' }, { name: 'Lucky Clover', k: 'clover', hue: 150, rtp: '96.2%' }, { name: 'Golden Dice', k: 'rolling-dices', hue: 60, rtp: '95.9%', badge: 'new' }];
+const G = { name: "Dragon's Hoard", k: 'flame', hue: 30, rtp: '96.4%', badge: 'new' };
+const GAMES = [G, { name: "Joker's Court", k: 'mask-happy', hue: 300, rtp: '97.0%', badge: 'hot' }, { name: 'Lucky Clover', k: 'clover', hue: 150, rtp: '96.2%' }, { name: 'Golden Dice', k: 'dice-five', hue: 60, rtp: '95.9%', badge: 'new' }];
 const PAY = [['VISA', 'oklch(45% 0.15 260)'], ['MC', 'oklch(62% 0.19 40)'], ['ETH', 'oklch(55% 0.13 270)'], ['₮', 'oklch(62% 0.13 170)'], ['₿', 'oklch(72% 0.16 65)']];
 const WINS = [['Lady Morgane', '€1,240', "Dragon's Hoard"], ['Sir Aldric', '€380', 'Royal Flush'], ['Baron K.', '€9,700', 'Crown Jewels']];
 const RUNGS = [['V', 'Baroness'], ['VI', 'Countess'], ['VII', 'Duchess'], ['VIII', 'Princess'], ['IX', 'Queen']];
@@ -229,7 +229,7 @@ function App() {
           <p>Presets side by side. Each card sets <code>data-theme</code> on itself — tokens recompute locally. Click to apply.</p>
           <div class="themes">${THEMES.map((t) => html`<div key=${t.id} data-theme=${t.id} class=${'tcard' + (look.theme === t.id ? ' on' : '')} onClick=${() => setLook({ theme: t.id, vars: {} })}>
             <div class="nm"><${Crown} size=${30}/><span class="metal-text">${t.name}</span></div><div class="nt">${t.note}</div>
-            <div class="row2"><${Art} hue=${{ noir: 40, royal: 30, elven: 165, arcane: 285 }[t.id]} framed><${Emblem} k=${{ noir: 'chess-knight', royal: 'dragon-head', elven: 'rose', arcane: 'cut-diamond' }[t.id]}/><//>
+            <div class="row2"><${Art} hue=${{ noir: 40, royal: 30, elven: 165, arcane: 285 }[t.id]} framed><${Emblem} k=${{ noir: 'crown', royal: 'flame', elven: 'flower-lotus', arcane: 'diamond' }[t.id]}/><//>
               <div style=${{ display: 'grid', gap: '10px', justifyItems: 'start' }}><${Gem} label="Play" size="sm"/><div style=${{ display: 'flex', gap: '6px' }}><${Badge} kind="new"/><${Badge} kind="hot"/></div></div></div>
             <${VipBar} pct=${70}/>
           </div>`)}</div>
@@ -253,7 +253,10 @@ function App() {
 
         <section class="grp" id="iconography"><h2><${Diamond}/>Iconography</h2>
           <p>Emblems — <a href="https://game-icons.net" style=${{ textDecoration: 'underline' }}>game-icons.net</a> (CC BY 3.0), painted as metal from tokens. Line icons — 24×24 stroke in <code>--metal</code>.</p>
-          <${Story} id="icons-gi" title="Emblem" note=${Object.keys(GI).length + ' icons'} code=${"<${Emblem} k=\"dragon-head\"/>   // keys: " + Object.keys(GI).join(', ')}>
+          <${Story} id="icons-ph" title="Emblem · Phosphor duotone" note=${Object.keys(PH).length + ' icons — game art (MIT)'} code=${"<${Emblem} k=\"crown\"/>   // keys: " + Object.keys(PH).join(', ')}>
+            <div class="icons">${Object.keys(PH).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption>${k}</figcaption></figure>`)}</div>
+          <//>
+          <${Story} id="icons-gi" title="Emblem · game-icons" note=${Object.keys(GI).length + ' icons'} code=${"<${Emblem} k=\"dragon-head\"/>   // keys: " + Object.keys(GI).join(', ')}>
             <div class="icons">${Object.keys(GI).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption>${k}</figcaption></figure>`)}</div>
           <//>
           <${Story} id="icons-line" title="Icon (line)" code=${'<${Icon} n="casino" w={20}/>'}>
@@ -294,8 +297,8 @@ function App() {
               <${SubHead}>Popular<//><div class="glist"><${GameRow} game=${GAMES[1]} kind="hot"/></div></div>
           <//>
 
-          <${Story} id="art" title="Art · Emblem" note="art background takes a hue from data; brightness comes from the theme" code=${'<${Art} hue={280} framed><${Emblem} k="crown-coin"/><//>'}>
-            ${[0, 45, 120, 165, 210, 250, 285, 330].map((h) => html`<${Lbl} key=${h} t=${'hue ' + h}><div style=${{ width: '120px' }}><${Art} hue=${h} framed><${Emblem} k="crown-coin"/><//></div><//>`)}
+          <${Story} id="art" title="Art · Emblem" note="art background takes a hue from data; brightness comes from the theme" code=${'<${Art} hue={280} framed><${Emblem} k="poker-chip"/><//>'}>
+            ${[0, 45, 120, 165, 210, 250, 285, 330].map((h) => html`<${Lbl} key=${h} t=${'hue ' + h}><div style=${{ width: '120px' }}><${Art} hue=${h} framed><${Emblem} k="poker-chip"/><//></div><//>`)}
           <//>
 
           <${Story} id="gamecard" title="GameCard" note="Orn + Art + Emblem + TiltCard" code=${'<${GameCard} game={{ name, k, hue, rtp, badge }}/>'}>
@@ -375,7 +378,7 @@ function App() {
         </section>
       </main>
     </div>
-    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0.</footer>
+    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0.</footer>
   <//>`;
 }
 

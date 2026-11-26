@@ -64,14 +64,14 @@ import { html, Orn, Gem, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, 
 
 // ── данные ──
 const GAMES = [
-  { name: "Dragon's Hoard", k: 'dragon-head', hue: 30, rtp: '96.4%', badge: 'new' },
-  { name: 'Crown Jewels', k: 'cut-diamond', hue: 250, rtp: '97.1%', badge: 'hot' },
-  { name: "Knight's Gambit", k: 'chess-knight', hue: 60, rtp: '95.8%' },
-  { name: 'Royal Flush', k: 'poker-hand', hue: 160, rtp: '98.2%', badge: 'hot' },
-  { name: 'Golden Chalice', k: 'holy-grail', hue: 300, rtp: '96.9%', badge: 'new' },
-  { name: "Queen's Garden", k: 'rose', hue: 10, rtp: '96.1%' },
-  { name: 'Midnight Joust', k: 'crossed-swords', hue: 270, rtp: '95.5%', badge: 'new' },
-  { name: 'Emerald Throne', k: 'throne-king', hue: 150, rtp: '97.6%' },
+  { name: "Dragon's Hoard", k: 'flame', hue: 30, rtp: '96.4%', badge: 'new' },
+  { name: 'Crown Jewels', k: 'sparkle', hue: 250, rtp: '97.1%', badge: 'hot' },
+  { name: "Knight's Gambit", k: 'horse', hue: 60, rtp: '95.8%' },
+  { name: 'Royal Flush', k: 'spade', hue: 160, rtp: '98.2%', badge: 'hot' },
+  { name: 'Golden Chalice', k: 'trophy', hue: 300, rtp: '96.9%', badge: 'new' },
+  { name: "Queen's Garden", k: 'flower-lotus', hue: 10, rtp: '96.1%' },
+  { name: 'Midnight Joust', k: 'sword', hue: 270, rtp: '95.5%', badge: 'new' },
+  { name: 'Emerald Throne', k: 'crown', hue: 150, rtp: '97.6%' },
 ];
 const WINS = [['Lady Morgane', '€1,240', "Dragon's Hoard"], ['Sir Aldric', '€380', 'Royal Flush'], ['Baron K.', '€9,700', 'Crown Jewels'], ['Duchess Ivy', '€615', "Queen's Garden"], ['Lord Ferren', '€2,030', 'Emerald Throne']];
 const RUNGS = [['V', 'Baroness'], ['VI', 'Countess'], ['VII', 'Duchess'], ['VIII', 'Princess'], ['IX', 'Queen']];
@@ -131,7 +131,7 @@ function App() {
         <div class="games">${GAMES.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${GameCard} game=${g}/><//>`)}</div>
       </main>
     </div>
-    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio.</span><span>Icons: <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0 · Play responsibly · 18+</span></footer>
+    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio.</span><span>Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0 · Play responsibly · 18+</span></footer>
   <//>`;
 }
 
