@@ -109,7 +109,7 @@ footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
-import { html, GI, PH, LINE, SUITS, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -252,12 +252,9 @@ function App() {
         </section>
 
         <section class="grp" id="iconography"><h2><${Diamond}/>Iconography</h2>
-          <p>Emblems — <a href="https://game-icons.net" style=${{ textDecoration: 'underline' }}>game-icons.net</a> (CC BY 3.0), painted as metal from tokens. Line icons — 24×24 stroke in <code>--metal</code>.</p>
-          <${Story} id="icons-ph" title="Emblem · Phosphor duotone" note=${Object.keys(PH).length + ' icons — game art (MIT)'} code=${"<${Emblem} k=\"crown\"/>   // keys: " + Object.keys(PH).join(', ')}>
+          <p>Emblems — <a href="https://phosphoricons.com" style=${{ textDecoration: 'underline' }}>Phosphor</a> duotone (MIT), painted as metal from tokens. Portraits — Lorelei (CC0). Line icons — 24×24 stroke in <code>--metal</code>.</p>
+          <${Story} id="icons-ph" title="Emblem" note=${Object.keys(PH).length + ' icons — game art (MIT)'} code=${"<${Emblem} k=\"crown\"/>   // keys: " + Object.keys(PH).join(', ')}>
             <div class="icons">${Object.keys(PH).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption>${k}</figcaption></figure>`)}</div>
-          <//>
-          <${Story} id="icons-gi" title="Emblem · game-icons" note=${Object.keys(GI).length + ' icons'} code=${"<${Emblem} k=\"dragon-head\"/>   // keys: " + Object.keys(GI).join(', ')}>
-            <div class="icons">${Object.keys(GI).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption>${k}</figcaption></figure>`)}</div>
           <//>
           <${Story} id="icons-line" title="Icon (line)" code=${'<${Icon} n="casino" w={20}/>'}>
             ${Object.keys(LINE).map((k) => html`<${Lbl} key=${k} t=${k}><${Icon} n=${k} w=${24}/><//>`)}
@@ -378,7 +375,7 @@ function App() {
         </section>
       </main>
     </div>
-    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0.</footer>
+    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0).</footer>
   <//>`;
 }
 

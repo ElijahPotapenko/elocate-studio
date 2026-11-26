@@ -7,9 +7,9 @@
 import React, { useState, useRef, useId, useMemo } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, VelocityMarquee, html } from '../../_shared/motion.js';
-import { GI, LINE, SUITS, PH, PORTRAITS } from './icons.js';
+import { LINE, SUITS, PH, PORTRAITS } from './icons.js';
 
-export { GI, LINE, SUITS, PH, PORTRAITS, html };
+export { LINE, SUITS, PH, PORTRAITS, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -84,37 +84,26 @@ export const Badge = ({ kind = 'new', children, className = '' }) => html`<span 
 
 export const Icon = ({ n, w = 16 }) => html`<svg class="ico" width=${w} height=${w} viewBox="0 0 24 24" aria-hidden="true"><path d=${LINE[n]}/></svg>`;
 
-// Металлическая эмблема из game-icons: подложка-тень, градиентное тело с кантом, блик, ореол
+// Металлическая эмблема: Phosphor duotone — мягкая металлическая заливка + полированный контур
 export function Emblem({ k, halo = true }) {
   const id = uid();
   const st = (c) => ({ stopColor: c });
-  if (PH[k]) return html`<svg class="emb ph" viewBox="-30 -30 316 316" aria-hidden="true">   ${'' /* Phosphor duotone: мягкая металлическая заливка + полированный контур */}
+  if (!PH[k]) return null;
+  return html`<svg class="emb ph" viewBox="-30 -30 316 316" aria-hidden="true">
     <defs><linearGradient id=${'g' + id} x1="0" y1="0" x2=".4" y2="1"><stop offset="0" style=${st('var(--metal-hi)')}/><stop offset=".5" style=${st('var(--metal)')}/><stop offset="1" style=${st('var(--metal-2)')}/></linearGradient>
       <radialGradient id=${'r' + id}><stop offset="0" style=${st('var(--glow-metal)')}/><stop offset="1" style=${{ stopColor: 'var(--metal)', stopOpacity: 0 }}/></radialGradient></defs>
     ${halo && html`<circle cx="128" cy="128" r="150" fill=${`url(#r${id})`}/>`}
     <path d=${PH[k][0]} fill=${`url(#g${id})`} style=${{ opacity: 0.32 }}/>
     <path d=${PH[k][1]} fill=${`url(#g${id})`}/>
   </svg>`;
-  return html`<svg class="emb" viewBox="-24 -24 560 560" aria-hidden="true">
-    <defs>
-      <linearGradient id=${'g' + id} x1="0" y1="0" x2=".35" y2="1"><stop offset="0" style=${st('var(--metal-hi)')}/><stop offset=".38" style=${st('var(--metal)')}/><stop offset=".66" style=${st('var(--metal-mid)')}/><stop offset="1" style=${st('var(--metal)')}/></linearGradient>
-      <linearGradient id=${'h' + id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" style=${{ stopColor: '#fff', stopOpacity: 0.5 }}/><stop offset=".42" style=${{ stopColor: '#fff', stopOpacity: 0 }}/></linearGradient>
-      <pattern id=${'e' + id} width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="2.2" height="14" style=${{ fill: 'var(--metal-shade)' }}/></pattern>
-      <radialGradient id=${'r' + id}><stop offset="0" style=${st('var(--glow-metal)')}/><stop offset="1" style=${{ stopColor: 'var(--metal)', stopOpacity: 0 }}/></radialGradient>
-    </defs>
-    ${halo && html`<circle cx="256" cy="256" r="280" fill=${`url(#r${id})`}/>`}
-    <path d=${GI[k]} style=${{ fill: 'var(--well)', opacity: 'calc(.8 * var(--depth))' }} transform="translate(8 18)"/>
-    <path d=${GI[k]} fill=${`url(#g${id})`} style=${{ stroke: 'var(--metal-shade)' }} stroke-width="4" paint-order="stroke"/>
-    <path d=${GI[k]} fill=${`url(#e${id})`} style=${{ opacity: 'calc(.45 * var(--texture))' }}/>
-    <path d=${GI[k]} fill=${`url(#h${id})`}/>
-  </svg>`;
 }
 
+// Корона бренда — Phosphor crown (duotone), металлом темы
 export function Crown({ size = 30 }) {
   const id = uid();
-  return html`<svg width=${size} height=${size} viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id=${'c' + id} x1="0" y1="0" x2=".3" y2="1">
-    <stop offset="0" style=${{ stopColor: 'var(--metal-hi)' }}/><stop offset=".45" style=${{ stopColor: 'var(--metal)' }}/><stop offset="1" style=${{ stopColor: 'var(--metal-deep)' }}/></linearGradient></defs>
-    <path d=${GI['queen-crown']} fill=${`url(#c${id})`} style=${{ stroke: 'var(--metal-shade)' }} stroke-width="10" paint-order="stroke"/></svg>`;
+  return html`<svg class="crown" width=${size} height=${size} viewBox="0 0 256 256" aria-hidden="true"><defs><linearGradient id=${'c' + id} x1="0" y1="0" x2=".3" y2="1">
+    <stop offset="0" style=${{ stopColor: 'var(--metal-hi)' }}/><stop offset=".5" style=${{ stopColor: 'var(--metal)' }}/><stop offset="1" style=${{ stopColor: 'var(--metal-2)' }}/></linearGradient></defs>
+    <path d=${PH.crown[0]} fill=${`url(#c${id})`} style=${{ opacity: 0.35 }}/><path d=${PH.crown[1]} fill=${`url(#c${id})`}/></svg>`;
 }
 
 export const Logo = ({ name = 'Regnum' }) => html`<a class="logo" href="#"><${Crown} size=${34}/><span class="metal-text">${name}</span></a>`;
@@ -177,7 +166,7 @@ export const Crest = ({ children }) => {
     <path d="M95 18 C 116 38, 142 36, 160 46 V148 C 160 180, 126 198, 95 210 C 64 198, 30 180, 30 148 V46 C 48 36, 74 38, 95 18 Z" fill="none" style=${{ stroke: 'var(--metal-dim)', opacity: 0.5 }} stroke-width="1"/>
     <path d="M95 0 L101 8 L95 16 L89 8 Z" fill=${`url(#f${id})`}/></svg>${children}</div>`;
 };
-// портрет Lorelei (PORTRAITS) или, для обратной совместимости, эмблема
+// портрет Lorelei (PORTRAITS) или, если ключ не портрет, эмблема Phosphor
 export const Avatar = ({ k = 'morgane' }) => html`<div class="ava">${PORTRAITS[k]
   ? html`<svg class="pt" viewBox="0 0 980 980" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: PORTRAITS[k] }}></svg>`
   : html`<${Emblem} k=${k} halo=${false}/>`}</div>`;
