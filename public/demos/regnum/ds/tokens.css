@@ -32,7 +32,7 @@
   --fx: none;                          /* декор-эффекты (пыль, блики, ореолы): none | block */
   --tf-glow: none; --cta-f: none; --cta-f-hover: none;   /* фильтры-свечения: none = браузер их не считает */
   --cut: 4px;      --ornament: .4;
-  --f-logo: 'Cinzel', serif; --f-head: 'Cormorant SC', serif;
+  --f-logo: 'Cinzel', serif; --f-head: 'Cinzel', serif;   /* Cormorant SC тонок на 11–13px — не читался */
 }
 /* ── Royal: королевская ночь — золото, рубин, свечения, пыль ── */
 [data-theme="royal"]{
@@ -89,8 +89,8 @@
   --panel-tint:oklch(calc(20% + var(--surface-l)) calc(var(--surface-c) * 2.3) calc(var(--surface-h) + 13) / .9);
   /* текст */
   --ink:   oklch(95% .02 var(--metal-h));
-  --muted: oklch(72% .03 calc(var(--metal-h) - 12));
-  --faint: oklch(52% .03 calc(var(--metal-h) - 22));
+  --muted: oklch(76% .03 calc(var(--metal-h) - 12));
+  --faint: oklch(60% .03 calc(var(--metal-h) - 22));   /* было 52% — мелкие подписи тонули в чёрном */
   /* металл */
   --metal:       oklch(82% var(--metal-c) var(--metal-h));
   --metal-hi:    oklch(95% calc(var(--metal-c) * .55) calc(var(--metal-h) + 8));
