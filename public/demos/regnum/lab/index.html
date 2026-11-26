@@ -318,8 +318,8 @@ function App() {
             <div class="vip-demo"><${VipCard} className="" level=${7} next="Princess" points=${4820} goal=${6000} rungs=${RUNGS} cur=${2} perks=${PERKS}/></div>
           <//>
 
-          <${Story} id="crest" title="Crest · Avatar" code=${'<${Crest}><${Avatar} k="woman-elf-face"/><${Presence} label="Online"/><//>'}>
-            ${['woman-elf-face', 'throne-king', 'chess-knight'].map((k, i) => html`<${Lbl} key=${k} t=${k}><${Crest}><${Avatar} k=${k}/><${Presence} label=${['Online', 'Away', 'In game'][i]}/><//><//>`)}
+          <${Story} id="crest" title="Crest · Avatar" code=${'<${Crest}><${Avatar} k="morgane"/><${Presence} label="Online"/><//>   // portraits: morgane · aurelia · seraphine'}>
+            ${['morgane', 'aurelia', 'seraphine'].map((k, i) => html`<${Lbl} key=${k} t=${k}><${Crest}><${Avatar} k=${k}/><${Presence} label=${['Online', 'Away', 'In game'][i]}/><//><//>`)}
           <//>
 
           <${Story} id="wallet" title="Wallet" note="coin hue from data" code=${'<${Wallet} sym="₿" hue={65} amount="0.0425 BTC" sub="≈ €2,610"/>'}>
@@ -378,7 +378,7 @@ function App() {
         </section>
       </main>
     </div>
-    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0.</footer>
+    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · <a href="https://game-icons.net">game-icons.net</a> (Lorc, Delapouite, Skoll, Caro Asercion) · CC BY 3.0.</footer>
   <//>`;
 }
 

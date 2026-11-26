@@ -7,9 +7,9 @@
 import React, { useState, useRef, useId, useMemo } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, VelocityMarquee, html } from '../../_shared/motion.js';
-import { GI, LINE, SUITS, PH } from './icons.js';
+import { GI, LINE, SUITS, PH, PORTRAITS } from './icons.js';
 
-export { GI, LINE, SUITS, PH, html };
+export { GI, LINE, SUITS, PH, PORTRAITS, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -177,7 +177,10 @@ export const Crest = ({ children }) => {
     <path d="M95 18 C 116 38, 142 36, 160 46 V148 C 160 180, 126 198, 95 210 C 64 198, 30 180, 30 148 V46 C 48 36, 74 38, 95 18 Z" fill="none" style=${{ stroke: 'var(--metal-dim)', opacity: 0.5 }} stroke-width="1"/>
     <path d="M95 0 L101 8 L95 16 L89 8 Z" fill=${`url(#f${id})`}/></svg>${children}</div>`;
 };
-export const Avatar = ({ k = 'woman-elf-face' }) => html`<div class="ava"><${Emblem} k=${k} halo=${false}/></div>`;
+// портрет Lorelei (PORTRAITS) или, для обратной совместимости, эмблема
+export const Avatar = ({ k = 'morgane' }) => html`<div class="ava">${PORTRAITS[k]
+  ? html`<svg class="pt" viewBox="0 0 980 980" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: PORTRAITS[k] }}></svg>`
+  : html`<${Emblem} k=${k} halo=${false}/>`}</div>`;
 export const Presence = ({ label = 'Online' }) => html`<div class="online">${label}</div>`;
 
 export function Tabs({ items, value, onChange }) {
@@ -269,7 +272,7 @@ export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', aside 
   <div class="hero-copy"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}<${Gem} label=${cta} magnetic/></div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
 // Карточка профиля: герб с портретом, статус, имя, ранг, табы
-export function ProfileCard({ name, rank, avatar = 'woman-elf-face', status = 'Online', tabs }) {
+export function ProfileCard({ name, rank, avatar = 'morgane', status = 'Online', tabs }) {
   const [tab, setTab] = useState(tabs[0][0]);
   return html`<${Orn} className="profile" lit deco>
     <${Crest}><${Avatar} k=${avatar}/><${Presence} label=${status}/><//>
