@@ -364,8 +364,8 @@ function App() {
             <div class="w-full"><${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
               text="Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift." pay=${PAY} aside=${html`<${CrownWheel}/>`}/></div>
           <//>
-          <${Story} id="profile" title="ProfileCard" code=${'<${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" tabs={[[\'dash\',\'Dashboard\'], …]}/>'}>
-            <div style=${{ width: '330px', maxWidth: '100%' }}><${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/></div>
+          <${Story} id="profile" title="ProfileCard" code=${'<${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7"\n  facts={[[\'2021\', \'Member since\'], [\'1,284\', \'Games played\'], [\'€9.7k\', \'Best win\']]}\n  tabs={[[\'dash\',\'Dashboard\'], …]}/>'}>
+            <div style=${{ width: '330px', maxWidth: '100%' }}><${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/></div>
           <//>
         </section>
 

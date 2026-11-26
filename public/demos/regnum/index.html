@@ -105,7 +105,7 @@ const PAY = [['VISA', 'oklch(45% 0.15 260)'], ['MC', 'oklch(62% 0.19 40)'], ['ET
 const Hero = () => html`<${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
   text="Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift." pay=${PAY} aside=${html`<${CrownWheel}/>`}/>`;
 
-const Profile = () => html`<${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/>`;
+const Profile = () => html`<${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/>`;
 
 const Stats = () => html`<div class="stats">
   <${Stat} k="Balance" to=${12480} prefix="€" delta="▲ €1,240 today"/>

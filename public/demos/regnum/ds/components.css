@@ -313,11 +313,19 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   .hero .guilloche{right:50%; top:auto; bottom:-10%; transform:translateX(50%); width:520px}
 }
 
-/* ── ProfileCard (паттерн) ── */
-.profile .in{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 22px 22px; text-align:center}
-.profile h3{margin:10px 0 2px; font:700 20px/1.2 var(--f-head)}
+/* ── ProfileCard (паттерн): герб сверху → имя → факты → табы прижаты к низу ── */
+.profile .in{display:flex; flex-direction:column; align-items:center; padding:28px 22px 22px; text-align:center}
+.profile .crest{flex:none; margin-top:4px}
+.profile h3{margin:14px 0 4px; font:700 21px/1.2 var(--f-head); letter-spacing:.02em}
 .profile .rank{font-size:13px; color:var(--metal)}
-.profile .ptabs{margin-top:20px}
+.profile .flourish{margin:16px 0 12px}
+.facts{display:grid; grid-template-columns:repeat(3,1fr); width:100%; margin:0}
+.facts > div{padding:2px 6px}
+.facts > div + div{box-shadow:inset 1px 0 0 color-mix(in oklch, var(--metal-dim) 25%, transparent)}
+.facts dt{font:800 17px/1.1 var(--f-head)}
+.facts dd{margin:5px 0 0; font-size:11px; color:var(--faint); letter-spacing:.03em}
+.profile .ptabs{margin-top:auto}
+.profile .in > .facts{margin-bottom:22px}
 
 /* ── Guilloche ── */
 .guilloche{fill:none; stroke:var(--metal); stroke-width:.45; opacity:calc(.22 * var(--texture)); pointer-events:none}

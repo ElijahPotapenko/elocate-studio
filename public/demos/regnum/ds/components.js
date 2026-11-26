@@ -261,11 +261,12 @@ export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', aside 
   <div class="hero-copy"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}<${Gem} label=${cta} magnetic/></div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
 // Карточка профиля: герб с портретом, статус, имя, ранг, табы
-export function ProfileCard({ name, rank, avatar = 'morgane', status = 'Online', tabs }) {
+export function ProfileCard({ name, rank, avatar = 'morgane', status = 'Online', facts, tabs }) {
   const [tab, setTab] = useState(tabs[0][0]);
   return html`<${Orn} className="profile" lit deco>
     <${Crest}><${Avatar} k=${avatar}/><${Presence} label=${status}/><//>
     <h3>${name}</h3><div class="rank">${rank}</div>
+    ${facts && html`<${Flourish} w=${90}/><dl class="facts">${facts.map(([v, l]) => html`<div key=${l}><dt class="metal-text">${v}</dt><dd>${l}</dd></div>`)}</dl>`}
     <${Tabs} items=${tabs} value=${tab} onChange=${setTab}/><//>`;
 }
 
