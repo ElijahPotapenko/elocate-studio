@@ -101,6 +101,7 @@ export const ui = {
     // — footer —
     'footer.github': 'GitHub',
     'footer.cv': 'Designer CV (PDF)',
+    'footer.cvFront': 'Frontend CV (PDF)',
     'footer.email': 'Email',
     'footer.privacy': 'Privacy',
     'footer.top': 'Back to top ↑',
