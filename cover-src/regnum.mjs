@@ -24,7 +24,7 @@ await shot('.profile', 'profile');
 await shot('.game', 'game1', 0); await shot('.game', 'game2', 1); await shot('.game', 'game3', 3);
 await shot('.stats .meter', 'mult', 0);
 // колесо — без фона героя (прозрачный PNG)
-await p.addStyleTag({ content: 'body,.hero,.hero>.in{background:transparent!important} body::before{display:none!important}' });
+await p.addStyleTag({ content: 'body,.hero,.hero .orn,.hero .in{background:transparent!important} .hero{filter:none!important} .hero .orn::after{display:none!important} body::before,body::after,.dust{display:none!important} .wheel{filter:drop-shadow(0 18px 28px rgb(0 0 0 / .7))!important}' });   // своё зарево колеса резалось краем вырезки — на обложке его даёт фон
 await p.click('.spin-btn'); await p.waitForTimeout(4800);                                   // остановилось на призе — с плашкой выигрыша
 await shot('.wheel-wrap', 'wheel');
 await p.close();
@@ -35,7 +35,7 @@ const page = `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;box-sizing:border-box} body{width:1120px;height:480px;overflow:hidden;position:relative;font-family:Manrope;
- background:radial-gradient(70% 90% at 78% 30%, oklch(32% 0.09 40), transparent 62%), radial-gradient(50% 70% at 0% 110%, oklch(26% 0.07 20), transparent 60%), oklch(13% 0.018 35)}
+ background:radial-gradient(45% 70% at 80% 40%, oklch(45% 0.2 30 / .55), transparent 70%), radial-gradient(30% 50% at 80% 40%, oklch(80% 0.12 80 / .18), transparent 70%), radial-gradient(50% 70% at 0% 110%, oklch(40% 0.14 300 / .3), transparent 60%), oklch(8.5% 0.012 30)}
 body::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg, oklch(100% 0 0 / .018) 0 2px, transparent 2px 10px)}
 .eb{position:absolute;left:64px;top:118px;font:700 12px/1 Cinzel;letter-spacing:.28em;color:oklch(82% 0.11 82)}
 h1{position:absolute;left:60px;top:146px;font:800 66px/1 Cinzel;color:oklch(95% 0.02 85);letter-spacing:.01em}
