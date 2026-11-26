@@ -19,9 +19,11 @@ const projects = [
     video: { src: '/assets/work/identity.mp4', poster: '/assets/work/identity-poster.jpg' },
     href: '#contact',
   },
-  { n: '05', tags: ['AI', 'Automation'], img: '/assets/work/support-bot.webp', href: '/demos/support-bot/' },
+  { n: '05', tags: ['AI', 'Automation'], img: '/assets/work/support-bot.webp', posMobile: '4% 50%', href: '/demos/support-bot/' },
   { n: '06', tags: ['Product', 'Data Viz'], img: '/assets/work/analytics-pulse.webp', href: '/demos/analytics-pulse/' },
   { n: '07', tags: ['Brand', '3D'], img: '/assets/work/nova.webp', href: '/demos/nova/' },
+  // imgMobile — своя обложка 16:10 для телефона (широкая 21:9 там режется по центру); posMobile — куда сдвинуть кадр, если своей нет
+  { n: '08', tags: ['Gamedev', 'UI Kit'], img: '/assets/work/regnum.webp', imgMobile: '/assets/work/regnum-m.webp', href: '/demos/regnum/' },
 ];
 ---
 
@@ -51,7 +53,10 @@ const projects = [
                   aria-label={t(`work.${p.n}.title`)}
                 ></video>
               : p.img
-                ? <img src={p.img} alt={t(`work.${p.n}.title`)} loading="lazy" width="640" height="420" />
+                ? <picture>
+                    {p.imgMobile && <source media="(max-width: 759px)" srcset={p.imgMobile} />}
+                    <img src={p.img} alt={t(`work.${p.n}.title`)} loading="lazy" width="640" height="420" style={p.posMobile ? `--pos-m: ${p.posMobile}` : undefined} />
+                  </picture>
                 : <div class="work-placeholder" aria-hidden="true"><span>{p.n}</span></div>}
           </div>
           <div class="work-body">
@@ -97,7 +102,8 @@ const projects = [
      ряд1: [04 Travel видео ·6] — полноширинный баннер
      ряд2: [02 ·3][03 видео ·3] — две равные плитки
      ряд3: [05 Support Bot ·6] — снова полноширинный баннер (тот же вес, что у 04/07)
-     ряд4: [06 ·3][07 ·3] — две равные плитки, закрывают сетку */
+     ряд4: [06 ·3][07 ·3] — две равные плитки
+     ряд5: [08 Regnum ·6] — широкий баннер, закрывает сетку тем же весом (2026-11-26) */
   @media (min-width: 760px) {
     .work-list { grid-template-columns: repeat(6, 1fr); }
     .work-item:nth-child(1) { grid-column: span 6; }
@@ -109,6 +115,8 @@ const projects = [
     .work-item:nth-child(4) .work-media { aspect-ratio: 21 / 9; }
     .work-item:nth-child(5) { grid-column: span 3; }
     .work-item:nth-child(6) { grid-column: span 3; }
+    .work-item:nth-child(7) { grid-column: span 6; }
+    .work-item:nth-child(7) .work-media { aspect-ratio: 21 / 9; }
   }
   .work-item {
     background: var(--bg-soft);
@@ -132,6 +140,8 @@ const projects = [
   }
 
   .work-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bg-elev); }
+  .work-media picture { display: contents; }
+  @media (max-width: 759px) { .work-media img { object-position: var(--pos-m, 50% 50%); } }   /* широкая обложка на телефоне — не терять заголовок слева */
   .work-media img,
   .work-video {
     width: 100%; height: 100%; object-fit: cover;

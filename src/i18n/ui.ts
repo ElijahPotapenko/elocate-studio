@@ -55,6 +55,9 @@ export const ui = {
     'work.07.title': 'Nova — Pop-Art Copilot',
     'work.07.desc':
       'A speculative brand concept pushed to the edge: Memphis confetti, sticker UI with hard offset shadows, a candy-glass 3D hero, and bouncy magnetic everything — the site as a piece of art.',
+    'work.08.title': 'Regnum — Royal Casino UI',
+    'work.08.desc':
+      'A gamedev dashboard for a fictional royal casino: gold-framed notched panels, gem buttons, a crest-framed player profile, VIP and multiplier meters — and a Crown Wheel that spins and lands on your prize.',
 
     // — about —
     'about.eyebrow': 'About the studio',
