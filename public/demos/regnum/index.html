@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regnum — royal casino dashboard · Elocate Studio</title>
+<meta name="description" content="A royal casino dashboard UI — gamedev case study demo by Elocate Studio. Fictional brand.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
+    "htm": "https://esm.sh/htm@3.1.1"
+  }
+}
+</script>
+<style>
+/* Regnum — королевская дизайн-система кейса (своя, не общая с другими кейсами: README в ../_shared).
+   Кожа: шоколадно-чёрный, золото, рубин→огонь на действиях, изумруд на «новом». Механика — ../_shared/motion.js. */
+:root{
+  --bg: oklch(14% 0.018 35);        --bg-2: oklch(17% 0.022 35);
+  --panel: oklch(19.5% 0.026 38);   --panel-2: oklch(23% 0.03 40);   --panel-hi: oklch(27% 0.035 42);
+  --ink: oklch(95% 0.02 85);        --muted: oklch(72% 0.03 70);     --faint: oklch(52% 0.03 60);
+  --gold: oklch(82% 0.11 82);       --gold-2: oklch(68% 0.11 72);    --gold-deep: oklch(52% 0.09 62);
+  --ruby: oklch(58% 0.22 27);       --fire: oklch(69% 0.2 45);       --rose: oklch(74% 0.1 15);
+  --emerald: oklch(70% 0.16 158);   --sapphire: oklch(64% 0.14 250); --amethyst: oklch(60% 0.14 300);
+  --gold-grad: linear-gradient(135deg, var(--gold) 0%, oklch(92% 0.07 90) 38%, var(--gold-2) 62%, var(--gold-deep) 100%);
+  --cut: 12px;
+  --notch: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
+  --f-logo: 'Cinzel Decorative', serif; --f-head: 'Cinzel', serif; --f-body: 'Manrope', system-ui, sans-serif;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 var(--f-body); -webkit-font-smoothing:antialiased; overflow-x:hidden}
+body::before{content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(70vmax 45vmax at 85% -10%, oklch(30% 0.08 40 / .55), transparent 60%),
+    radial-gradient(50vmax 40vmax at -10% 110%, oklch(26% 0.07 20 / .5), transparent 60%),
+    repeating-linear-gradient(45deg, oklch(100% 0 0 / .012) 0 2px, transparent 2px 9px);}
+a{color:inherit; text-decoration:none}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
+#root{position:relative; z-index:1}
+
+/* ── орнамент: панель со срезанными углами и золотой окантовкой (обёртка = рамка, .in = тело) ── */
+.orn{position:relative; padding:1px; clip-path:var(--notch); background:linear-gradient(160deg, oklch(60% 0.09 70 / .85), oklch(35% 0.05 50 / .6) 40%, oklch(55% 0.08 65 / .7));}
+.orn > .in{clip-path:var(--notch); background:linear-gradient(180deg, var(--panel-2), var(--panel)); height:100%}
+.orn.flat > .in{background:var(--panel)}
+.diamond{width:8px; height:8px; transform:rotate(45deg); background:var(--gold-grad); box-shadow:0 0 10px oklch(82% 0.11 82 / .6); display:inline-block; flex:none}
+
+/* ── кнопка-самоцвет: рубин→огонь, торцы-шестигранники, камни на концах ── */
+.gem{--h:46px; position:relative; display:inline-flex; align-items:center; justify-content:center; gap:10px; height:var(--h); padding:0 34px;
+  font:800 14px/1 var(--f-head); letter-spacing:.14em; text-transform:uppercase; color:oklch(98% 0.02 80); cursor:pointer;
+  clip-path:polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
+  background:linear-gradient(180deg, var(--gold), var(--gold-deep)); padding:2px; text-shadow:0 1px 0 oklch(30% 0.1 30)}
+.gem > span{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; height:100%; padding:0 34px;
+  clip-path:inherit; background:linear-gradient(180deg, var(--fire), var(--ruby) 70%); box-shadow:inset 0 2px 0 oklch(100% 0 0 / .25)}
+.gem::before,.gem::after{content:''; position:absolute; top:50%; width:9px; height:9px; transform:translateY(-50%) rotate(45deg);
+  background:radial-gradient(circle at 30% 30%, oklch(98% 0.03 350), var(--rose) 45%, oklch(45% 0.15 350)); z-index:2}
+.gem::before{left:5px} .gem::after{right:5px}
+.gem.sm{--h:36px; font-size:12px} .gem.sm > span{padding:0 22px}
+.gem.gold > span{background:linear-gradient(180deg, oklch(80% 0.1 80), oklch(62% 0.1 68)); color:oklch(22% 0.04 50); text-shadow:none}
+
+/* ── каркас ── */
+.app{display:grid; grid-template-columns:268px 1fr; gap:22px; max-width:1360px; margin:0 auto; padding:18px 22px 60px}
+.top{grid-column:1 / -1; display:flex; align-items:center; gap:18px}
+.logo{display:flex; align-items:center; gap:10px; font:900 30px/1 var(--f-logo); letter-spacing:.02em;
+  background:var(--gold-grad); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 2px 0 oklch(25% 0.05 40))}
+.logo svg{filter:drop-shadow(0 0 12px oklch(82% 0.11 82 / .45))}
+.seg{display:flex; padding:4px; gap:4px; background:var(--bg-2); clip-path:var(--notch); --cut:9px}
+.seg button{padding:9px 20px; font:700 12px/1 var(--f-head); letter-spacing:.16em; color:var(--muted); clip-path:var(--notch); --cut:7px; transition:color .2s var(--ease)}
+.seg button.on{color:oklch(22% 0.04 50); background:var(--gold-grad)}
+.search{flex:1; display:flex; align-items:center; gap:10px; height:42px; padding:0 16px; background:var(--bg-2); clip-path:var(--notch); --cut:10px; color:var(--faint)}
+.search input{flex:1; background:none; border:0; outline:0; color:var(--ink); font:inherit}
+.auth{display:flex; align-items:center; gap:14px; font-weight:700; color:var(--muted)}
+.back{font-size:12px; color:var(--faint); white-space:nowrap} .back:hover{color:var(--gold)}
+
+/* сайдбар */
+.side .in{padding:18px 12px}
+.crest-top{display:flex; justify-content:center; margin:-4px 0 12px; opacity:.8}
+.nav{display:flex; flex-direction:column; gap:6px}
+.nav a{display:flex; align-items:center; gap:12px; padding:11px 12px; font-weight:700; color:var(--muted); clip-path:var(--notch); --cut:8px; transition:background .25s var(--ease), color .25s var(--ease)}
+.nav a:hover{background:var(--panel-hi); color:var(--ink)}
+.nav a.on{color:var(--ink); background:linear-gradient(90deg, oklch(45% 0.1 55 / .9), oklch(30% 0.05 45 / .3)); box-shadow:inset 3px 0 0 var(--gold)}
+.nav .ic{width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--bg-2); box-shadow:inset 0 0 0 1px oklch(60% 0.08 70 / .4); flex:none}
+.nav .ic svg{width:15px; height:15px}
+.sub-h{display:flex; align-items:center; gap:8px; margin:18px 8px 8px; font:700 12px/1 var(--f-head); letter-spacing:.16em; color:var(--gold)}
+.glist{display:flex; flex-direction:column; gap:6px}
+.grow{display:flex; align-items:center; gap:10px; padding:7px 8px; border-radius:10px; font-size:13px; font-weight:600; color:var(--muted); transition:background .2s}
+.grow:hover{background:var(--panel-hi); color:var(--ink)}
+.grow .em{width:28px; height:28px; border-radius:8px; flex:none}
+.badge{margin-left:auto; padding:3px 7px; font:800 10px/1 var(--f-body); letter-spacing:.06em; border-radius:4px; color:#fff; background:var(--ruby)}
+.badge.hot{background:var(--emerald); color:oklch(20% 0.05 160)}
+
+/* основная колонка */
+.main{display:flex; flex-direction:column; gap:22px; min-width:0}
+.hero .in{display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:10px; padding:34px 36px; min-height:330px;
+  background:radial-gradient(90% 120% at 80% 30%, oklch(32% 0.09 40 / .9), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
+.eyebrow{font:700 13px/1 var(--f-head); letter-spacing:.22em; color:var(--gold); text-transform:uppercase}
+.hero h1{margin:12px 0 6px; font:800 clamp(30px,4vw,48px)/1.05 var(--f-head); letter-spacing:.01em}
+.hero h1 b{background:var(--gold-grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero p{margin:0 0 18px; color:var(--muted); max-width:440px}
+.pay{display:flex; gap:8px; margin-bottom:22px}
+.pay i{display:grid; place-items:center; width:34px; height:34px; border-radius:50%; font:800 10px/1 var(--f-body); font-style:normal; color:#fff; box-shadow:0 0 0 2px oklch(100% 0 0 / .08)}
+
+/* колесо короны — незабываемая деталь */
+.wheel-wrap{position:relative; display:grid; place-items:center}
+.wheel{width:min(300px,80%); aspect-ratio:1; filter:drop-shadow(0 18px 30px oklch(0% 0 0 / .55)) drop-shadow(0 0 30px oklch(82% 0.11 82 / .18))}
+.pointer{position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:30px; filter:drop-shadow(0 3px 4px oklch(0% 0 0 / .6)); z-index:2}
+.spin-btn{position:absolute; width:76px; height:76px; border-radius:50%; display:grid; place-items:center; font:800 13px/1 var(--f-head); letter-spacing:.12em; color:oklch(22% 0.04 50);
+  background:radial-gradient(circle at 35% 30%, oklch(95% 0.06 90), var(--gold) 45%, var(--gold-deep)); box-shadow:0 0 0 4px oklch(30% 0.04 40), 0 0 0 6px var(--gold-2), 0 8px 18px oklch(0% 0 0 / .5)}
+.spin-btn:disabled{cursor:default; filter:saturate(.6)}
+.win{position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); padding:8px 16px; white-space:nowrap; font:800 13px/1 var(--f-head); letter-spacing:.1em; color:oklch(22% 0.04 50); background:var(--gold-grad); clip-path:var(--notch); --cut:8px}
+
+/* строка выигрышей */
+.ticker{overflow:hidden; white-space:nowrap; padding:12px 0; mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)}
+.ticker .t{display:inline-flex; align-items:center; gap:10px; margin-right:34px; font-size:13px; color:var(--muted)}
+.ticker .t b{color:var(--gold); font-weight:800}
+
+/* профиль + статистика */
+.row{display:grid; grid-template-columns:330px 1fr; gap:22px}
+.profile .in{display:flex; flex-direction:column; align-items:center; padding:26px 22px 20px; text-align:center}
+.frame{position:relative; width:190px; height:230px}
+.frame svg{position:absolute; inset:0}
+.ava{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:96px; height:96px; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, oklch(70% 0.06 60), oklch(40% 0.05 40)); display:grid; place-items:center; font:800 34px/1 var(--f-head); color:var(--ink);
+  box-shadow:0 0 0 3px var(--gold-2), 0 0 24px oklch(82% 0.11 82 / .35)}
+.online{position:absolute; left:50%; bottom:20px; transform:translateX(-50%); font-size:12px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:6px}
+.online::after{content:''; width:7px; height:7px; border-radius:50%; background:var(--emerald); box-shadow:0 0 8px var(--emerald)}
+.profile h3{margin:10px 0 2px; font:700 20px/1.2 var(--f-head)}
+.profile .rank{font-size:13px; color:var(--gold)}
+.ptabs{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; margin-top:18px}
+.ptabs button{display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px 6px; font-size:12px; font-weight:700; color:var(--muted); background:var(--bg-2); clip-path:var(--notch); --cut:8px; transition:background .2s, color .2s}
+.ptabs button.on{color:var(--ink); background:linear-gradient(180deg, oklch(40% 0.08 55), oklch(28% 0.05 45))}
+.ptabs svg{width:20px; height:20px}
+
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; align-content:start}
+.stat .in{padding:18px 18px 16px}
+.stat .k{font:700 11px/1 var(--f-head); letter-spacing:.18em; color:var(--muted); text-transform:uppercase}
+.stat .v{margin-top:10px; font:800 28px/1 var(--f-head); background:var(--gold-grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+.stat .d{margin-top:6px; font-size:12px; font-weight:700; color:var(--emerald)}
+.span3{grid-column:1 / -1}
+.meter .in{padding:20px 22px 22px}
+.meter-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px}
+.meter-head h4{margin:0; font:700 16px/1 var(--f-head)}
+.meter-head span{font-size:13px; color:var(--muted)}
+.track{position:relative; height:26px; border-radius:6px; background:var(--bg-2); overflow:hidden; box-shadow:inset 0 0 0 1px oklch(60% 0.08 70 / .3)}
+.fill{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg, var(--gold-2), var(--rose) 45%, var(--sapphire)); box-shadow:0 0 18px oklch(74% 0.1 15 / .5)}
+.fill::after{content:''; position:absolute; inset:0; background:repeating-linear-gradient(-45deg, oklch(100% 0 0 / .12) 0 6px, transparent 6px 12px)}
+.ticks{display:flex; justify-content:space-between; margin-top:8px; font:700 12px/1 var(--f-head); color:var(--faint)}
+.ticks .hit{color:var(--gold)}
+.vip{display:flex; align-items:center; gap:14px}
+.vip .lvl{flex:1}
+.vip .bar{height:8px; border-radius:4px; background:var(--bg-2); overflow:hidden; margin-top:8px}
+.vip .bar i{display:block; height:100%; background:var(--gold-grad)}
+
+/* кошельки */
+.wallets{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.wallet .in{position:relative; padding:18px; overflow:hidden}
+.wallet .coin{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font:800 13px/1 var(--f-body); color:#fff}
+.wallet .amt{margin-top:14px; font:800 22px/1 var(--f-head)}
+.wallet .sub{margin-top:4px; font-size:12px; color:var(--muted)}
+.wallet .glow{position:absolute; right:-30px; top:-30px; width:120px; height:120px; border-radius:50%; filter:blur(30px); opacity:.35}
+.add{display:grid; place-items:center; color:var(--gold); font-weight:800; font-size:13px; letter-spacing:.08em; gap:8px}
+
+/* игры */
+.sec-head{display:flex; align-items:center; gap:12px; margin:4px 0 -6px}
+.sec-head h2{margin:0; font:800 20px/1 var(--f-head); letter-spacing:.06em}
+.sec-head .line{flex:1; height:1px; background:linear-gradient(90deg, var(--gold-deep), transparent)}
+.games{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+.game{cursor:pointer}
+.game .in{padding:10px}
+.art{position:relative; aspect-ratio:4/3; border-radius:10px; overflow:hidden; display:grid; place-items:center}
+.art svg{width:46%; filter:drop-shadow(0 6px 10px oklch(0% 0 0 / .5))}
+.art .tag{position:absolute; top:8px; left:8px}
+.game h5{margin:10px 2px 2px; font:700 14px/1.2 var(--f-head)}
+.game .meta{display:flex; justify-content:space-between; margin:0 2px; font-size:12px; color:var(--muted)}
+.game .meta b{color:var(--gold)}
+
+footer.foot{max-width:1360px; margin:0 auto; padding:0 22px 40px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--faint)}
+
+/* ── адаптив ── */
+@media (max-width: 1100px){ .games{grid-template-columns:repeat(3,1fr)} .row{grid-template-columns:1fr} .stats{grid-template-columns:repeat(3,1fr)} }
+@media (max-width: 900px){
+  .app{grid-template-columns:1fr; padding:14px 14px 40px; gap:16px}
+  .side{order:2} .main{order:1}
+  .top{flex-wrap:wrap; gap:12px} .search{order:3; flex-basis:100%} .auth .lnk{display:none}
+  .hero .in{grid-template-columns:1fr; padding:26px 22px; text-align:center} .hero p{margin-inline:auto} .pay{justify-content:center}
+  .wheel{width:min(250px,70%)}
+}
+@media (max-width: 640px){
+  .games{grid-template-columns:repeat(2,1fr)} .wallets{grid-template-columns:1fr} .stats{grid-template-columns:1fr 1fr}
+  .stats .stat:first-child{grid-column:1 / -1} .logo{font-size:24px} .back{display:none}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+import React, { useState, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
+import { motion, animate } from 'framer-motion';
+import { MagneticCTA, TiltCard, VelocityMarquee, CountUp, Reveal, html } from '../_shared/motion.js';
+
+// ── SVG: корона, гербовая рамка, эмблемы игр — нарисованы здесь, без чужих картинок ──
+const GOLD = html`<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="oklch(92% 0.07 90)"/><stop offset=".5" stop-color="oklch(80% 0.11 82)"/><stop offset="1" stop-color="oklch(55% 0.1 65)"/></linearGradient></defs>`;
+const Crown = ({ size = 30 }) => html`<svg width=${size} height=${size} viewBox="0 0 32 32">${GOLD}
+  <path d="M4 24 L3 9 L10 15 L16 5 L22 15 L29 9 L28 24 Z" fill="url(#gg)" stroke="oklch(40% 0.06 55)" stroke-width="1"/>
+  <rect x="4" y="24" width="24" height="4" rx="1" fill="url(#gg)" stroke="oklch(40% 0.06 55)" stroke-width="1"/>
+  <circle cx="16" cy="18" r="2.4" fill="oklch(60% 0.22 27)"/><circle cx="9.5" cy="19.5" r="1.6" fill="oklch(70% 0.16 158)"/><circle cx="22.5" cy="19.5" r="1.6" fill="oklch(64% 0.14 250)"/>
+  <circle cx="3" cy="9" r="1.8" fill="url(#gg)"/><circle cx="16" cy="5" r="1.8" fill="url(#gg)"/><circle cx="29" cy="9" r="1.8" fill="url(#gg)"/></svg>`;
+
+const ICONS = {
+  home: 'M3 11 L12 3 L21 11 V21 H14 V15 H10 V21 H3 Z',
+  casino: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12z',
+  live: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 4a11 11 0 0 0 0 16M20 4a11 11 0 0 1 0 16',
+  sports: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 7l4 3-1.5 5h-5L8 10z',
+  promo: 'M3 9h18v4H3zM5 13h14v8H5zM12 9v12M12 9c-2-4-6-4-6-1s4 1 6 1c2 0 6 2 6-1s-4-3-6 1',
+  support: 'M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H4zM17 14h3v6h-3z',
+  dash: 'M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z',
+  shield: 'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z',
+  wallet: 'M3 6h15v3h3v11H3zM16 13h3',
+};
+const Icon = ({ n, w = 16 }) => html`<svg width=${w} height=${w} viewBox="0 0 24 24" fill="none" stroke="oklch(82% 0.11 82)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d=${ICONS[n]}/></svg>`;
+
+const EMBLEMS = {
+  dragon: html`<path d="M10 70 C 20 30, 50 20, 70 30 C 60 35, 58 42, 66 48 C 80 40, 92 46, 90 60 C 80 54, 72 58, 70 66 C 60 60, 46 66, 40 78 Z" fill="url(#eg)"/><circle cx="66" cy="36" r="3" fill="oklch(60% 0.22 27)"/>`,
+  jewels: html`<path d="M50 14 L78 38 L50 88 L22 38 Z" fill="url(#eg)"/><path d="M22 38 H78 M36 38 L50 14 L64 38 L50 88" stroke="oklch(40% 0.06 55)" stroke-width="2" fill="none"/>`,
+  knight: html`<path d="M30 84 H72 L68 70 C 80 56, 78 30, 58 18 L 52 28 L 44 22 C 34 30, 30 42, 36 52 L 30 60 L 40 62 L 34 72 Z" fill="url(#eg)"/>`,
+  flush: html`<rect x="22" y="20" width="36" height="52" rx="5" transform="rotate(-12 40 46)" fill="url(#eg)"/><rect x="42" y="22" width="36" height="52" rx="5" transform="rotate(10 60 48)" fill="oklch(95% 0.02 85)"/><path d="M60 38 C 52 30, 46 40, 60 52 C 74 40, 68 30, 60 38" transform="rotate(10 60 48)" fill="oklch(58% 0.22 27)"/>`,
+  chalice: html`<path d="M28 18 H72 C 72 44, 60 54, 54 56 V72 H66 V82 H34 V72 H46 V56 C 40 54, 28 44, 28 18 Z" fill="url(#eg)"/><circle cx="50" cy="34" r="5" fill="oklch(70% 0.16 158)"/>`,
+  rose: html`<circle cx="50" cy="44" r="22" fill="url(#eg)"/><path d="M50 30 C 40 38, 44 52, 50 56 C 56 52, 60 38, 50 30 M50 66 V86 M50 74 C 42 70, 36 74, 34 78 M50 78 C 58 74, 64 78, 66 82" stroke="oklch(40% 0.06 55)" stroke-width="3" fill="none"/>`,
+  joust: html`<path d="M14 82 L82 14 L88 20 L20 88 Z" fill="url(#eg)"/><path d="M60 24 L76 40 L66 50 L50 34 Z" fill="oklch(58% 0.22 27)"/><circle cx="24" cy="76" r="8" fill="url(#eg)"/>`,
+  throne: html`<path d="M26 88 V40 L34 16 L42 40 V54 H58 V40 L66 16 L74 40 V88 H64 V70 H36 V88 Z" fill="url(#eg)"/><circle cx="50" cy="28" r="6" fill="oklch(70% 0.16 158)"/>`,
+};
+const Emblem = ({ k }) => html`<svg viewBox="0 0 100 100"><defs><linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="oklch(94% 0.06 90)"/><stop offset=".5" stop-color="oklch(80% 0.11 82)"/><stop offset="1" stop-color="oklch(52% 0.1 62)"/></linearGradient></defs>${EMBLEMS[k]}</svg>`;
+
+const GAMES = [
+  { name: "Dragon's Hoard", k: 'dragon', bg: ['oklch(42% 0.15 30)', 'oklch(20% 0.06 25)'], rtp: '96.4%', badge: 'new' },
+  { name: 'Crown Jewels', k: 'jewels', bg: ['oklch(40% 0.13 250)', 'oklch(18% 0.05 260)'], rtp: '97.1%', badge: 'hot' },
+  { name: "Knight's Gambit", k: 'knight', bg: ['oklch(36% 0.08 60)', 'oklch(16% 0.03 50)'], rtp: '95.8%' },
+  { name: 'Royal Flush', k: 'flush', bg: ['oklch(38% 0.12 160)', 'oklch(17% 0.05 165)'], rtp: '98.2%', badge: 'hot' },
+  { name: 'Golden Chalice', k: 'chalice', bg: ['oklch(40% 0.12 300)', 'oklch(18% 0.05 300)'], rtp: '96.9%', badge: 'new' },
+  { name: "Queen's Garden", k: 'rose', bg: ['oklch(44% 0.12 10)', 'oklch(19% 0.05 10)'], rtp: '96.1%' },
+  { name: 'Midnight Joust', k: 'joust', bg: ['oklch(34% 0.09 270)', 'oklch(14% 0.03 270)'], rtp: '95.5%', badge: 'new' },
+  { name: 'Emerald Throne', k: 'throne', bg: ['oklch(38% 0.11 150)', 'oklch(16% 0.04 150)'], rtp: '97.6%' },
+];
+const art = (g) => ({ background: `radial-gradient(120% 90% at 50% 20%, ${g.bg[0]}, ${g.bg[1]})` });
+
+// ── компоненты ──
+const Orn = ({ className = '', flat, children, style }) => html`<div class=${'orn ' + (flat ? 'flat ' : '') + className} style=${style}><div class="in">${children}</div></div>`;
+
+function Top() {
+  const [tab, setTab] = useState('casino');
+  return html`<header class="top">
+    <a class="logo" href="#"><${Crown} size=${34}/>Regnum</a>
+    <nav class="seg">${['sport', 'casino'].map((t) => html`<button key=${t} class=${tab === t ? 'on' : ''} onClick=${() => setTab(t)}>${t.toUpperCase()}</button>`)}</nav>
+    <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input placeholder="Search the royal library of games…"/></label>
+    <div class="auth"><a class="lnk" href="#">Sign in</a><a class="gem sm gold" href="#"><span>Join</span></a></div>
+    <a class="back" href="/#work">← Elocate</a>
+  </header>`;
+}
+
+function Side() {
+  const nav = [['home', 'Main hall'], ['casino', 'Casino', true], ['live', 'Live casino'], ['sports', 'Sports'], ['promo', 'Promotions']];
+  const fresh = GAMES.filter((g) => g.badge === 'new'), hot = GAMES.filter((g) => g.badge === 'hot').concat(GAMES.slice(2, 3));
+  const list = (arr, kind) => html`<div class="glist">${arr.map((g) => html`<a key=${g.name} class="grow" href="#"><span class="em" style=${art(g)}></span>${g.name}<span class=${'badge' + (kind === 'hot' ? ' hot' : '')}>${kind === 'hot' ? 'HOT' : 'NEW'}</span></a>`)}</div>`;
+  return html`<aside class="side"><${Orn}>
+    <div class="crest-top"><svg width="70" height="18" viewBox="0 0 70 18"><path d="M0 9 H26 M44 9 H70" stroke="oklch(60% 0.09 70)" stroke-width="1"/><path d="M35 1 L41 9 L35 17 L29 9 Z" fill="oklch(80% 0.11 82)"/></svg></div>
+    <nav class="nav">${nav.map(([ic, label, on]) => html`<a key=${label} class=${on ? 'on' : ''} href="#"><span class="ic"><${Icon} n=${ic}/></span>${label}</a>`)}</nav>
+    <div class="sub-h"><span class="diamond"></span>New games</div>${list(fresh, 'new')}
+    <div class="sub-h"><span class="diamond"></span>Popular</div>${list(hot, 'hot')}
+    <nav class="nav" style=${{ marginTop: '16px' }}><a href="#"><span class="ic"><${Icon} n="support"/></span>Royal support</a></nav>
+  <//></aside>`;
+}
+
+// колесо короны: 8 секторов, крутится пружиной, останавливается на выигрыше
+const PRIZES = ['50 FS', '€25', '2× XP', '€100', '10 FS', 'VIP+', '€500', '25 FS'];
+function CrownWheel() {
+  const ref = useRef(null), rot = useRef(0);
+  const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null);
+  const seg = 360 / PRIZES.length;
+  function spin() {
+    if (spinning) return;
+    const pick = Math.floor(Math.random() * PRIZES.length);
+    const target = rot.current + 360 * 5 + (360 - pick * seg - seg / 2) - (rot.current % 360);
+    setSpinning(true); setWin(null);
+    animate(rot.current, target, { duration: 4.2, ease: [0.12, 0.8, 0.18, 1], onUpdate: (v) => { if (ref.current) ref.current.style.transform = `rotate(${v}deg)`; },
+      onComplete: () => { rot.current = target; setSpinning(false); setWin(PRIZES[pick]); } });
+  }
+  const R = 100, sectors = PRIZES.map((p, i) => {
+    const a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180;
+    const d = `M110 110 L${110 + R * Math.cos(a0)} ${110 + R * Math.sin(a0)} A${R} ${R} 0 0 1 ${110 + R * Math.cos(a1)} ${110 + R * Math.sin(a1)} Z`;
+    const mid = (i + 0.5) * seg;
+    return html`<g key=${p}><path d=${d} fill=${i % 2 ? 'oklch(30% 0.06 35)' : 'oklch(48% 0.17 27)'} stroke="oklch(80% 0.11 82)" stroke-width="1.2"/>
+      <text x="110" y="34" transform=${`rotate(${mid} 110 110)`} text-anchor="middle" font-family="Cinzel" font-weight="800" font-size="11" fill="oklch(95% 0.03 85)">${p}</text></g>`;
+  });
+  return html`<div class="wheel-wrap">
+    <svg class="pointer" viewBox="0 0 30 36"><path d="M15 36 L3 10 A12 12 0 1 1 27 10 Z" fill="oklch(80% 0.11 82)" stroke="oklch(40% 0.06 55)"/><circle cx="15" cy="12" r="5" fill="oklch(58% 0.22 27)"/></svg>
+    <svg class="wheel" viewBox="0 0 220 220"><circle cx="110" cy="110" r="108" fill="oklch(24% 0.04 40)" stroke="oklch(80% 0.11 82)" stroke-width="3"/>
+      <g ref=${ref} style=${{ transformOrigin: '110px 110px' }}>${sectors}</g>
+      ${Array.from({ length: 16 }, (_, i) => { const a = i * 22.5 * Math.PI / 180; return html`<circle key=${i} cx=${110 + 104 * Math.cos(a)} cy=${110 + 104 * Math.sin(a)} r="2.6" fill="oklch(92% 0.07 90)"/>`; })}</svg>
+    <button class="spin-btn" onClick=${spin} disabled=${spinning}>${spinning ? '…' : 'SPIN'}</button>
+    ${win && html`<${motion.div} class="win" initial=${{ opacity: 0, y: 8, scale: 0.9 }} animate=${{ opacity: 1, y: 0, scale: 1 }}>★ You won ${win}<//>`}
+  </div>`;
+}
+
+function Hero() {
+  return html`<${Orn} className="hero"><div>
+      <div class="eyebrow">Welcome to the court</div>
+      <h1>100% up to <b>€500</b><br/>+ 200 free spins</h1>
+      <p>Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift.</p>
+      <div class="pay"><i style=${{ background: 'oklch(45% 0.15 260)' }}>VISA</i><i style=${{ background: 'oklch(62% 0.19 40)' }}>MC</i><i style=${{ background: 'oklch(55% 0.13 270)' }}>ETH</i><i style=${{ background: 'oklch(62% 0.13 170)' }}>₮</i><i style=${{ background: 'oklch(72% 0.16 65)' }}>₿</i></div>
+      <${MagneticCTA} className="gem" href="#" label=${html`<span>Join now</span>`} strength=${0.22}/>
+    </div><${CrownWheel}/><//>`;
+}
+
+const WINS = [['Lady Morgane', '€1,240', "Dragon's Hoard"], ['Sir Aldric', '€380', 'Royal Flush'], ['Baron K.', '€9,700', 'Crown Jewels'], ['Duchess Ivy', '€615', "Queen's Garden"], ['Lord Ferren', '€2,030', 'Emerald Throne']];
+const Ticker = () => html`<${VelocityMarquee} className="ticker" baseSpeed=${3.2} renderTrack=${() => WINS.map(([who, amt, g], i) => html`<span key=${i} class="t"><span class="diamond"></span>${who} won <b>${amt}</b> in ${g}</span>`)}/>`;
+
+function Profile() {
+  const [tab, setTab] = useState('dash');
+  return html`<${Orn} className="profile">
+    <div class="frame"><svg viewBox="0 0 190 230"><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="oklch(90% 0.08 88)"/><stop offset="1" stop-color="oklch(52% 0.1 62)"/></linearGradient></defs>
+      <path d="M95 6 C 120 30, 150 26, 172 40 V150 C 172 190, 130 210, 95 224 C 60 210, 18 190, 18 150 V40 C 40 26, 70 30, 95 6 Z" fill="oklch(22% 0.03 38)" stroke="url(#fg)" stroke-width="3"/>
+      <path d="M95 18 C 116 38, 142 36, 160 46 V148 C 160 180, 126 198, 95 210 C 64 198, 30 180, 30 148 V46 C 48 36, 74 38, 95 18 Z" fill="none" stroke="oklch(60% 0.09 70 / .5)" stroke-width="1"/>
+      <path d="M95 0 L101 8 L95 16 L89 8 Z" fill="url(#fg)"/></svg>
+      <div class="ava">LM</div><div class="online">Online</div></div>
+    <h3>Lady Morgane</h3><div class="rank">♛ Duchess · VIP level 7</div>
+    <div class="ptabs">${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']].map(([k, l]) => html`<button key=${k} class=${tab === k ? 'on' : ''} onClick=${() => setTab(k)}><${Icon} n=${k} w=${20}/>${l}</button>`)}</div>
+  <//>`;
+}
+
+function Stats() {
+  const [mult] = useState(3.4);
+  return html`<div class="stats">
+    <${Orn} className="stat"><div class="k">Balance</div><div class="v">€<${CountUp} to=${12480} locale/></div><div class="d">▲ €1,240 today</div><//>
+    <${Orn} className="stat"><div class="k">Wagered</div><div class="v">€<${CountUp} to=${86300} locale/></div><div class="d">this season</div><//>
+    <${Orn} className="stat"><div class="k">Crown points</div><div class="v"><${CountUp} to=${4820} locale/></div><div class="d">+320 this week</div><//>
+    <${Orn} className="meter span3"><div class="meter-head"><h4>Royal multiplier</h4><span>${mult.toFixed(1)}× active</span></div>
+      <div class="track"><${motion.div} class="fill" initial=${{ width: 0 }} whileInView=${{ width: `${(mult - 1) / 4 * 100}%` }} viewport=${{ once: true }} transition=${{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}/></div>
+      <div class="ticks">${[1, 2, 3, 4, 5].map((x) => html`<span key=${x} class=${x <= mult ? 'hit' : ''}>${x}×</span>`)}</div><//>
+    <${Orn} className="meter span3"><div class="vip"><${Crown} size=${40}/><div class="lvl"><div class="meter-head" style=${{ margin: 0 }}><h4>VIP level 7 → 8</h4><span>4,820 / 6,000</span></div><div class="bar"><i style=${{ width: '80%' }}></i></div></div></div><//>
+  </div>`;
+}
+
+const COINS = [['₿', 'oklch(72% 0.16 65)', '0.0425 BTC', '≈ €2,610'], ['₮', 'oklch(62% 0.13 170)', '4,120 USDT', '≈ €3,800'], ['€', 'oklch(55% 0.14 260)', '€6,070', 'Main wallet']];
+const Wallets = () => html`<div class="wallets">${COINS.map(([s, c, a, sub]) => html`<${Orn} key=${s} className="wallet"><span class="glow" style=${{ background: c }}></span><div class="coin" style=${{ background: c }}>${s}</div><div class="amt">${a}</div><div class="sub">${sub}</div><//>`)}</div>`;
+
+const Games = () => html`<div class="games">${GAMES.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${TiltCard} className="game" maxTilt=${8} hoverY=${-4}><${Orn}>
+  <div class="art" style=${art(g)}>${g.badge && html`<span class=${'badge tag' + (g.badge === 'hot' ? ' hot' : '')}>${g.badge.toUpperCase()}</span>`}<${Emblem} k=${g.k}/></div>
+  <h5>${g.name}</h5><div class="meta"><span>Regnum Originals</span><b>RTP ${g.rtp}</b></div><//><//><//>`)}</div>`;
+
+const Section = ({ title, children }) => html`<${Reveal}><div class="sec-head"><span class="diamond"></span><h2>${title}</h2><span class="line"></span></div><//>${children}`;
+
+function App() {
+  return html`<${React.Fragment}>
+    <div class="app">
+      <${Top}/>
+      <${Side}/>
+      <main class="main">
+        <${Reveal}><${Hero}/><//>
+        <${Ticker}/>
+        <${Reveal}><div class="row"><${Profile}/><${Stats}/></div><//>
+        <${Section} title="Your wallets"><${Wallets}/><//>
+        <${Section} title="Royal games"><${Games}/><//>
+      </main>
+    </div>
+    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio.</span><span>Play responsibly · 18+</span></footer>
+  <//>`;
+}
+
+createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
