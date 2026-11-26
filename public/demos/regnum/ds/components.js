@@ -6,10 +6,10 @@
 // ════════════════════════════════════════════════════════════════════════════════════════
 import React, { useState, useRef, useId, useMemo } from 'react';
 import { motion, animate } from 'framer-motion';
-import { MagneticCTA, TiltCard, CountUp, html } from '../../_shared/motion.js';
-import { GI, LINE } from './icons.js';
+import { MagneticCTA, TiltCard, CountUp, VelocityMarquee, html } from '../../_shared/motion.js';
+import { GI, LINE, SUITS } from './icons.js';
 
-export { GI, LINE, html };
+export { GI, LINE, SUITS, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -171,6 +171,7 @@ export const Crest = ({ children }) => {
     <path d="M95 0 L101 8 L95 16 L89 8 Z" fill=${`url(#f${id})`}/></svg>${children}</div>`;
 };
 export const Avatar = ({ k = 'woman-elf-face' }) => html`<div class="ava"><${Emblem} k=${k} halo=${false}/></div>`;
+export const Presence = ({ label = 'Online' }) => html`<div class="online">${label}</div>`;
 
 export function Tabs({ items, value, onChange }) {
   return html`<div class="ptabs">${items.map(([k, l]) => html`<button key=${k} class=${value === k ? 'on' : ''} onClick=${() => onChange(k)}><${Icon} n=${k} w=${20}/>${l}</button>`)}</div>`;
@@ -189,9 +190,9 @@ const BULBS = Array.from({ length: 24 }, (_, i) => { const a = (i * 15 - 90) * M
   return html`<g key=${i} style=${{ '--k': i % 3 }}><circle class="socket" cx=${x} cy=${y} r="3.6"/><circle class="bulb-halo" cx=${x} cy=${y} r="6"/><circle class="bulb" cx=${x} cy=${y} r="2.3"/></g>`; });
 const TICKS = Array.from({ length: 96 }, (_, i) => { const a = (i * 3.75 - 90) * Math.PI / 180, r1 = i % 4 ? 94 : 91;
   return html`<line key=${i} x1=${C + r1 * Math.cos(a)} y1=${C + r1 * Math.sin(a)} x2=${C + 97 * Math.cos(a)} y2=${C + 97 * Math.sin(a)}/>`; });
-export const PRIZES = [
-  { label: '50 FS', icon: 'magic-swirl' }, { label: '€25', icon: 'holy-grail' }, { label: '2× XP', icon: 'crystal-ball' }, { label: '€100', icon: 'cut-diamond' },
-  { label: '10 FS', icon: 'fairy-wand' }, { label: 'VIP+', icon: 'queen-crown' }, { label: '€500', icon: 'open-treasure-chest' }, { label: '25 FS', icon: 'spell-book' },
+export const PRIZES = [   // масти по кругу ♠ ♦ ♣ ♥ — строгая казино-разметка вместо картинок
+  { label: '50 FS', suit: 'spade' }, { label: '€25', suit: 'diamond' }, { label: '2× XP', suit: 'club' }, { label: '€100', suit: 'heart' },
+  { label: '10 FS', suit: 'spade' }, { label: 'VIP+', suit: 'diamond' }, { label: '€500', suit: 'club' }, { label: '25 FS', suit: 'heart' },
 ];
 const norm = (p) => (typeof p === 'string' ? { label: p } : p);
 
@@ -228,8 +229,8 @@ export function CrownWheel({ prizes = PRIZES, onWin }) {
     const d = `M${C} ${C} L${C + R * Math.cos(a0)} ${C + R * Math.sin(a0)} A${R} ${R} 0 0 1 ${C + R * Math.cos(a1)} ${C + R * Math.sin(a1)} Z`;
     return html`<g key=${p.label + i}><path class=${i % 2 ? 'sb' : 'sa'} d=${d}/><path class=${'hl' + (win === i ? ' on' : '')} d=${d}/>
       <g transform=${`rotate(${mid} ${C} ${C})`}>
-        ${p.icon && GI[p.icon] && html`<path class="si" d=${GI[p.icon]} transform=${`translate(${C - 10} 27) scale(${20 / 512})`}/>`}
-        <text x=${C} y=${p.icon ? 62 : 44} text-anchor="middle">${p.label}</text></g></g>`;
+        ${p.suit && html`<path class="si" d=${SUITS[p.suit]} transform=${`translate(${C - 7} 29) scale(.14)`}/>`}
+        <text x=${C} y=${p.suit ? 58 : 44} text-anchor="middle">${p.label}</text></g></g>`;
   });
   return html`<div class=${'wheel-wrap' + (spinning ? ' fast' : '') + (party ? ' won' : '')}>
     <div class="wheel-glow"></div>
@@ -245,6 +246,28 @@ export function CrownWheel({ prizes = PRIZES, onWin }) {
     </div>
     ${win != null && !spinning && html`<${motion.div} class="win" initial=${{ opacity: 0, y: 10, scale: 0.92 }} animate=${{ opacity: 1, y: 0, scale: 1 }} transition=${{ type: 'spring', stiffness: 260, damping: 18 }}>★ You won ${list[win].label}<//>`}
   </div>`;
+}
+
+/* ───────────────────────────── Мелочи бренда ───────────────────────────── */
+export const Suit = ({ s = 'spade', w = 16 }) => html`<svg class="suit" width=${w} height=${w} viewBox="0 0 100 100" aria-hidden="true"><path d=${SUITS[s]}/></svg>`;
+// орнамент-разделитель: две линии и ромб
+export const Flourish = ({ w = 70 }) => html`<div class="flourish"><svg width=${w} height="18" viewBox="0 0 70 18" aria-hidden="true"><path class="fl" d="M0 9 H26 M44 9 H70"/><path class="fd" d="M35 1 L41 9 L35 17 L29 9 Z"/></svg></div>`;
+// платёжные методы: бренд-цвет гасится ручкой --art-c (как обложки игр)
+export const PayRow = ({ items }) => html`<div class="pay">${items.map(([t, c]) => html`<i key=${t} style=${{ '--b': c }}>${t}</i>`)}</div>`;
+export const WinsTicker = ({ wins, speed = 3.2 }) => html`<${VelocityMarquee} className="ticker" baseSpeed=${speed} renderTrack=${() => wins.map(([who, amt, g], i) => html`<span key=${i} class="t"><${Diamond}/>${who} won <b>${amt}</b> in ${g}</span>`)}/>`;
+
+/* ───────────────────────────── Паттерны (собраны из компонентов) ───────────────────────────── */
+// Баннер: текст слева, что угодно справа (колесо). Фон — гильош-гравировка.
+export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', aside }) => html`<${Orn} className="hero" lit sheen deco><${Guilloche}/>
+  <div class="hero-copy"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}<${Gem} label=${cta} magnetic/></div>
+  ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
+// Карточка профиля: герб с портретом, статус, имя, ранг, табы
+export function ProfileCard({ name, rank, avatar = 'woman-elf-face', status = 'Online', tabs }) {
+  const [tab, setTab] = useState(tabs[0][0]);
+  return html`<${Orn} className="profile" lit deco>
+    <${Crest}><${Avatar} k=${avatar}/><${Presence} label=${status}/><//>
+    <h3>${name}</h3><div class="rank">${rank}</div>
+    <${Tabs} items=${tabs} value=${tab} onChange=${setTab}/><//>`;
 }
 
 /* ───────────────────────────── Атмосфера ───────────────────────────── */

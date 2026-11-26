@@ -206,10 +206,17 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .online::after{content:''; width:7px; height:7px; border-radius:50%; background:var(--pos); box-shadow:0 0 8px var(--pos); animation:blink 1.6s ease-in-out infinite}
 @keyframes blink{50%{opacity:.35}}
 
-/* ── Tabs (иконка + подпись) ── */
-.ptabs{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%}
-.ptabs button{display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px 6px; font-size:12px; font-weight:700; color:var(--muted); background:var(--bg-2); clip-path:var(--notch); --cut:8px; transition:background var(--dur-fast), color var(--dur-fast)}
-.ptabs button.on{color:var(--ink); background:linear-gradient(180deg, color-mix(in oklch, var(--metal-deep) 70%, var(--panel)), var(--panel-hi)); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal) 60%, transparent)}
+/* ── Tabs: одна полоса с волосяной рамкой, ячейки через разделители; активная — металлическая черта снизу ── */
+.ptabs{display:grid; grid-template-columns:repeat(var(--n, 3),1fr); width:100%; border-radius:var(--radius); overflow:hidden;
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
+.ptabs button{position:relative; display:flex; flex-direction:column; align-items:center; gap:7px; padding:13px 6px 12px; font-size:12px; font-weight:700; letter-spacing:.02em; color:var(--faint);
+  transition:color var(--dur-fast), background var(--dur-fast)}
+.ptabs button + button{box-shadow:inset 1px 0 0 color-mix(in oklch, var(--metal-dim) 22%, transparent)}
+.ptabs button::after{content:''; position:absolute; left:22%; right:22%; bottom:0; height:2px; background:var(--metal-tex), var(--metal-grad); transform:scaleX(0); transition:transform var(--dur) var(--ease)}
+.ptabs button:hover{color:var(--ink)}
+.ptabs button.on{color:var(--ink); background:linear-gradient(180deg, transparent, color-mix(in oklch, var(--metal-deep) 16%, transparent))}
+.ptabs button.on::after{transform:scaleX(1)}
+.ptabs .ico{stroke:currentColor; transition:stroke var(--dur-fast)} .ptabs button.on .ico{stroke:var(--metal)}
 .ptabs svg{width:20px; height:20px}
 
 /* ── Wallet ── */
@@ -278,6 +285,37 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .dust{display:var(--fx); position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden}
 .dust i{position:absolute; bottom:-10px; border-radius:50%; background:var(--metal-hi); box-shadow:0 0 8px var(--metal); opacity:0; animation:rise linear infinite; will-change:transform,opacity}
 @keyframes rise{0%{transform:translateY(0) translateX(0); opacity:0} 10%{opacity:.8} 90%{opacity:.5} 100%{transform:translateY(-105vh) translateX(30px); opacity:0}}
+
+/* ── Мелочи бренда ── */
+.suit{fill:var(--metal); flex:none}
+.flourish{display:flex; justify-content:center; margin:-4px 0 12px; opacity:.85}
+.flourish .fl{fill:none; stroke:var(--metal-dim); stroke-width:1} .flourish .fd{fill:var(--metal)}
+.pay{display:flex; gap:8px; flex-wrap:wrap}
+.pay i{display:grid; place-items:center; width:34px; height:34px; border-radius:50%; font:800 10px/1 var(--f-body); font-style:normal; color:var(--ink);
+  background:var(--metal-tex), color-mix(in oklch, var(--b) calc(100% * min(var(--art-c), 1)), var(--panel-hi)); box-shadow:inset 0 0 0 1px oklch(100% 0 0 / .14)}
+
+/* ── HeroBanner (паттерн) ── */
+.hero .in{display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:10px; padding:34px 36px; min-height:330px; overflow:hidden;
+  background:radial-gradient(60% 90% at 82% 40%, color-mix(in oklch, var(--accent-deep) calc(55% * var(--glow)), transparent), transparent 65%),
+    radial-gradient(40% 60% at 82% 40%, var(--glow-metal-soft), transparent 70%),
+    radial-gradient(70% 100% at 0% 0%, color-mix(in oklch, var(--magic) calc(18% * var(--glow)), transparent), transparent 60%), var(--panel)}
+.hero-copy, .hero-aside{position:relative; z-index:1}
+.hero h1{margin:12px 0 6px; font:800 clamp(30px,4vw,48px)/1.05 var(--f-head); letter-spacing:.01em; text-shadow:0 0 30px var(--glow-metal-soft)}
+.hero h1 b{filter:var(--tf-glow)}
+.hero p{margin:0 0 18px; color:var(--muted); max-width:440px}
+.hero .pay{margin-bottom:22px}
+.hero .guilloche{position:absolute; right:3%; top:50%; width:min(560px,62%); transform:translateY(-50%)}
+@media (max-width: 900px){
+  .hero .in{grid-template-columns:1fr; padding:26px 22px; text-align:center} .hero p{margin-inline:auto} .hero .pay{justify-content:center}
+  .hero .wheel{width:min(250px,70%)}
+  .hero .guilloche{right:50%; top:auto; bottom:-10%; transform:translateX(50%); width:520px}
+}
+
+/* ── ProfileCard (паттерн) ── */
+.profile .in{display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px 22px 22px; text-align:center}
+.profile h3{margin:10px 0 2px; font:700 20px/1.2 var(--f-head)}
+.profile .rank{font-size:13px; color:var(--metal)}
+.profile .ptabs{margin-top:20px}
 
 /* ── Guilloche ── */
 .guilloche{fill:none; stroke:var(--metal); stroke-width:.45; opacity:calc(.22 * var(--texture)); pointer-events:none}
