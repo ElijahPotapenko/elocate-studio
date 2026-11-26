@@ -13,6 +13,7 @@ export { GI, LINE, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
+  { id: 'noir', name: 'Noir', note: 'шампань · бордо · чёрный бархат, без свечений' },
   { id: 'royal', name: 'Royal', note: 'золото · рубин · королевская ночь' },
   { id: 'elven', name: 'Elven', note: 'лунное серебро · изумруд · хвоя' },
   { id: 'arcane', name: 'Arcane', note: 'серебро-лёд · аметист · индиго' },
@@ -23,23 +24,31 @@ export const KNOBS = [
   { v: '--metal-c', label: 'Metal chroma', min: 0, max: 0.18, step: 0.005, group: 'Metal' },
   { v: '--accent-h', label: 'Accent hue', min: 0, max: 360, step: 1, group: 'Accent' },
   { v: '--accent-c', label: 'Accent chroma', min: 0, max: 0.3, step: 0.005, group: 'Accent' },
+  { v: '--accent-l', label: 'Accent lightness', min: -25, max: 10, step: 1, unit: '%', group: 'Accent' },
   { v: '--fire-h', label: 'Accent top hue', min: 0, max: 360, step: 1, group: 'Accent' },
   { v: '--gem-h', label: 'Gem hue', min: 0, max: 360, step: 1, group: 'Accent' },
   { v: '--surface-h', label: 'Surface hue', min: 0, max: 360, step: 1, group: 'Surface' },
   { v: '--surface-c', label: 'Surface chroma', min: 0, max: 0.06, step: 0.001, group: 'Surface' },
+  { v: '--surface-l', label: 'Surface lightness', min: -6, max: 6, step: 0.5, unit: '%', group: 'Surface' },
+  { v: '--art-c', label: 'Game art chroma', min: 0, max: 1.5, step: 0.05, group: 'Surface' },
+  { v: '--art-l', label: 'Game art lightness', min: -20, max: 10, step: 1, unit: '%', group: 'Surface' },
   { v: '--pos-h', label: 'Positive hue', min: 0, max: 360, step: 1, group: 'Signals' },
   { v: '--magic-h', label: 'Magic hue', min: 0, max: 360, step: 1, group: 'Signals' },
+  { v: '--sig-c', label: 'Signal chroma', min: 0, max: 0.2, step: 0.005, group: 'Signals' },
   { v: '--glow', label: 'Glow strength', min: 0, max: 2, step: 0.05, group: 'Light & form' },
+  { v: '--depth', label: 'Shadow depth', min: 0, max: 1.5, step: 0.05, group: 'Light & form' },
+  { v: '--texture', label: 'Texture', min: 0, max: 1.5, step: 0.05, group: 'Light & form' },
+  { v: '--fx', label: 'Effects (dust · sheen · halos)', type: 'switch', on: 'block', off: 'none', group: 'Light & form' },
   { v: '--cut', label: 'Corner cut', min: 0, max: 28, step: 1, unit: 'px', group: 'Light & form' },
   { v: '--ornament', label: 'Ornament', min: 0, max: 1, step: 0.05, group: 'Light & form' },
 ];
-const LS = 'regnum-ds-look';
+const LS = 'regnum-ds-look-v2';   // v2: тема по умолчанию стала noir — старые подкрутки не тянем
 // look = { theme: 'royal', vars: { '--metal-h': '120', … } } — общий для демо и лабы (один origin)
-export function loadLook() { try { return JSON.parse(localStorage.getItem(LS)) || { theme: 'royal', vars: {} }; } catch { return { theme: 'royal', vars: {} }; } }
+export function loadLook() { try { return JSON.parse(localStorage.getItem(LS)) || { theme: 'noir', vars: {} }; } catch { return { theme: 'noir', vars: {} }; } }
 export function saveLook(look) { try { localStorage.setItem(LS, JSON.stringify(look)); } catch { /* приватный режим — живём без памяти */ } }
 export function applyLook(look) {
   const r = document.documentElement;
-  r.dataset.theme = look.theme || 'royal';
+  r.dataset.theme = look.theme || 'noir';
   KNOBS.forEach(({ v }) => r.style.removeProperty(v));
   Object.entries(look.vars || {}).forEach(([v, x]) => r.style.setProperty(v, x));
 }
@@ -83,11 +92,13 @@ export function Emblem({ k, halo = true }) {
     <defs>
       <linearGradient id=${'g' + id} x1="0" y1="0" x2=".35" y2="1"><stop offset="0" style=${st('var(--metal-hi)')}/><stop offset=".38" style=${st('var(--metal)')}/><stop offset=".66" style=${st('var(--metal-mid)')}/><stop offset="1" style=${st('var(--metal)')}/></linearGradient>
       <linearGradient id=${'h' + id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" style=${{ stopColor: '#fff', stopOpacity: 0.5 }}/><stop offset=".42" style=${{ stopColor: '#fff', stopOpacity: 0 }}/></linearGradient>
+      <pattern id=${'e' + id} width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="2.2" height="14" style=${{ fill: 'var(--metal-shade)' }}/></pattern>
       <radialGradient id=${'r' + id}><stop offset="0" style=${st('var(--glow-metal)')}/><stop offset="1" style=${{ stopColor: 'var(--metal)', stopOpacity: 0 }}/></radialGradient>
     </defs>
     ${halo && html`<circle cx="256" cy="256" r="280" fill=${`url(#r${id})`}/>`}
-    <path d=${GI[k]} style=${{ fill: 'var(--well)', opacity: 0.8 }} transform="translate(8 18)"/>
+    <path d=${GI[k]} style=${{ fill: 'var(--well)', opacity: 'calc(.8 * var(--depth))' }} transform="translate(8 18)"/>
     <path d=${GI[k]} fill=${`url(#g${id})`} style=${{ stroke: 'var(--metal-shade)' }} stroke-width="4" paint-order="stroke"/>
+    <path d=${GI[k]} fill=${`url(#e${id})`} style=${{ opacity: 'calc(.45 * var(--texture))' }}/>
     <path d=${GI[k]} fill=${`url(#h${id})`}/>
   </svg>`;
 }
@@ -167,33 +178,72 @@ export function Tabs({ items, value, onChange }) {
 
 export const Wallet = ({ sym, hue, amount, sub }) => html`<${Orn} className="wallet"><span class="glow" style=${{ '--coin-h': hue }}></span><div class="coin" style=${{ '--coin-h': hue }}>${sym}</div><div class="amt">${amount}</div><div class="sub">${sub}</div><//>`;
 
-/* ───────────────────────────── Колесо ───────────────────────────── */
-const BULBS = Array.from({ length: 24 }, (_, i) => { const a = i * 15 * Math.PI / 180, x = 110 + 104 * Math.cos(a), y = 110 + 104 * Math.sin(a);
-  return html`<g key=${i} style=${{ '--k': i % 3 }}><circle class="bulb-halo" cx=${x} cy=${y} r="5.5"/><circle class="bulb" cx=${x} cy=${y} r="2.6"/></g>`; });
-export const PRIZES = ['50 FS', '€25', '2× XP', '€100', '10 FS', 'VIP+', '€500', '25 FS'];
+/* ───────────────────────────── Колесо ─────────────────────────────
+   Слои (снизу вверх): обод из шлифованного металла (CSS conic — свет «бегает» по кругу) →
+   вращающееся лицо (SVG: сектора, эмблемы, насечка-шкала) → неподвижный свет (лак-блик) и лампы в гнёздах →
+   ступица (рифлёное кольцо + полированный купол) → стрелка-маятник.
+   Анимация: замах назад → разгон и долгое торможение с перекатом → пружинный возврат. Стрелка «щёлкает»
+   на каждой границе сектора (прямо в DOM, без перерисовки React). Выигрыш: сектор вспыхивает, лампы мигают. */
+const C = 120;                                                       // центр в координатах SVG 240×240
+const BULBS = Array.from({ length: 24 }, (_, i) => { const a = (i * 15 - 90) * Math.PI / 180, x = C + 112 * Math.cos(a), y = C + 112 * Math.sin(a);
+  return html`<g key=${i} style=${{ '--k': i % 3 }}><circle class="socket" cx=${x} cy=${y} r="3.6"/><circle class="bulb-halo" cx=${x} cy=${y} r="6"/><circle class="bulb" cx=${x} cy=${y} r="2.3"/></g>`; });
+const TICKS = Array.from({ length: 96 }, (_, i) => { const a = (i * 3.75 - 90) * Math.PI / 180, r1 = i % 4 ? 94 : 91;
+  return html`<line key=${i} x1=${C + r1 * Math.cos(a)} y1=${C + r1 * Math.sin(a)} x2=${C + 97 * Math.cos(a)} y2=${C + 97 * Math.sin(a)}/>`; });
+export const PRIZES = [
+  { label: '50 FS', icon: 'magic-swirl' }, { label: '€25', icon: 'holy-grail' }, { label: '2× XP', icon: 'crystal-ball' }, { label: '€100', icon: 'cut-diamond' },
+  { label: '10 FS', icon: 'fairy-wand' }, { label: 'VIP+', icon: 'queen-crown' }, { label: '€500', icon: 'open-treasure-chest' }, { label: '25 FS', icon: 'spell-book' },
+];
+const norm = (p) => (typeof p === 'string' ? { label: p } : p);
+
 export function CrownWheel({ prizes = PRIZES, onWin }) {
-  const ref = useRef(null), rot = useRef(0);
-  const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null);
-  const seg = 360 / prizes.length;
-  function spin() {
+  const list0 = prizes.length, face = useRef(null), ptr = useRef(null), rot = useRef(-180 / list0), lastSeg = useRef(0);   // в покое стрелка — в середине сектора
+  const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null), [party, setParty] = useState(false);
+  const list = useMemo(() => prizes.map(norm), [prizes]);
+  const seg = 360 / list.length;
+  const paint = (v) => {
+    if (face.current) face.current.style.transform = `rotate(${v}deg)`;
+    const s = Math.floor((v + seg / 2) / seg);                         // пересекли границу сектора под стрелкой → щелчок
+    if (s !== lastSeg.current && ptr.current) {
+      lastSeg.current = s; const el = ptr.current;
+      el.style.transition = 'none'; el.style.transform = 'rotate(-24deg)';
+      requestAnimationFrame(() => { el.style.transition = 'transform .22s cubic-bezier(.3,1.7,.5,1)'; el.style.transform = 'rotate(0deg)'; });
+    }
+  };
+  async function spin() {
     if (spinning) return;
-    const pick = Math.floor(Math.random() * prizes.length);
-    const target = rot.current + 360 * 5 + (360 - pick * seg - seg / 2) - (rot.current % 360);
-    setSpinning(true); setWin(null);
-    animate(rot.current, target, { duration: 4.2, ease: [0.12, 0.8, 0.18, 1], onUpdate: (v) => { if (ref.current) ref.current.style.transform = `rotate(${v}deg)`; },
-      onComplete: () => { rot.current = target; setSpinning(false); setWin(prizes[pick]); onWin && onWin(prizes[pick]); } });
+    const pick = Math.floor(Math.random() * list.length);
+    const base = rot.current - (rot.current % 360);
+    const target = base + 360 * 6 + (360 - pick * seg - seg / 2);
+    setSpinning(true); setWin(null); setParty(false);
+    await animate(rot.current, rot.current - 14, { duration: 0.38, ease: [0.4, 0, 0.6, 1], onUpdate: paint });                 // замах
+    await animate(rot.current - 14, target + 5, { duration: 5.2, ease: [0.16, 0.72, 0.12, 1], onUpdate: paint });              // разгон → торможение с перекатом
+    await animate(target + 5, target, { type: 'spring', stiffness: 140, damping: 9, onUpdate: paint });                        // возврат
+    rot.current = target; setSpinning(false); setWin(pick); setParty(true);
+    setTimeout(() => setParty(false), 2400);
+    onWin && onWin(list[pick].label);
   }
-  const sectors = useMemo(() => prizes.map((p, i) => {
-    const R = 100, a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180;
-    const d = `M110 110 L${110 + R * Math.cos(a0)} ${110 + R * Math.sin(a0)} A${R} ${R} 0 0 1 ${110 + R * Math.cos(a1)} ${110 + R * Math.sin(a1)} Z`;
-    return html`<g key=${p + i}><path class=${i % 2 ? 'sb' : 'sa'} d=${d}/><text x="110" y="34" transform=${`rotate(${(i + 0.5) * seg} 110 110)`} text-anchor="middle">${p}</text></g>`;
-  }), [prizes]);
-  return html`<div class=${'wheel-wrap' + (spinning ? ' fast' : '')}>
+  const R = 100;
+  const sectors = list.map((p, i) => {
+    const a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180, mid = (i + 0.5) * seg;
+    const d = `M${C} ${C} L${C + R * Math.cos(a0)} ${C + R * Math.sin(a0)} A${R} ${R} 0 0 1 ${C + R * Math.cos(a1)} ${C + R * Math.sin(a1)} Z`;
+    return html`<g key=${p.label + i}><path class=${i % 2 ? 'sb' : 'sa'} d=${d}/><path class=${'hl' + (win === i ? ' on' : '')} d=${d}/>
+      <g transform=${`rotate(${mid} ${C} ${C})`}>
+        ${p.icon && GI[p.icon] && html`<path class="si" d=${GI[p.icon]} transform=${`translate(${C - 10} 27) scale(${20 / 512})`}/>`}
+        <text x=${C} y=${p.icon ? 62 : 44} text-anchor="middle">${p.label}</text></g></g>`;
+  });
+  return html`<div class=${'wheel-wrap' + (spinning ? ' fast' : '') + (party ? ' won' : '')}>
     <div class="wheel-glow"></div>
-    <svg class="pointer" viewBox="0 0 30 36"><path d="M15 36 L3 10 A12 12 0 1 1 27 10 Z"/><circle cx="15" cy="12" r="5"/></svg>
-    <svg class="wheel" viewBox="0 0 220 220"><circle class="rim" cx="110" cy="110" r="108"/><g ref=${ref} style=${{ transformOrigin: '110px 110px' }}>${sectors}</g>${BULBS}</svg>
-    <button class="spin-btn" onClick=${spin} disabled=${spinning}>${spinning ? '…' : 'SPIN'}</button>
-    ${win && html`<${motion.div} class="win" initial=${{ opacity: 0, y: 8, scale: 0.9 }} animate=${{ opacity: 1, y: 0, scale: 1 }}>★ You won ${win}<//>`}
+    <div class="wheel">
+      <div class="bezel"></div>
+      <svg class="face" viewBox="0 0 240 240"><g ref=${face} style=${{ transformOrigin: '120px 120px', transform: `rotate(${-180 / list0}deg)` }}>
+        ${sectors}<g class="ticks">${TICKS}</g><circle class="rim-in" cx=${C} cy=${C} r="97.6"/></g></svg>
+      <svg class="lights" viewBox="0 0 240 240" aria-hidden="true"><defs><radialGradient id="wl" cx=".32" cy=".26" r=".75">
+        <stop offset="0" style=${{ stopColor: '#fff', stopOpacity: 0.16 }}/><stop offset=".45" style=${{ stopColor: '#fff', stopOpacity: 0 }}/><stop offset="1" style=${{ stopColor: '#000', stopOpacity: 0.35 }}/></radialGradient></defs>
+        <circle cx=${C} cy=${C} r="101.5" fill="url(#wl)"/>${BULBS}</svg>
+      <button class="spin-btn" onClick=${spin} disabled=${spinning} aria-label="Spin the wheel"><span>Spin</span></button>
+      <div class="pointer" ref=${ptr}><svg viewBox="0 0 40 56" aria-hidden="true"><path class="pb" d="M20 55 L7 21 A15 15 0 1 1 33 21 Z"/><path class="pe" d="M20 49 L10 21 A11 11 0 1 1 30 21 Z"/><circle class="pg" cx="20" cy="16" r="5.5"/><circle class="ph" cx="18.2" cy="14.2" r="1.6"/></svg></div>
+    </div>
+    ${win != null && !spinning && html`<${motion.div} class="win" initial=${{ opacity: 0, y: 10, scale: 0.92 }} animate=${{ opacity: 1, y: 0, scale: 1 }} transition=${{ type: 'spring', stiffness: 260, damping: 18 }}>★ You won ${list[win].label}<//>`}
   </div>`;
 }
 
@@ -201,4 +251,11 @@ export function CrownWheel({ prizes = PRIZES, onWin }) {
 export function Dust({ n = 18 }) {
   const dots = useMemo(() => Array.from({ length: n }, (_, i) => ({ left: (i * 37) % 100, d: 9 + (i * 7) % 11, delay: -((i * 13) % 20), s: 1 + (i % 3) })), [n]);
   return html`<div class="dust" aria-hidden="true">${dots.map((x, i) => html`<i key=${i} style=${{ left: x.left + '%', width: x.s * 2 + 'px', height: x.s * 2 + 'px', animationDuration: x.d + 's', animationDelay: x.delay + 's' }}></i>`)}</div>`;
+}
+
+// Гильош — гравировка как на банкнотах: розетка из повёрнутых эллипсов. Статичный SVG, тонкая линия металла.
+export function Guilloche({ n = 48, className = 'guilloche' }) {
+  const rings = useMemo(() => Array.from({ length: n }, (_, i) => html`<ellipse key=${i} cx="200" cy="200" rx="190" ry="64" transform=${`rotate(${(i * 180) / n} 200 200)`}/>`), [n]);
+  const inner = useMemo(() => Array.from({ length: n }, (_, i) => html`<ellipse key=${i} cx="200" cy="200" rx="118" ry="30" transform=${`rotate(${(i * 180) / n + 90 / n} 200 200)`}/>`), [n]);
+  return html`<svg class=${className} viewBox="0 0 400 400" aria-hidden="true"><g>${rings}</g><g>${inner}</g><circle cx="200" cy="200" r="196"/><circle cx="200" cy="200" r="150"/></svg>`;
 }

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="royal">
+<html lang="en" data-theme="noir">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,7 +20,7 @@
   }
 }
 </script>
-<script>try{var L=JSON.parse(localStorage.getItem('regnum-ds-look'));if(L){document.documentElement.dataset.theme=L.theme||'royal';for(var k in(L.vars||{}))document.documentElement.style.setProperty(k,L.vars[k]);}}catch(e){}</script>
+<script>try{var L=JSON.parse(localStorage.getItem('regnum-ds-look-v2'));if(L){document.documentElement.dataset.theme=L.theme||'noir';for(var k in(L.vars||{}))document.documentElement.style.setProperty(k,L.vars[k]);}}catch(e){}</script>
 <link rel="stylesheet" href="../ds/tokens.css">
 <link rel="stylesheet" href="../ds/components.css">
 <style>
@@ -68,12 +68,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; hei
 input[type=range]::-moz-range-thumb{width:14px; height:14px; border:0; border-radius:3px; background:var(--metal); box-shadow:0 0 10px var(--glow-metal); cursor:pointer}
 .hue input[type=range]{background:linear-gradient(90deg, oklch(65% .15 0), oklch(65% .15 60), oklch(65% .15 120), oklch(65% .15 180), oklch(65% .15 240), oklch(65% .15 300), oklch(65% .15 360))}
 .board-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
-.preview .in{padding:22px; display:grid; gap:18px}
+.preview .in{padding:22px; display:grid; gap:18px; overflow:hidden}
+.pv-g{position:absolute; right:-80px; top:-60px; width:420px}
+.preview .in > *:not(.pv-g):not(.cr){position:relative; z-index:1}
 .pv-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
 .pv-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center}
 .pv-grid .wheel{width:min(220px,90%)}
 /* темы рядом */
-.themes{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.themes{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+@media (max-width: 1250px){ .themes{grid-template-columns:repeat(2,1fr)} }
 .tcard{position:relative; padding:18px; border-radius:14px; background:radial-gradient(80% 60% at 70% 0%, var(--amb-1), transparent 70%), var(--bg); color:var(--ink);
   box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); display:grid; gap:14px; cursor:pointer; transition:box-shadow var(--dur) var(--ease)}
 .tcard:hover, .tcard.on{box-shadow:inset 0 0 0 1px var(--metal), 0 0 30px var(--glow-metal-soft)}
@@ -107,7 +110,7 @@ import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { html, GI, LINE, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
-  GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust } from '../ds/components.js';
+  GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
 const G = { name: "Dragon's Hoard", k: 'dragon-head', hue: 30, rtp: '96.4%', badge: 'new' };
 const GAMES = [G, { name: 'Moon Oracle', k: 'crystal-ball', hue: 280, rtp: '97.0%', badge: 'hot' }, { name: 'Unicorn Glade', k: 'unicorn', hue: 165, rtp: '96.2%' }, { name: 'Wyvern Gold', k: 'wyvern', hue: 45, rtp: '95.9%', badge: 'new' }];
@@ -127,17 +130,20 @@ function Story({ id, title, note, code, col, children }) {
 const Lbl = ({ t, children }) => html`<div>${children}<span class="lbl">${t}</span></div>`;
 
 // ── Пульт: ручки токенов ──
-function readKnob(v) { const x = getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return parseFloat(x); }
+function readKnob(k) { const x = getComputedStyle(document.documentElement).getPropertyValue(k.v).trim(); return k.type === 'switch' ? x : parseFloat(x); }
 function Board({ look, setLook }) {
   const [vals, setVals] = useState({});
-  useEffect(() => { const o = {}; KNOBS.forEach(({ v }) => o[v] = readKnob(v)); setVals(o); }, [look.theme, JSON.stringify(look.vars)]);
+  useEffect(() => { const o = {}; KNOBS.forEach((k) => o[k.v] = readKnob(k)); setVals(o); }, [look.theme, JSON.stringify(look.vars)]);
   const set = (k, x) => setLook({ ...look, vars: { ...look.vars, [k.v]: x + (k.unit || '') } });
   const groups = [...new Set(KNOBS.map((k) => k.group))];
   const [ok, setOk] = useState(false);
   const css = lookCSS(look);
   return html`<div class="board">
     <${Orn} className="knobs" deco>
-      ${groups.map((g) => html`<div key=${g} class="kg"><h4>${g}</h4>${KNOBS.filter((k) => k.group === g).map((k) => html`<label key=${k.v} class=${'knob' + (k.v.endsWith('-h') ? ' hue' : '') + (look.vars[k.v] != null ? ' changed' : '')}>
+      ${groups.map((g) => html`<div key=${g} class="kg"><h4>${g}</h4>${KNOBS.filter((k) => k.group === g).map((k) => k.type === 'switch'
+        ? html`<label key=${k.v} class=${'knob' + (look.vars[k.v] != null ? ' changed' : '')}><span>${k.label}</span>
+            <${Seg} items=${['off', 'on']} value=${vals[k.v] === k.on ? 'on' : 'off'} onChange=${(x) => setLook({ ...look, vars: { ...look.vars, [k.v]: x === 'on' ? k.on : k.off } })}/><b></b></label>`
+        : html`<label key=${k.v} class=${'knob' + (k.v.endsWith('-h') ? ' hue' : '') + (look.vars[k.v] != null ? ' changed' : '')}>
         <span>${k.label}</span><input type="range" min=${k.min} max=${k.max} step=${k.step} value=${vals[k.v] ?? 0} onChange=${(e) => set(k, e.target.value)}/><b>${vals[k.v] ?? ''}${k.unit || ''}</b></label>`)}</div>`)}
       <div class="board-actions">
         <${Gem} label=${ok ? 'Copied' : 'Copy theme CSS'} tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); copy(css); setOk(true); setTimeout(() => setOk(false), 1200); }}/>
@@ -145,7 +151,7 @@ function Board({ look, setLook }) {
       </div>
       <pre class="code" style=${{ marginTop: '14px', borderRadius: '8px' }}>${css}</pre>
     <//>
-    <${Orn} className="preview" lit sheen deco>
+    <${Orn} className="preview" lit sheen deco><${Guilloche} className="guilloche pv-g"/>
       <div class="pv-row"><${Logo}/><${Badge} kind="new"/><${Badge} kind="hot"/><${Badge} kind="metal">VIP<//></div>
       <div class="pv-grid"><div style=${{ display: 'grid', gap: '16px', justifyItems: 'start' }}>
           <div class="eyebrow">Welcome to the court</div>
@@ -206,7 +212,7 @@ function App() {
           <p>Presets side by side. Each card sets <code>data-theme</code> on itself — tokens recompute locally. Click to apply.</p>
           <div class="themes">${THEMES.map((t) => html`<div key=${t.id} data-theme=${t.id} class=${'tcard' + (look.theme === t.id ? ' on' : '')} onClick=${() => setLook({ theme: t.id, vars: {} })}>
             <div class="nm"><${Crown} size=${30}/><span class="metal-text">${t.name}</span></div><div class="nt">${t.note}</div>
-            <div class="row2"><${Art} hue=${t.id === 'royal' ? 30 : t.id === 'elven' ? 165 : 285} framed><${Emblem} k=${t.id === 'royal' ? 'dragon-head' : t.id === 'elven' ? 'unicorn' : 'crystal-ball'}/><//>
+            <div class="row2"><${Art} hue=${{ noir: 40, royal: 30, elven: 165, arcane: 285 }[t.id]} framed><${Emblem} k=${{ noir: 'chess-knight', royal: 'dragon-head', elven: 'unicorn', arcane: 'crystal-ball' }[t.id]}/><//>
               <div style=${{ display: 'grid', gap: '10px', justifyItems: 'start' }}><${Gem} label="Play" size="sm"/><div style=${{ display: 'flex', gap: '6px' }}><${Badge} kind="new"/><${Badge} kind="hot"/></div></div></div>
             <${VipBar} pct=${70}/>
           </div>`)}</div>
@@ -219,7 +225,7 @@ function App() {
         </section>
 
         <section class="grp" id="type"><h2><${Diamond}/>Typography</h2>
-          <p>Three roles: <code>--f-logo</code>, <code>--f-head</code>, <code>--f-body</code>. Themes may swap them (Elven → Uncial Antiqua + Cormorant SC, Arcane → Almendra SC).</p>
+          <p>Three roles: <code>--f-logo</code>, <code>--f-head</code>, <code>--f-body</code>. Themes may swap them (Noir → Cinzel + Cormorant SC, Royal → Cinzel Decorative + Cinzel, Elven → Uncial Antiqua, Arcane → Almendra SC).</p>
           <${Orn} flat><div style=${{ padding: '8px 20px' }}>
             <div class="type-row"><small>--f-logo · 900</small><div class="metal-text" style=${{ font: '900 44px/1 var(--f-logo)' }}>Regnum</div></div>
             <div class="type-row"><small>--f-head · 800</small><div style=${{ font: '800 32px/1.1 var(--f-head)' }}>100% up to €500</div></div>

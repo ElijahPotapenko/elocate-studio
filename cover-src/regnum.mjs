@@ -24,8 +24,8 @@ await shot('.profile', 'profile');
 await shot('.game', 'game1', 0); await shot('.game', 'game2', 1); await shot('.game', 'game3', 3);
 await shot('.stats .meter', 'mult', 0);
 // колесо — без фона героя (прозрачный PNG)
-await p.addStyleTag({ content: 'body,.hero,.hero .orn,.hero .in{background:transparent!important} .hero{filter:none!important} .hero .orn::after{display:none!important} body::before,body::after,.dust,.castle,.wheel-glow,.hero .cr{display:none!important} .wheel{filter:drop-shadow(0 18px 28px rgb(0 0 0 / .7))!important}' });   // своё зарево колеса резалось краем вырезки — на обложке его даёт фон
-await p.click('.spin-btn'); await p.waitForTimeout(4800);                                   // остановилось на призе — с плашкой выигрыша
+await p.addStyleTag({ content: 'body,.hero,.hero .orn,.hero .in{background:transparent!important} .hero{filter:none!important} .hero .orn::after{display:none!important} body::before,body::after,.dust,.castle,.wheel-glow,.hero .cr,.guilloche,.hero .in::after{display:none!important} .hero .wheel-wrap{padding-top:22px} .wheel{filter:drop-shadow(0 18px 28px rgb(0 0 0 / .7))!important}' });   // своё зарево колеса резалось краем вырезки — на обложке его даёт фон
+await p.click('.spin-btn'); await p.waitForTimeout(8000);                                   // остановилось на призе — с плашкой выигрыша
 await shot('.wheel-wrap', 'wheel');
 await p.close();
 

@@ -4,43 +4,75 @@
       сила свечения, срезы углов, шрифты. Тема = набор ручек. Лаба (lab/) крутит именно их.
    2) ВЫВОДЫ — все цвета/градиенты/свечения вычисляются из ручек. Компоненты (components.css)
       берут ТОЛЬКО выводы: ни одного «голого» oklch в компонентах.
-   Новая тема = блок [data-theme="…"] с ручками. Ничего больше трогать не нужно.
+   Новая тема = блок [data-theme="…"] со ВСЕМИ ручками (берите блок noir/royal за образец).
    ════════════════════════════════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&family=Uncial+Antiqua&family=Almendra+SC&family=Cormorant+SC:wght@600;700&display=swap');
 
-/* ── 1. РУЧКИ: тема по умолчанию — Royal (королевская ночь: золото, рубин, шоколадно-чёрный) ── */
-:root, [data-theme="royal"]{
-  --metal-h: 82;   --metal-c: .11;     /* металл рамок/текста: 82 = золото, 210 = серебро-лёд, 95 = лунное золото */
-  --accent-h: 27;  --accent-c: .22;    /* действие (кнопки, NEW, сектора колеса): 27 = рубин */
-  --fire-h: 45;                        /* второй тон акцента (низ→верх кнопки) */
-  --gem-h: 15;                         /* камушки на концах кнопки */
-  --surface-h: 32; --surface-c: .013;  /* тон фона/панелей: почти чёрный с подтоном */
-  --pos-h: 158;    --info-h: 250;      --magic-h: 300;   /* сигналы: «горячее/плюс», «инфо», «магия» */
-  --glow: 1;                           /* общая сила свечений: 0 — матово, 1 — как задумано, 1.6 — неон */
-  --cut: 12px;                         /* срез углов у панелей */
-  --ornament: .8;                      /* видимость золотых завитков в углах */
-  --f-logo: 'Cinzel Decorative', serif;
-  --f-head: 'Cinzel', serif;
+/* ── 1. РУЧКИ. Общие (не зависят от темы) ── */
+:root{
   --f-body: 'Manrope', system-ui, sans-serif;
   --ease: cubic-bezier(.22,1,.36,1);
   --dur-fast: .2s; --dur: .35s; --dur-slow: .6s;
 }
-
-/* ── Темы-черновики для фэнтези-поиска (крутить в лабе, лучшее — закрепить здесь) ── */
-[data-theme="elven"]{   /* Эльфийский лес: лунное серебро-золото, изумруд, глубокая хвоя */
+/* ── Тема по умолчанию — NOIR: дорогой минимализм. Почти чёрный, шампань-латунь, бордо.
+   Без свечений и теней (--glow:0, --depth:0), эффекты выключены (--fx:none — не рисуются вовсе),
+   вместо них — фактура: зерно, шлифованный металл, гравировка (--texture). ── */
+:root, [data-theme="noir"]{
+  --metal-h: 78;   --metal-c: .055;    /* металл: 82 = золото, 78/.055 = шампань-латунь, 215/.05 = серебро-лёд */
+  --accent-h: 22;  --accent-c: .14;    /* действие: 22/.14 = бордо, 27/.22 = рубин */
+  --accent-l: -17%;                    /* светлота акцента: минус — глубже (бордо вместо красного) */
+  --fire-h: 30;    --gem-h: 30;
+  --surface-h: 70; --surface-c: .003;  /* тон фона: почти нейтральный чёрный */
+  --surface-l: -3.5%;                  /* светлота всех поверхностей: минус — темнее */
+  --pos-h: 150;    --info-h: 70;       --magic-h: 30;   --sig-c: .09;   /* сигналы и их насыщенность */
+  --art-c: .35;    --art-l: -9%;       /* обложки игр: насыщенность (×) и светлота (±) */
+  --glow: 0;                           /* свечения: 0 — нет, 1 — как в Royal, 1.6 — неон */
+  --depth: 0;                          /* тени: 0 — плоско, 1 — парят */
+  --texture: .5;                       /* фактура: зерно, шлифовка металла, гравировка */
+  --fx: none;                          /* декор-эффекты (пыль, блики, ореолы): none | block */
+  --tf-glow: none; --cta-f: none; --cta-f-hover: none;   /* фильтры-свечения: none = браузер их не считает */
+  --cut: 4px;      --ornament: .4;
+  --f-logo: 'Cinzel', serif; --f-head: 'Cormorant SC', serif;
+}
+/* ── Royal: королевская ночь — золото, рубин, свечения, пыль ── */
+[data-theme="royal"]{
+  --metal-h: 82;   --metal-c: .11;
+  --accent-h: 27;  --accent-c: .22; --accent-l: 0%; --fire-h: 45; --gem-h: 15;
+  --surface-h: 32; --surface-c: .013; --surface-l: 0%;
+  --pos-h: 158;    --info-h: 250; --magic-h: 300; --sig-c: .16;
+  --art-c: 1;      --art-l: 0%;
+  --glow: 1; --depth: 1; --texture: .2; --fx: block;
+  --tf-glow: drop-shadow(0 0 12px var(--glow-metal));
+  --cta-f: drop-shadow(0 0 10px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
+  --cta-f-hover: drop-shadow(0 0 12px var(--glow-accent-strong)) drop-shadow(0 0 32px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
+  --cut: 12px; --ornament: .8;
+  --f-logo: 'Cinzel Decorative', serif; --f-head: 'Cinzel', serif;
+}
+/* ── Фэнтези-черновики ── */
+[data-theme="elven"]{   /* Эльфийский лес: лунное серебро-золото, изумруд, хвоя */
   --metal-h: 100; --metal-c: .06;
-  --accent-h: 155; --accent-c: .16; --fire-h: 130; --gem-h: 200;
-  --surface-h: 165; --surface-c: .02;
-  --pos-h: 85; --info-h: 210; --magic-h: 280;
-  --glow: 1.1; --cut: 16px; --ornament: .9;
+  --accent-h: 155; --accent-c: .16; --accent-l: 0%; --fire-h: 130; --gem-h: 200;
+  --surface-h: 165; --surface-c: .02; --surface-l: 0%;
+  --pos-h: 85; --info-h: 210; --magic-h: 280; --sig-c: .16;
+  --art-c: 1; --art-l: 0%;
+  --glow: 1.1; --depth: 1; --texture: .25; --fx: block;
+  --tf-glow: drop-shadow(0 0 12px var(--glow-metal));
+  --cta-f: drop-shadow(0 0 10px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
+  --cta-f-hover: drop-shadow(0 0 12px var(--glow-accent-strong)) drop-shadow(0 0 32px var(--glow-accent));
+  --cut: 16px; --ornament: .9;
   --f-logo: 'Uncial Antiqua', serif; --f-head: 'Cormorant SC', serif;
 }
-[data-theme="arcane"]{  /* Тайная магия: серебро-лёд, аметист, индиго-ночь */
+[data-theme="arcane"]{  /* Тайная магия: серебро-лёд, аметист, индиго */
   --metal-h: 215; --metal-c: .05;
-  --accent-h: 300; --accent-c: .2; --fire-h: 330; --gem-h: 195;
-  --surface-h: 285; --surface-c: .025;
-  --pos-h: 190; --info-h: 250; --magic-h: 330;
-  --glow: 1.25; --cut: 10px; --ornament: .7;
+  --accent-h: 300; --accent-c: .2; --accent-l: 0%; --fire-h: 330; --gem-h: 195;
+  --surface-h: 285; --surface-c: .025; --surface-l: 0%;
+  --pos-h: 190; --info-h: 250; --magic-h: 330; --sig-c: .16;
+  --art-c: 1; --art-l: 0%;
+  --glow: 1.25; --depth: 1; --texture: .25; --fx: block;
+  --tf-glow: drop-shadow(0 0 12px var(--glow-metal));
+  --cta-f: drop-shadow(0 0 10px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
+  --cta-f-hover: drop-shadow(0 0 12px var(--glow-accent-strong)) drop-shadow(0 0 32px var(--glow-accent));
+  --cut: 10px; --ornament: .7;
   --f-logo: 'Almendra SC', serif; --f-head: 'Cinzel', serif;
 }
 
@@ -48,13 +80,13 @@
    включить и на отдельном блоке (лаба ставит темы рядом), выводы пересчитаются на месте ── */
 :root, [data-theme]{
   /* поверхности */
-  --bg:        oklch(8.5% var(--surface-c) var(--surface-h));
-  --bg-2:      oklch(12% calc(var(--surface-c) * 1.1) var(--surface-h));
-  --well:      oklch(7% var(--surface-c) var(--surface-h));
-  --panel:     oklch(11.5% var(--surface-c) calc(var(--surface-h) + 3));
-  --panel-2:   oklch(15% calc(var(--surface-c) * 1.25) calc(var(--surface-h) + 6));
-  --panel-hi:  oklch(20% calc(var(--surface-c) * 1.5) calc(var(--surface-h) + 8));
-  --panel-tint:oklch(20% calc(var(--surface-c) * 2.3) calc(var(--surface-h) + 13) / .9);
+  --bg:        oklch(calc(8.5% + var(--surface-l)) var(--surface-c) var(--surface-h));
+  --bg-2:      oklch(calc(12% + var(--surface-l)) calc(var(--surface-c) * 1.1) var(--surface-h));
+  --well:      oklch(calc(7% + var(--surface-l)) var(--surface-c) var(--surface-h));
+  --panel:     oklch(calc(11.5% + var(--surface-l)) var(--surface-c) calc(var(--surface-h) + 3));
+  --panel-2:   oklch(calc(15% + var(--surface-l)) calc(var(--surface-c) * 1.25) calc(var(--surface-h) + 6));
+  --panel-hi:  oklch(calc(20% + var(--surface-l)) calc(var(--surface-c) * 1.5) calc(var(--surface-h) + 8));
+  --panel-tint:oklch(calc(20% + var(--surface-l)) calc(var(--surface-c) * 2.3) calc(var(--surface-h) + 13) / .9);
   /* текст */
   --ink:   oklch(95% .02 var(--metal-h));
   --muted: oklch(72% .03 calc(var(--metal-h) - 12));
@@ -73,17 +105,17 @@
   --frame-grad:  linear-gradient(160deg, oklch(86% calc(var(--metal-c) * .9) calc(var(--metal-h) + 3)), oklch(42% calc(var(--metal-c) * .55) calc(var(--metal-h) - 22)) 32%,
                  oklch(28% calc(var(--metal-c) * .3) calc(var(--metal-h) - 32)) 55%, oklch(72% calc(var(--metal-c) * .9) calc(var(--metal-h) - 4)) 100%);
   /* акцент (действие) */
-  --accent:      oklch(58% var(--accent-c) var(--accent-h));
-  --accent-2:    oklch(69% calc(var(--accent-c) * .9) var(--fire-h));
-  --accent-deep: oklch(46% calc(var(--accent-c) * .86) var(--accent-h));
-  --accent-dark: oklch(22% calc(var(--accent-c) * .4) var(--accent-h));
+  --accent:      oklch(calc(58% + var(--accent-l)) var(--accent-c) var(--accent-h));
+  --accent-2:    oklch(calc(69% + var(--accent-l)) calc(var(--accent-c) * .9) var(--fire-h));
+  --accent-deep: oklch(calc(46% + var(--accent-l) * .7) calc(var(--accent-c) * .86) var(--accent-h));
+  --accent-dark: oklch(calc(22% + var(--accent-l) * .3) calc(var(--accent-c) * .4) var(--accent-h));
   --accent-grad: linear-gradient(180deg, var(--accent-2), var(--accent) 70%);
   --gem:         oklch(74% .1 var(--gem-h));
   --gem-grad:    radial-gradient(circle at 30% 30%, oklch(98% .03 var(--gem-h)), var(--gem) 45%, oklch(45% .15 var(--gem-h)));
   /* сигналы */
-  --pos:   oklch(70% .16 var(--pos-h));   --on-pos: oklch(20% .05 var(--pos-h));
-  --info:  oklch(64% .14 var(--info-h));
-  --magic: oklch(60% .14 var(--magic-h));
+  --pos:   oklch(70% var(--sig-c) var(--pos-h));   --on-pos: oklch(20% .05 var(--pos-h));
+  --info:  oklch(64% calc(var(--sig-c) * .9) var(--info-h));
+  --magic: oklch(60% calc(var(--sig-c) * .9) var(--magic-h));
   /* свечения — все через одну ручку --glow */
   --glow-metal:        color-mix(in oklch, var(--metal) calc(45% * var(--glow)), transparent);
   --glow-metal-soft:   color-mix(in oklch, var(--metal) calc(20% * var(--glow)), transparent);
@@ -92,8 +124,13 @@
   --glow-accent-strong:color-mix(in oklch, var(--accent) calc(95% * var(--glow)), transparent);
   --glow-pos:          color-mix(in oklch, var(--pos) calc(65% * var(--glow)), transparent);
   --glow-gem:          color-mix(in oklch, var(--gem) calc(90% * var(--glow)), transparent);
-  --shade:   oklch(0% 0 0 / .7);
-  --shade-2: oklch(0% 0 0 / .45);
+  --shade:   oklch(0% 0 0 / calc(.7 * var(--depth)));
+  --shade-2: oklch(0% 0 0 / calc(.45 * var(--depth)));
+  /* фактуры */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --metal-tex: repeating-linear-gradient(90deg, oklch(100% 0 0 / calc(.09 * var(--texture))) 0 1px, transparent 1px 2px, oklch(0% 0 0 / calc(.08 * var(--texture))) 2px 3px, transparent 3px 5px);
+  --engrave: repeating-linear-gradient(-45deg, oklch(100% 0 0 / calc(.07 * var(--texture))) 0 1px, transparent 1px 5px);
+  --edge: inset 0 1px 0 oklch(100% 0 0 / calc(.05 + .04 * var(--texture)));   /* гравированная кромка сверху */
   /* фоновый свет страницы */
   --amb-1: color-mix(in oklch, oklch(55% .2 var(--accent-h)) calc(22% * var(--glow)), transparent);
   --amb-2: color-mix(in oklch, oklch(78% .13 var(--metal-h)) calc(14% * var(--glow)), transparent);
