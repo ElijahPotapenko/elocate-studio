@@ -13,7 +13,12 @@ import { viewTransition, initSpotlight, celebrate, revealHeadline, toast } from 
 export { LINE, SUITS, PH, PORTRAITS, BRANDS, html, viewTransition, initSpotlight, celebrate, revealHeadline };
 // Уведомление — одно на всю систему: плашка внизу, иконка по виду. Любое «получилось / выиграл / скоро будет» — только сюда
 const NOTE_ICON = { ok: 'check', win: 'star', info: 'info', wallet: 'wallet', bell: 'bell' };
-export const notify = (text, kind = 'info') => toast(text, { icon: LINE[NOTE_ICON[kind] || 'info'], kind, ms: kind === 'win' ? 3600 : 2800 });
+// выигрыш (kind 'win') — салют вылетает из самой плашки: одно место для радости, а не взрывы по всей странице
+export const notify = (text, kind = 'info', { big = false } = {}) => {
+  const el = toast(text, { icon: LINE[NOTE_ICON[kind] || 'info'], kind, ms: kind === 'win' ? 3600 : 2800 });
+  if (kind === 'win') requestAnimationFrame(() => celebrate(el, { big }));   // кадр спустя — плашка уже на месте
+  return el;
+};
 // заглушка действия демо: ссылка без адреса не прыгает по странице, а честно говорит, что откроется в полной сборке
 const soon = (what, kind = 'info') => (e) => { e.preventDefault(); notify(`${what} opens in the full build`, kind); };
 
@@ -270,9 +275,8 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
     await animate(rot.current - 14, target + 5, { duration: 5.2, ease: [0.16, 0.72, 0.12, 1], onUpdate: paint });              // разгон → торможение с перекатом
     await animate(target + 5, target, { type: 'spring', stiffness: 140, damping: 9, onUpdate: paint });                        // возврат
     rot.current = target; setSpinning(false); setWin(pick); setParty(true);
-    celebrate(wrap.current?.querySelector('.wheel'), { big: /€500|VIP/.test(list[pick].label) });   // салют из центра колеса
     setTimeout(() => setParty(false), 2400);
-    notify(`You won ${list[pick].label}`, 'win');
+    notify(`You won ${list[pick].label}`, 'win', { big: /€500|VIP/.test(list[pick].label) });
     onWin && onWin(list[pick].label);
   }
   const R = 100;
@@ -359,7 +363,7 @@ export const Burger = ({ open, onClick, controls = 'side-nav', label = 'Menu' })
 export const Suit = ({ s = 'spade', w = 16 }) => html`<svg class="suit" width=${w} height=${w} viewBox="0 0 100 100" aria-hidden="true"><path d=${SUITS[s]}/></svg>`;
 // орнамент-разделитель: две линии и ромб
 export const Flourish = ({ w = 70 }) => html`<div class="flourish"><svg width=${w} height="18" viewBox="0 0 70 18" aria-hidden="true"><path class="fl" d="M0 9 H26 M44 9 H70"/><path class="fd" d="M35 1 L41 9 L35 17 L29 9 Z"/></svg></div>`;
-// платёжные методы: настоящие логотипы (Simple Icons), монохромом темы; на ховере — фирменный цвет
+// платёжные методы: настоящие логотипы (Simple Icons) в фирменных цветах на светлой плашке; без ховера — нажимать нечего
 export const PayRow = ({ items = ['visa', 'mastercard', 'ethereum', 'tether', 'bitcoin'] }) => html`<div class="pay" role="list" aria-label="Payment methods">${items.map((k) => html`<span key=${k} class="pay-chip" role="listitem" title=${BRANDS[k].name} aria-label=${BRANDS[k].name} style=${{ '--brand': BRANDS[k].hex }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d=${BRANDS[k].d}/></svg></span>`)}</div>`;
 // Бегущая строка — чистая CSS-анимация (композитор), две копии трека, сдвиг на -50%. Было: rAF-скрипт каждый кадр
 // (VelocityMarquee) — в Firefox каждое изменение заставляло перерисовать всю страницу (простой 9 fps → 49).
@@ -376,7 +380,7 @@ export function HeroBanner({ eyebrow, title, text, pay, cta = 'Join now', second
   ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
   <div class="hero-copy"><div class="hero-top"><span class="eyebrow">${eyebrow}</span>${endsAt && html`<span class="hero-timer"><${Countdown} to=${endsAt} prefix="Ends in "/></span>`}</div>
     <h1 ref=${h1}>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
-    <div class="hero-actions"><${Gem} label=${cta} magnetic onClick=${(e) => { e.preventDefault(); celebrate(e.currentTarget, { big: true }); notify('Bonus claimed — 50% up to €500 is on your balance', 'win'); }}/>${secondary && html`<a class="hero-link" href="#" onClick=${soon(secondary)}>${secondary}</a>`}</div>
+    <div class="hero-actions"><${Gem} label=${cta} magnetic onClick=${(e) => { e.preventDefault(); notify('Bonus claimed — 50% up to €500 is on your balance', 'win', { big: true }); }}/>${secondary && html`<a class="hero-link" href="#" onClick=${soon(secondary)}>${secondary}</a>`}</div>
     ${slides > 1 && html`<div class="dots" aria-label=${`Promo ${slide + 1} of ${slides}`}>${Array.from({ length: slides }, (_, i) => html`<i key=${i} class=${i === slide ? 'on' : ''}></i>`)}</div>`}</div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
 }

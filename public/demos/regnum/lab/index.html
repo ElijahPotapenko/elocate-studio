@@ -150,7 +150,7 @@ function TypeScale() {
       <div class="ts-spec">${specs[r] || ''}</div></div>`)}</div><//>`;
 }
 
-function FxCelebrate() { const r = React.useRef(null); return html`<div ref=${r} style=${{ display: 'flex', gap: '12px', alignItems: 'center' }}><${Gem} label="Celebrate" size="sm" onClick=${(e) => { e.preventDefault(); celebrate(r.current); }}/><${Gem} label="Big win" tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); celebrate(r.current, { big: true }); }}/></div>`; }
+function FxCelebrate() { const r = React.useRef(null); return html`<div ref=${r} style=${{ display: 'flex', gap: '12px', alignItems: 'center' }}><${Gem} label="Celebrate" size="sm" onClick=${(e) => { e.preventDefault(); notify('You won 25 FS', 'win'); }}/><${Gem} label="Big win" tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); notify('You won €500', 'win', { big: true }); }}/></div>`; }
 function FxTitle() { const [k, setK] = useState(0); const ref = React.useRef(null);
   React.useEffect(() => { if (ref.current) { delete ref.current.dataset.revealed; revealHeadline(ref.current); } }, [k]);
   return html`<div style=${{ display: 'grid', gap: '12px', justifyItems: 'start' }}><h2 key=${k} ref=${ref} class="t-display" style=${{ margin: 0 }}>50% up to <b class="metal-text">€500</b><br/>+ 100 free spins</h2><${GhostButton} icon="casino" label="Replay" onClick=${(e) => { e.preventDefault(); setK(k + 1); }}/></div>`; }
@@ -370,7 +370,7 @@ function App() {
           <${Story} id="fx-spot" title="Effect · Spotlight" note="light follows the cursor inside the card and on its rim (Linear/Vercel pattern) — only the hovered card repaints; add the spot prop to any Orn" code=${'initSpotlight();   // once per page\n<${Orn} spot>…<//>   // GameCard, Stat, Wallet, Meter, VipCard, Perk have it'}>
             <div class="mini-games">${GAMES.slice(0, 3).map((g) => html`<${GameCard} key=${g.name} game=${g}/>`)}</div>
           <//>
-          <${Story} id="fx-confetti" title="Effect · Celebrate" note="canvas-confetti (MIT, ~6 KB, loaded on demand) in theme metal + accent; fires on a wheel win, bigger for €500 / VIP+" code=${'celebrate(element, { big: true })'}>
+          <${Story} id="fx-confetti" title="Notification · Win" note="every message is one bottom plate (notify); a win bursts canvas-confetti (MIT, ~6 KB, on demand) out of the plate itself, bigger for €500 / VIP+" code=${"notify('You won €500', 'win', { big: true })"}>
             <${FxCelebrate}/>
           <//>
           <${Story} id="fx-title" title="Effect · Headline reveal" note="GSAP SplitText (free since 2025): words rise from line masks once on mount, markup restored after" code=${'revealHeadline(h1Element)   // HeroBanner does it'}>

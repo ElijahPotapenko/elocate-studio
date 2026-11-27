@@ -359,9 +359,9 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .flourish{display:flex; justify-content:center; margin:-4px 0 12px; opacity:.85}
 .flourish .fl{fill:none; stroke:var(--metal-dim); stroke-width:1} .flourish .fd{fill:var(--metal)}
 .pay{display:flex; gap:8px; flex-wrap:wrap}
-.pay-chip{display:grid; place-items:center; width:52px; height:34px; border-radius:8px; background:color-mix(in oklch, var(--panel-hi) 70%, transparent);
-  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); transition:box-shadow var(--dur-fast), background var(--dur-fast)}
-.pay-chip svg{width:24px; height:24px; fill:var(--ink); opacity:.88; transition:fill var(--dur-fast), opacity var(--dur-fast)}
+.pay-chip{display:grid; place-items:center; width:52px; height:34px; border-radius:8px; background:var(--ink);   /* светлая плашка: фирменные цвета (тёмный Visa, серый Ethereum) читаются */
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
+.pay-chip svg{width:24px; height:24px; fill:var(--brand)}   /* логотипы — в фирменных цветах по умолчанию */
 
 
 /* ── HeroBanner (паттерн) ── */

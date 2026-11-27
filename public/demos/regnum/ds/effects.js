@@ -44,6 +44,7 @@ export function toast(text, { icon = '', kind = 'info', ms = 2800 } = {}) {
   toastEl.querySelector('.tt-tx').textContent = text;
   toastEl.classList.remove('on'); void toastEl.offsetWidth; toastEl.classList.add('on');
   clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), ms);
+  return toastEl;
 }
 
 /* ── Цвета темы → hex (canvas-confetti понимает только hex/rgb) ── */
