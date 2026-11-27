@@ -172,10 +172,27 @@ export const SectionHead = ({ title }) => html`<div class="sec-head"><${Diamond}
 export const Art = ({ hue, framed, className = '', children }) => html`<div class=${'art ' + (framed ? 'framed ' : '') + className} style=${{ '--art-h': hue }}>${children}</div>`;
 
 /* ───────────────────────────── Навигация ───────────────────────────── */
-export const NavItem = ({ icon, label, on, href = '#' }) => html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
+// soon — раздел ещё закрыт: бейдж «Soon», клик не уводит, а говорит об этом уведомлением (единый notify)
+export const NavItem = ({ icon, label, on, href = '#', soon: closed }) => closed
+  ? html`<a class="soon-item" href=${href} onClick=${(e) => { e.preventDefault(); notify(`${label} opens soon — the court is still preparing it`, 'info'); }}><span class="ic"><${Icon} n=${icon}/></span>${label}<${Badge} kind="metal" className="nav-soon">Soon<//></a>`
+  : html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
 // клик по игре: в демо — подсказка, что игра откроется в полной сборке (href="#" раньше уводил на главную)
 const openGame = (game) => soon(game.name);
 export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#" onClick=${openGame(game)}><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
+// Результат поиска — длинная карточка: эмблема · название и студия/тип · бейдж · RTP · «Play». Клик — открыть игру
+const TYPE_NAME = { slots: 'Slots', table: 'Table game', live: 'Live table' };
+export const ResultRow = ({ game }) => html`<a class="result" href="#" role="option" onClick=${openGame(game)}>
+  <span class="r-art art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>
+  <span class="r-main"><span class="r-name">${game.name}</span><span class="r-meta">${game.studio || 'Regnum Originals'}${game.type ? ' · ' + TYPE_NAME[game.type] : ''}</span></span>
+  ${game.badge && html`<${Badge} kind=${game.badge}/>`}<span class="r-rtp">RTP <b>${game.rtp}</b></span><span class="r-go">Play</span></a>`;
+// Поиск по всей библиотеке — панель под полем, раздел не важен: ищет по названию, студии и типу.
+// Видна, пока в поле есть текст и фокус внутри (клик мимо — прячет, Esc — очищает)
+export function SearchResults({ q, items, inline = false }) {   // inline — панель в потоке (лаба), без всплытия
+  const qq = q.trim().toLowerCase(); if (!qq) return null;
+  const list = items.filter((g) => [g.name, g.studio || 'Regnum Originals', TYPE_NAME[g.type] || ''].join(' ').toLowerCase().includes(qq));
+  return html`<div class=${'search-pop' + (inline ? ' inline' : '')} role="listbox" aria-label="Search results"><div class="sp-head">${list.length ? `${list.length} ${list.length === 1 ? 'game' : 'games'} for “${q.trim()}”` : 'No results'}</div>
+    ${list.length ? list.map((g) => html`<${ResultRow} key=${g.name} game=${g}/>`) : html`<div class="sp-empty">Nothing matches “${q.trim()}”. Try “royal”, “slots” or “live”.</div>`}</div>`;
+}
 export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
 
 /* ───────────────────────────── Карточки и данные ───────────────────────────── */

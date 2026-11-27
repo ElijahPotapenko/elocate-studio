@@ -38,7 +38,7 @@ test.describe('Regnum design system', () => {
     });
   }
 
-  test('sidebar sections: hash routes, active item, back button, search jumps to casino', async ({ page }) => {
+  test('sidebar sections: hash routes, active item, back button, closed section notice, global search', async ({ page }) => {
     test.slow();
     await page.goto('/demos/regnum/index.html?fps=0', { waitUntil: 'networkidle' });
     await page.waitForSelector('#rg-loader', { state: 'detached' });
@@ -53,9 +53,21 @@ test.describe('Regnum design system', () => {
     await page.goBack();
     await expect(page.locator('.side .nav a.on')).toHaveText('Casino');
     await page.goto('/demos/regnum/index.html?fps=0#/hall'); await page.waitForSelector('#rg-loader', { state: 'detached' });
+    // закрытый раздел: не уводит, говорит уведомлением
+    await page.click('.side .nav a:has-text("Live casino")');
+    await expect(page.locator('.rg-toast.on')).toContainText('Live casino opens soon');
+    await expect(page).toHaveURL(/#\/hall$/);
+    // поиск — по всей библиотеке, раздел не меняется; результаты — длинные карточки; Esc очищает
     await page.fill('.top .field input', 'dra');
-    await expect(page).toHaveURL(/#\/casino$/);
-    await expect(page.locator('.games .game')).toHaveCount(1);
+    await expect(page).toHaveURL(/#\/hall$/);
+    await expect(page.locator('.search-pop .result')).toHaveCount(1);
+    await expect(page.locator('.search-pop .result .r-name')).toHaveText("Dragon's Hoard");
+    await page.locator('.search-pop .result').click();
+    await expect(page.locator('.rg-toast.on')).toContainText("Dragon's Hoard opens in the full build");
+    await page.fill('.top .field input', 'qqq');
+    await expect(page.locator('.sp-empty')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.top .field input')).toHaveValue('');
   });
 
   test('mobile: burger opens the sidebar drawer; nav / veil / Esc close it', async ({ page }) => {

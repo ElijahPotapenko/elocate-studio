@@ -69,7 +69,7 @@ footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--
   .side-veil{display:block; position:fixed; inset:0; z-index:55; background:oklch(0% 0 0 / .55); opacity:0; pointer-events:none; transition:opacity .3s var(--ease)}
   .side-veil.on{opacity:1; pointer-events:auto}
   html.menu-open{overflow:hidden}
-  .top{flex-wrap:wrap; gap:10px} .top .field{order:5; flex-basis:100%} .um-name{display:none} .top .logo{margin-right:auto}
+  .top{flex-wrap:wrap; gap:10px} .top .search{order:5; flex-basis:100%} .um-name{display:none} .top .logo{margin-right:auto}
 }
 @media (max-width: 640px){
   .top .seg{display:none} .bc-k{display:none} .links{display:none} .um-bell{display:none} .top{gap:8px}
@@ -100,7 +100,7 @@ footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
-import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
+import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, SearchResults, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
   Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight } from './ds/components.js';
 calmScroll(); initSpotlight();
 
@@ -126,7 +126,8 @@ function Top({ q, setQ, route, menu, setMenu }) {
     <span class="top-burger"><${Burger} open=${menu} onClick=${() => setMenu(!menu)}/></span>
     <${Logo}/>
     <${Seg} items=${['sport', 'casino']} value=${route === 'sports' ? 'sport' : 'casino'} onChange=${(t) => go(t === 'sport' ? 'sports' : 'casino')}/>
-    <${Field} placeholder="Search games…" value=${q} onChange=${(v) => { setQ(v); if (v) requestAnimationFrame(() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }}/>
+    <div class="search" onKeyDown=${(e) => { if (e.key === 'Escape') { setQ(''); e.currentTarget.querySelector('input')?.blur(); } }}>
+      <${Field} placeholder="Search games…" value=${q} onChange=${setQ}/><${SearchResults} q=${q} items=${GAMES}/></div>
     <${BalanceChip} amount="€12,480"/>
     <${UserMenu} name="Lady Morgane" unread=${3}/>
     <div class="links"><a class="back lab" href="lab/index.html">✦ Lab</a><a class="back" href="/#work">← Elocate</a></div>
@@ -138,7 +139,7 @@ function Side({ route, open, close }) {
   return html`<${React.Fragment}><div class=${'side-veil' + (open ? ' on' : '')} onClick=${close} aria-hidden="true"></div>
   <aside class=${'side' + (open ? ' open' : '')} id="side-nav" onClick=${(e) => { if (e.target.closest('a')) close(); }}><${Orn} deco>
     <${Flourish}/>
-    <nav class="nav" aria-label="Sections">${ROUTES.map(([k, i, l]) => html`<${NavItem} key=${k} icon=${i} label=${l} href=${'#/' + k} on=${route === k}/>`)}</nav>
+    <nav class="nav" aria-label="Sections">${ROUTES.map(([k, i, l, closed]) => html`<${NavItem} key=${k} icon=${i} label=${l} href=${'#/' + k} on=${route === k} soon=${closed}/>`)}</nav>
     <${SubHead}>New games<//><div class="glist">${fresh.map((g) => html`<${GameRow} key=${g.name} game=${g} kind="new"/>`)}</div>
     <${SubHead}>Popular<//><div class="glist">${hot.map((g) => html`<${GameRow} key=${g.name} game=${g} kind="hot"/>`)}</div>
     <nav class="nav" style=${{ marginTop: '16px' }}><${NavItem} icon="support" label="Royal support"/></nav>
@@ -163,8 +164,9 @@ const Stats = () => html`<div class="stats">
 </div>`;
 
 // ── разделы (левое меню): адрес #/раздел — работает «назад» в браузере ──
-const ROUTES = [['hall', 'home', 'Main hall'], ['casino', 'casino', 'Casino'], ['live', 'live', 'Live casino'], ['sports', 'sports', 'Sports'], ['promos', 'promo', 'Promotions']];
-const routeOf = () => { const r = location.hash.replace(/^#\/?/, ''); return ROUTES.some(([k]) => k === r) ? r : 'hall'; };
+// четвёртое поле — раздел ещё закрыт: в меню с бейджем Soon, клик — уведомление; прямой адрес ведёт в главный зал
+const ROUTES = [['hall', 'home', 'Main hall'], ['casino', 'casino', 'Casino'], ['live', 'live', 'Live casino', true], ['sports', 'sports', 'Sports'], ['promos', 'promo', 'Promotions']];
+const routeOf = () => { const r = location.hash.replace(/^#\/?/, ''); return ROUTES.some(([k, , , closed]) => k === r && !closed) ? r : 'hall'; };
 function useRoute() {
   const [r, setR] = useState(routeOf);
   React.useEffect(() => { const on = () => viewTransition(() => { setR(routeOf()); scrollTo(0, 0); }); addEventListener('hashchange', on); return () => removeEventListener('hashchange', on); }, []);
@@ -173,15 +175,13 @@ function useRoute() {
 const go = (r) => { if (routeOf() !== r) location.hash = '#/' + r; };
 
 const TYPES = ['all', 'slots', 'table', 'live'];
-function Games({ q, setQ, title = 'Royal games', fixedType }) {
+function Games({ title = 'Royal games', fixedType }) {
   const [type0, setType] = useState('all'); const type = fixedType || type0;
-  const qq = q.trim().toLowerCase();
-  const list = GAMES.filter((g) => (type === 'all' || g.type === type) && (!qq || g.name.toLowerCase().includes(qq)));
+  const list = GAMES.filter((g) => type === 'all' || g.type === type);
   return html`<section id="games" class="games-sec">
     <${Reveal}><${SectionHead} title=${title}/><//>
-    <div class="games-bar">${fixedType ? html`<span></span>` : html`<${Seg} items=${TYPES} value=${type} onChange=${setType}/>`}<span class="games-count">${list.length} of ${GAMES.length}${qq ? html` · “${q.trim()}”` : ''}</span></div>
-    <div class="games">${list.length ? list.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${GameCard} game=${g}/><//>`)
-      : html`<div class="empty">No games match “${q.trim()}” in ${type === 'all' ? 'the library' : type}. <a href="#" onClick=${(e) => { e.preventDefault(); setQ(''); setType('all'); }} style=${{ textDecoration: 'underline' }}>Clear filters</a></div>`}</div>
+    <div class="games-bar">${fixedType ? html`<span></span>` : html`<${Seg} items=${TYPES} value=${type} onChange=${setType}/>`}<span class="games-count">${list.length} of ${GAMES.length}</span></div>
+    <div class="games">${list.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${GameCard} game=${g}/><//>`)}</div>
   </section>`;
 }
 
@@ -193,11 +193,10 @@ const Hall = () => html`
   <${Reveal}><div class="row"><${Profile}/><${Stats}/></div><//>
   <${Reveal}><${SectionHead} title="Your wallets"/><//>
   <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>`;
-const Casino = ({ q, setQ }) => html`
+const Casino = () => html`
   <${Reveal}><${WheelPanel} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
   <${WinsTicker} wins=${WINS}/>
-  <${Games} q=${q} setQ=${setQ}/>`;
-const Live = ({ q, setQ }) => html`<${Games} q=${q} setQ=${setQ} title="Live casino" fixedType="live"/>`;
+  <${Games}/>`;
 const Sports = () => html`<${Reveal}><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon"
   text="Live odds, tournaments and crown points on every match. Until then — the treasury is open at the tables." cta="Go to casino" href="#/casino"
   art="assets/sports-hoard.webp" artMobile="assets/sports-hoard-m.webp" artAlt="Forest creatures guarding a royal treasure chest"/><//>`;
@@ -215,14 +214,13 @@ function App() {
     document.documentElement.classList.toggle('menu-open', menu);
     const k = (e) => { if (e.key === 'Escape') setMenu(false); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k);
   }, [menu]);
-  const setSearch = (v) => { setQ(v); const now = routeOf(); if (v && now !== 'casino' && now !== 'live') go('casino'); };   // по текущему адресу: состояние может отставать на время перехода
   return html`<${React.Fragment}>
     <${Dust}/>
     <div class="app">
-      <${Top} q=${q} setQ=${setSearch} route=${route} menu=${menu} setMenu=${setMenu}/>
+      <${Top} q=${q} setQ=${setQ} route=${route} menu=${menu} setMenu=${setMenu}/>
       <${Side} route=${route} open=${menu} close=${() => setMenu(false)}/>
       <main class="main" key=${route}>
-        ${route === 'hall' ? html`<${Hall}/>` : route === 'casino' ? html`<${Casino} q=${q} setQ=${setSearch}/>` : route === 'live' ? html`<${Live} q=${q} setQ=${setSearch}/>`
+        ${route === 'hall' ? html`<${Hall}/>` : route === 'casino' ? html`<${Casino}/>`
           : route === 'sports' ? html`<${Sports}/>` : html`<${Promos}/>`}
       </main>
     </div>

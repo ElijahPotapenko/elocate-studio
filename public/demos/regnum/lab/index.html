@@ -120,7 +120,7 @@ import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline, notify } from '../ds/components.js';
 calmScroll(); initSpotlight();
-import { html, PH, LINE, SUITS, ComingSoon, Burger, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -159,7 +159,7 @@ function BurgerDemo() { const [o, setO] = useState(false); return html`<${Burger
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger'];
+  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -336,8 +336,13 @@ function App() {
             <div class="w-360"><${Tabs} items=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]} value=${tab} onChange=${setTab}/></div>
           <//>
 
-          <${Story} id="nav" title="NavItem · GameRow · SubHead" note="sidebar rows with chevron cut" code=${'<${NavItem} icon="casino" label="Casino" on/>\n<${GameRow} game={g} kind="new"/>'}>
-            <div class="w-280"><nav class="nav"><${NavItem} icon="home" label="Main hall"/><${NavItem} icon="casino" label="Casino" on/><${NavItem} icon="live" label="Live casino"/></nav></div>
+          <${Story} id="search" title="SearchResults · ResultRow" note="search across the whole library, whatever the section: a panel under the field with long result cards (emblem · name · studio and type · badge · RTP · Play). Shows while the field has text and focus; Esc clears"
+            code=${'<div class="search"><${Field} value={q} onChange={setQ}/><${SearchResults} q={q} items={GAMES}/></div>\n<${ResultRow} game={g}/>'}>
+            <div class="w-640" style=${{ width: '100%', maxWidth: '640px' }}><${SearchResults} q="o" items=${GAMES} inline/></div>
+          <//>
+
+          <${Story} id="nav" title="NavItem · GameRow · SubHead" note="sidebar rows with chevron cut · soon = a section not open yet: Soon badge, click shows a notification instead of navigating" code=${'<${NavItem} icon="casino" label="Casino" on/>\n<${NavItem} icon="live" label="Live casino" soon/>\n<${GameRow} game={g} kind="new"/>'}>
+            <div class="w-280"><nav class="nav"><${NavItem} icon="home" label="Main hall"/><${NavItem} icon="casino" label="Casino" on/><${NavItem} icon="live" label="Live casino" soon/></nav></div>
             <div class="w-280"><${SubHead}>New games<//><div class="glist"><${GameRow} game=${GAMES[0]} kind="new"/><${GameRow} game=${GAMES[3]} kind="new"/></div>
               <${SubHead}>Popular<//><div class="glist"><${GameRow} game=${GAMES[1]} kind="hot"/></div></div>
           <//>

@@ -578,3 +578,32 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .gem .gem-sep{width:5px; height:5px; transform:rotate(45deg); background:currentColor; opacity:.5; flex:none}
 .spin-btn span{display:flex; flex-direction:column; align-items:center; gap:2px}
 .spin-btn .countdown{font:var(--t-micro); letter-spacing:var(--tr-micro); font-variant-numeric:tabular-nums; white-space:nowrap}
+
+/* ── Поиск: панель результатов под полем (вся библиотека, раздел не важен) ── */
+.search{position:relative; flex:1; display:flex; min-width:0}
+.search .field{flex:1}
+.search-pop{position:absolute; top:calc(100% + 8px); left:0; width:max(100%, min(640px, calc(100vw - 32px))); z-index:60;   /* шире поля: длинной карточке нужен простор */
+  display:none; flex-direction:column; gap:6px; padding:10px;
+  max-height:min(70vh, 560px); overflow:auto; border-radius:12px; corner-shape:bevel; background:color-mix(in oklch, var(--panel) 97%, transparent);
+  box-shadow:inset 0 0 0 1px var(--metal-2), 0 24px 60px var(--shade), 0 0 0 4px color-mix(in oklch, var(--bg) 70%, transparent)}
+.search:focus-within .search-pop, .search-pop.inline{display:flex}
+.search-pop.inline{position:static; width:100%}
+.sp-head{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint); padding:2px 6px 4px}
+.sp-empty{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--muted); padding:18px 8px; text-align:center}
+.result{display:flex; align-items:center; gap:14px; padding:8px 14px 8px 8px; border-radius:10px; background:color-mix(in oklch, var(--panel-hi) 55%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 25%, transparent); transition:background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease)}
+.result:hover, .result:focus-visible{outline:none; background:color-mix(in oklch, var(--panel-hi) 95%, transparent); box-shadow:inset 0 0 0 1px var(--metal-2)}
+.result .r-art{width:56px; aspect-ratio:1; flex:none; border-radius:8px}
+.result .r-art .emb{width:62%}
+.result .r-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
+.result .r-name{font:var(--t-subtitle); letter-spacing:var(--tr-subtitle); color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.result .r-meta{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.result .r-rtp{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--muted); white-space:nowrap} .result .r-rtp b{color:var(--metal)}
+.result .r-go{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; color:var(--metal); padding:7px 12px; border-radius:8px;
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 45%, transparent); transition:color var(--dur-fast), box-shadow var(--dur-fast)}
+.result:hover .r-go{color:var(--metal-hi); box-shadow:inset 0 0 0 1px var(--metal)}
+@media (max-width: 640px){ .search-pop{width:100%} .result .r-rtp, .result .badge{display:none} .result{gap:10px} .result .r-art{width:46px} }
+
+/* раздел, который ещё закрыт: тише обычного пункта, с бейджем Soon; клик — уведомление */
+.nav .soon-item{color:var(--faint)} .nav .soon-item:hover{color:var(--muted)}
+.nav .soon-item .nav-soon{margin-left:auto}
