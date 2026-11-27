@@ -330,8 +330,34 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .spin-btn::after{content:''; position:absolute; inset:22%; border-radius:50%; background:radial-gradient(circle at 40% 32%, oklch(100% 0 0 / .28), transparent 60%); pointer-events:none}
 .spin-btn:not(:disabled):hover::before{transform:rotate(140deg)}
 .spin-btn:not(:disabled):active::before{transform:rotate(140deg) scale(.96)}
-.spin-btn span{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; position:relative; z-index:1; color:var(--on-metal); text-shadow:0 1px 0 oklch(100% 0 0 / .4)}
-.spin-btn:disabled{cursor:default} .spin-btn:disabled:not(.locked) span{opacity:.45}
+.spin-btn .spin-tx{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; position:relative; z-index:1; color:var(--on-metal); text-shadow:0 1px 0 oklch(100% 0 0 / .4)}
+.spin-btn:disabled{cursor:default} .spin-btn.busy .spin-tx{opacity:.55}
+/* SPIN — главное действие экрана: полированный золотой купол с сиянием в рифлёном кольце (на зелёных и чёрных секторах
+   золото видно лучше всего). После появления зовёт мягкой волной (3 раза)
+   (transform+opacity своего слоя — без перерисовки колеса; на прокрутке пауза). Нажатие: вдавливание, ударная волна и
+   искры из ступицы — один раз, CSS; вибрация на телефоне. Заперто — серебро без камня (правило .locked ниже) */
+.spin-btn{transition:transform .14s var(--ease)}
+.spin-btn:not(:disabled):active{transform:scale(.92); transition-duration:.06s}
+.spin-btn:not(.locked)::before{background:radial-gradient(42% 30% at 50% 22%, oklch(100% 0 0 / .42), transparent), radial-gradient(circle at 50% 30%, var(--metal-hi), var(--metal) 34%, var(--metal-2) 70%, var(--metal-deep));
+  box-shadow:inset 0 0 0 1.5px var(--metal-hi), inset 0 -7px 12px color-mix(in oklch, var(--metal-shade) 75%, transparent), 0 0 0 3px color-mix(in oklch, var(--metal-deep) 80%, transparent),
+    0 0 26px var(--glow-metal), 0 0 60px var(--glow-metal-soft); transition:filter var(--dur-fast) var(--ease)}
+.spin-btn:not(:disabled):not(.locked):hover::before{transform:none; filter:brightness(1.14) saturate(1.1)}
+.spin-btn:not(:disabled):not(.locked):active::before{transform:none; filter:brightness(.92)}
+.spin-btn:not(.locked) .spin-tx{font:var(--t-control); letter-spacing:var(--tr-control); color:var(--on-metal); text-shadow:0 1px 0 oklch(100% 0 0 / .5)}
+.spin-halo{position:absolute; inset:9%; border-radius:50%; pointer-events:none; box-shadow:0 0 0 2px var(--metal-hi), 0 0 18px var(--glow-metal);
+  opacity:0; will-change:transform, opacity; animation:spin-call 2.4s var(--ease) .6s 3}   /* зовёт 3 раза и уходит из DOM (onAnimationEnd): волна и даже её пустой слой стоили 5–6 fps на мыши в Firefox */
+@keyframes spin-call{0%{transform:scale(1); opacity:.75} 70%,100%{transform:scale(1.55); opacity:0}}
+.spin-fx{position:absolute; inset:0; pointer-events:none}
+.spin-fx .sw{position:absolute; inset:9%; border-radius:50%; box-shadow:0 0 0 4px var(--metal-hi), 0 0 30px var(--glow-metal), inset 0 0 20px var(--glow-metal); animation:spin-wave .7s cubic-bezier(.2,.7,.2,1) both}
+.spin-fx .sw.s2{box-shadow:0 0 0 3px var(--accent-2), 0 0 24px var(--glow-accent); animation-delay:.09s; animation-duration:.85s}
+@keyframes spin-wave{from{transform:scale(.9); opacity:1} to{transform:scale(2.3); opacity:0}}
+/* искра = «спица» длиной в радиус ступицы, повёрнутая на свой угол; искра на её конце летит наружу — % от длины спицы,
+   поэтому разлёт масштабируется с колесом (от 0.7 до 2.15 радиуса) */
+.spin-fx b{position:absolute; inset:0; transform:rotate(var(--a))}
+.spin-fx b i{position:absolute; left:50%; top:0; width:14px; height:50%; margin-left:-7px; animation:spin-spark .9s cubic-bezier(.12,.7,.3,1) both}
+.spin-fx b i::before{content:''; position:absolute; left:0; top:0; width:14px; height:14px; transform:rotate(45deg); background:var(--metal-hi); box-shadow:0 0 16px var(--glow-metal), 0 0 4px var(--metal-hi)}
+.spin-fx b:nth-child(odd) i::before{background:var(--accent-2); box-shadow:0 0 14px var(--glow-accent); width:9px; height:9px; left:2.5px}
+@keyframes spin-spark{0%{transform:translateY(30%) scale(1.1); opacity:1} 65%{opacity:1} 100%{transform:translateY(-140%) scale(.5); opacity:0}}
 /* заперто до следующего спина — центр серебряный (та же ступица, металл без золота): «сейчас нельзя», но красиво;
    золото возвращается, когда спин снова доступен. Свои --metal-* только на кнопке — остальное колесо золотое */
 .spin-btn.locked{--metal-hi:oklch(96% .004 250); --metal:oklch(80% .008 250); --metal-2:oklch(67% .01 250); --metal-deep:oklch(44% .012 250);
@@ -576,7 +602,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* отсчёт на кнопке: после «получено» время до следующего раза — прямо на кнопке */
 .gem .countdown{font-variant-numeric:tabular-nums; opacity:.85}
 .gem .gem-sep{width:5px; height:5px; transform:rotate(45deg); background:currentColor; opacity:.5; flex:none}
-.spin-btn span{display:flex; flex-direction:column; align-items:center; gap:2px}
+.spin-btn .spin-tx{display:flex; flex-direction:column; align-items:center; gap:2px}
 .spin-btn .countdown{font:var(--t-micro); letter-spacing:var(--tr-micro); font-variant-numeric:tabular-nums; white-space:nowrap}
 
 /* ── Поиск: панель результатов под полем (вся библиотека, раздел не важен) ── */
@@ -639,6 +665,28 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   background:color-mix(in oklch, var(--panel) 80%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--pos) 35%, transparent)}
 .ws-status .dot{width:8px; height:8px; border-radius:50%; background:var(--pos); box-shadow:0 0 10px var(--glow-pos)}
 .ws-status.wait{color:var(--muted); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent)} .ws-status b{color:var(--ink)}
+/* шансы выпадения (PrizeOdds): плитка на приз, цвет — редкость (--tc из токенов темы: обычный — тусклый металл,
+   редкий — самоцвет, эпический — акцент, легендарный — яркое золото с сиянием) */
+.odds{width:min(820px, 100%); padding:0 16px; display:flex; flex-direction:column; gap:12px}
+.odds-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+.odds-note{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
+.odds-grid{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px}
+.odd{--tc:var(--metal-dim); position:relative; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; padding:12px 14px 16px; border-radius:12px; text-align:left;
+  background:color-mix(in oklch, var(--panel) 84%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--tc) 40%, transparent)}
+.odd.tier-rare{--tc:var(--gem)} .odd.tier-epic{--tc:var(--accent-2)} .odd.tier-legendary{--tc:var(--metal-hi)}
+.odd.tier-legendary{box-shadow:inset 0 0 0 1px var(--metal), 0 0 20px var(--glow-metal-soft)}
+.o-suit{width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:color-mix(in oklch, var(--tc) 16%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--tc) 45%, transparent)}
+.o-suit .suit{fill:var(--tc)}
+.o-main{display:flex; flex-direction:column; gap:4px; min-width:0}
+.o-label{font:var(--t-label); letter-spacing:var(--tr-label); color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.o-tier{font:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--tc)}
+.o-pct{font:var(--t-num-md); letter-spacing:var(--tr-num); font-variant-numeric:tabular-nums; color:var(--ink)}
+.odd.tier-legendary .o-pct, .odd.tier-legendary .o-label{color:var(--metal-hi)}
+.o-bar{position:absolute; left:14px; right:14px; bottom:8px; height:2px; border-radius:2px; background:color-mix(in oklch, var(--tc) 14%, transparent)}
+.o-bar::after{content:''; position:absolute; inset:0; border-radius:inherit; transform-origin:left; transform:scaleX(var(--w)); background:var(--tc)}
+.odd.hit{animation:odd-hit 1.8s var(--ease) both}
+@keyframes odd-hit{0%,30%{background:color-mix(in oklch, var(--tc) 30%, var(--panel)); box-shadow:inset 0 0 0 1.5px var(--tc), 0 0 26px color-mix(in oklch, var(--tc) 55%, transparent)}}
+@media (max-width: 760px){ .odds-grid{grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px} .odd{padding:10px 12px 14px; gap:8px} .o-suit{width:28px; height:28px} .odds-note{display:none} }
 .ws-prizes{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:760px}
 .ws-prizes li{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--ink);
   background:color-mix(in oklch, var(--panel-hi) 55%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 28%, transparent)}

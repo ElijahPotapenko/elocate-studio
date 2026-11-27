@@ -271,17 +271,27 @@ const BULBS = LAMP_POS.map(([x, y], i) => html`<g key=${i}><circle class="socket
 // бегущие огни по ободу убраны (слово Элайджи 2026-11-27: «только мешают») — о выигрыше говорят салют и уведомление
 const TICKS = Array.from({ length: 96 }, (_, i) => { const a = (i * 3.75 - 90) * Math.PI / 180, r1 = i % 4 ? 94 : 91;
   return html`<line key=${i} x1=${C + r1 * Math.cos(a)} y1=${C + r1 * Math.sin(a)} x2=${C + 97 * Math.cos(a)} y2=${C + 97 * Math.sin(a)}/>`; });
-export const PRIZES = [   // масти по кругу ♠ ♦ ♣ ♥ — строгая казино-разметка вместо картинок
-  { label: '50 FS', suit: 'spade' }, { label: '€25', suit: 'diamond' }, { label: '2× XP', suit: 'club' }, { label: '€100', suit: 'heart' },
-  { label: '10 FS', suit: 'spade' }, { label: 'VIP+', suit: 'diamond' }, { label: '€500', suit: 'club' }, { label: '25 FS', suit: 'heart' },
+// масти по кругу ♠ ♦ ♣ ♥ — строгая казино-разметка вместо картинок. chance — шанс выпадения в % (сумма 100): колесо
+// выбирает приз ИМЕННО по нему, поэтому таблица шансов под колесом честная. tier — редкость (цвет плитки в PrizeOdds)
+export const PRIZES = [
+  { label: '50 FS', suit: 'spade', chance: 9, tier: 'rare' }, { label: '€25', suit: 'diamond', chance: 22, tier: 'common' },
+  { label: '2× XP', suit: 'club', chance: 20, tier: 'common' }, { label: '€100', suit: 'heart', chance: 7, tier: 'rare' },
+  { label: '10 FS', suit: 'spade', chance: 24, tier: 'common' }, { label: 'VIP+', suit: 'diamond', chance: 3, tier: 'epic' },
+  { label: '€500', suit: 'club', chance: 1, tier: 'legendary' }, { label: '25 FS', suit: 'heart', chance: 14, tier: 'rare' },
 ];
+const pickWeighted = (list) => {   // по шансам; у приза без chance вес 1
+  let r = Math.random() * list.reduce((s, p) => s + (p.chance ?? 1), 0), i = 0;
+  for (; i < list.length - 1; i++) { r -= list[i].chance ?? 1; if (r < 0) break; }
+  return i;
+};
+const SPARKS = Array.from({ length: 12 }, (_, i) => i * 30 + (i % 2 ? 9 : -6));   // направления искр от ступицы, неровно — живее
 const norm = (p) => (typeof p === 'string' ? { label: p } : p);
 
 // locked — колесо заперто; число (метка времени) — заперто ДО этого момента: отсчёт идёт на самой кнопке Spin
 export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
   const wrap = useRef(null);
   const list0 = prizes.length, face = useRef(null), ptr = useRef(null), rot = useRef(-180 / list0), lastSeg = useRef(0);   // в покое стрелка — в середине сектора
-  const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null), [party, setParty] = useState(false);
+  const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null), [party, setParty] = useState(false), [kick, setKick] = useState(0), [called, setCalled] = useState(false);
   const list = useMemo(() => prizes.map(norm), [prizes]);
   const seg = 360 / list.length;
   const paint = (v) => {
@@ -295,7 +305,8 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
   };
   async function spin() {
     if (spinning || locked) return;
-    const pick = Math.floor(Math.random() * list.length);
+    setKick((k) => k + 1); setCalled(true); navigator.vibrate?.(14);   // отклик нажатия: волна + искры (CSS, один раз), короткая вибрация на телефоне
+    const pick = pickWeighted(list);
     const base = rot.current - (rot.current % 360);
     const target = base + 360 * 6 + (360 - pick * seg - seg / 2);
     setSpinning(true); setWin(null); setParty(false);
@@ -325,10 +336,29 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
       <svg class="lights" viewBox="0 0 240 240" aria-hidden="true"><defs><radialGradient id="wl" cx=".32" cy=".26" r=".75">
         <stop offset="0" style=${{ stopColor: '#fff', stopOpacity: 0.16 }}/><stop offset=".45" style=${{ stopColor: '#fff', stopOpacity: 0 }}/><stop offset="1" style=${{ stopColor: '#000', stopOpacity: 0.35 }}/></radialGradient></defs>
         <circle cx=${C} cy=${C} r="101.5" fill="url(#wl)"/>${BULBS}</svg>
-      <button class=${'spin-btn' + (locked ? ' locked' : '')} onClick=${spin} disabled=${spinning || locked} aria-label=${locked ? 'Next free spin is not ready yet' : 'Spin the wheel'}><span>${locked ? html`<${Icon} n="lock" w=${16}/>${typeof locked === 'number' && html`<${Countdown} to=${locked}/>`}` : 'Spin'}</span></button>
+      <button class=${'spin-btn' + (locked ? ' locked' : '') + (spinning ? ' busy' : '')} onClick=${spin} disabled=${spinning || locked} aria-label=${locked ? 'Next free spin is not ready yet' : 'Spin the wheel'}>
+        ${!locked && !spinning && !called && html`<i class="spin-halo" aria-hidden="true" onAnimationEnd=${() => setCalled(true)}></i>`}
+        ${kick > 0 && html`<span class="spin-fx" key=${kick} aria-hidden="true"><i class="sw"></i><i class="sw s2"></i>${SPARKS.map((a) => html`<b key=${a} style=${{ '--a': a + 'deg' }}><i></i></b>`)}</span>`}
+        <span class="spin-tx">${locked ? html`<${Icon} n="lock" w=${16}/>${typeof locked === 'number' && html`<${Countdown} to=${locked}/>`}` : 'Spin'}</span></button>
       <div class="pointer" ref=${ptr}><svg viewBox="0 0 40 56" aria-hidden="true"><path class="pb" d="M20 55 L7 21 A15 15 0 1 1 33 21 Z"/><path class="pe" d="M20 49 L10 21 A11 11 0 1 1 30 21 Z"/><circle class="pg" cx="20" cy="16" r="5.5"/><circle class="ph" cx="18.2" cy="14.2" r="1.6"/></svg></div>
     </div>
   </div>`;
+}
+
+// Шансы выпадения под колесом: плитка на приз — масть, приз, редкость, % и полоска шанса. Сортировка от редкого к частому.
+// hit — выпавший приз: плитка вспыхивает. Призы без chance не показываются
+const TIERS = { legendary: 'Legendary', epic: 'Epic', rare: 'Rare', common: 'Common' };
+export function PrizeOdds({ prizes = PRIZES, hit, title = 'Drop chances', note = 'per spin · fixed odds' }) {
+  const list = prizes.map(norm).filter((p) => p.chance != null).sort((a, b) => a.chance - b.chance);
+  const max = Math.max(...list.map((p) => p.chance));
+  return html`<section class="odds" aria-label=${title}>
+    <div class="odds-head"><span class="eyebrow">${title}</span><span class="odds-note">${note}</span></div>
+    <ul class="odds-grid">${list.map((p) => html`<li key=${p.label} class=${'odd tier-' + (p.tier || 'common') + (hit === p.label ? ' hit' : '')}>
+      <span class="o-suit">${p.suit && html`<${Suit} s=${p.suit} w=${15}/>`}</span>
+      <span class="o-main"><span class="o-label">${p.label}</span><span class="o-tier">${TIERS[p.tier] || TIERS.common}</span></span>
+      <span class="o-pct">${p.chance}%</span>
+      <i class="o-bar" style=${{ '--w': p.chance / max }} aria-hidden="true"></i></li>`)}</ul>
+  </section>`;
 }
 
 /* ───────────────────────────── Спокойная прокрутка ───────────────────────────── */
@@ -442,7 +472,7 @@ export function WheelStage({ eyebrow = 'Daily ritual', title = 'Crown Wheel', te
     <div class="ws-head"><div class="eyebrow">${eyebrow}</div><h2 class="t-display metal-text">${title}</h2>${text && html`<p>${text}</p>`}</div>
     <div class="ws-wheel"><${CrownWheel} prizes=${prizes} locked=${nextAt || false} onWin=${(p) => { setWon(p); setTimeout(() => setNextAt(Date.now() + cooldownMs), 2600); }}/></div>
     <div class=${'ws-status' + (nextAt ? ' wait' : '')}>${nextAt ? html`${won ? html`<b>${won}</b> added to your account` : 'Today’s spin is used'}` : html`<i class="dot"></i>1 free spin ready`}</div>
-    <ul class="ws-prizes" aria-label="Prizes on the wheel">${prizes.map((p, i) => { const q = typeof p === 'string' ? { label: p } : p; return html`<li key=${q.label + i}>${q.suit && html`<${Suit} s=${q.suit} w=${13}/>`}<span>${q.label}</span></li>`; })}</ul>
+    <${PrizeOdds} prizes=${prizes} hit=${won}/>
   </section>`;
 }
 // Карточка профиля: герб с портретом, статус, имя, ранг, табы

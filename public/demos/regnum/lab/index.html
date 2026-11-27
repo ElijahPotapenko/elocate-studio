@@ -131,7 +131,7 @@ import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline, notify } from '../ds/components.js';
 calmScroll(); initSpotlight();
-import { html, PH, LINE, SUITS, Backdrop, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, WheelStage, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, Backdrop, PrizeOdds, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, WheelStage, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -170,7 +170,7 @@ function BurgerDemo() { const [o, setO] = useState(false); return html`<${Burger
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'WheelStage', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger', 'Backdrop'];
+  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'WheelStage', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger', 'Backdrop', 'PrizeOdds'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -492,6 +492,10 @@ function App() {
           <${Story} id="wheel-stage" title="WheelStage" note="the wheel as the hero of a section, the way premium casinos do it: no frame, a big centred wheel on a light circle with still rays (static SVG, no masks), title in metal above, status pill and prize chips below. Used on Casino"
             code=${'<${WheelStage} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp" text="One free spin every day…" prizes={PRIZES}/>'}>
             <div class="w-full"><${WheelStage} art="../assets/wheel-glade.webp" artMobile="../assets/wheel-glade-m.webp" text="One free spin every day. Land a suit, take the prize."/></div>
+          <//>
+          <${Story} id="prize-odds" title="PrizeOdds" note="drop chances under the wheel: a tile per prize — suit, prize, rarity, % and a chance bar; sorted rare → common. Rarity colour comes from the theme (common — dim metal, rare — gem, epic — accent, legendary — bright gold with a glow). The wheel picks by these same chances, so the table is honest; hit flashes the won prize"
+            code=${'// PRIZES: { label, suit, chance /* % */, tier: \'common\' | \'rare\' | \'epic\' | \'legendary\' }\n<${PrizeOdds} prizes={PRIZES} hit="€100"/>'}>
+            <div class="w-full"><${PrizeOdds} hit="€100"/></div>
           <//>
           <${Story} id="backdrop" title="Backdrop" note="a location for a whole page: the art covers the screen behind everything and stays still while the page scrolls (own layer, no repaint); darkened towards the header and edges with gradients on top (no mask, no filter) so cards and text stay readable. Fades in when the section opens. Used on Casino; shown here inside a frame"
             code=${'<${Backdrop} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp"/>   // first child of the page, behind .app'}>
