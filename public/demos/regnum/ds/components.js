@@ -69,7 +69,7 @@ export const Orn = ({ className = '', flat, lit, sheen, deco, children, style })
   <div class=${'orn' + (flat ? ' flat' : '') + (sheen ? ' sheen' : '')}><div class="in">${deco && html`<i class="cr tl"></i><i class="cr tr"></i><i class="cr bl"></i><i class="cr br"></i>`}${children}</div></div></div>`;
 
 // ── Текст: роли = text styles (tokens.css → --t-*). Любой текст интерфейса — одна из них ──
-export const TYPE_ROLES = ["logo", "display", "title", "subtitle", "heading-sm", "eyebrow", "eyebrow-sm", "num-xl", "num-lg", "num-md", "body", "label", "body-sm", "caption", "micro", "control-lg", "control", "control-sm"];
+export const TYPE_ROLES = ["logo", "display", "title", "subtitle", "eyebrow", "eyebrow-sm", "num-xl", "num-md", "body", "label", "body-sm", "caption", "micro", "control", "control-sm"];
 export const Text = ({ v = 'body', as = 'span', className = '', children, style }) => html`<${as} class=${'t-' + v + (className ? ' ' + className : '')} style=${style}>${children}<//>`;
 
 // Аудит шрифтов: каждый элемент с собственным текстом должен совпасть с одной из ролей (семейство + размер + жирность).

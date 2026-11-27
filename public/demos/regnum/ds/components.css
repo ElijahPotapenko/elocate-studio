@@ -22,18 +22,15 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .t-display{font:var(--t-display); letter-spacing:var(--tr-display);}
 .t-title{font:var(--t-title); letter-spacing:var(--tr-title);}
 .t-subtitle{font:var(--t-subtitle); letter-spacing:var(--tr-subtitle);}
-.t-heading-sm{font:var(--t-heading-sm); letter-spacing:var(--tr-heading-sm);}
 .t-eyebrow{font:var(--t-eyebrow); letter-spacing:var(--tr-eyebrow); text-transform:uppercase;}
 .t-eyebrow-sm{font:var(--t-eyebrow-sm); letter-spacing:var(--tr-eyebrow-sm);}
 .t-num-xl{font:var(--t-num-xl); letter-spacing:var(--tr-num);}
-.t-num-lg{font:var(--t-num-lg); letter-spacing:var(--tr-num);}
 .t-num-md{font:var(--t-num-md); letter-spacing:var(--tr-num);}
 .t-body{font:var(--t-body); letter-spacing:var(--tr-body);}
 .t-label{font:var(--t-label); letter-spacing:var(--tr-label);}
 .t-body-sm{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm);}
 .t-caption{font:var(--t-caption); letter-spacing:var(--tr-caption);}
 .t-micro{font:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase;}
-.t-control-lg{font:var(--t-control-lg); letter-spacing:var(--tr-control); text-transform:uppercase;}
 .t-control{font:var(--t-control); letter-spacing:var(--tr-control); text-transform:uppercase;}
 .t-control-sm{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase;}
 
@@ -43,7 +40,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   box-shadow:0 14px 34px var(--shade), 0 0 18px color-mix(in oklch, var(--metal) calc(7% * var(--glow)), transparent); transition:box-shadow var(--dur) var(--ease)}
 .ornw.lit::before{box-shadow:0 0 34px var(--glow-metal-soft), 0 0 80px color-mix(in oklch, var(--accent) calc(24% * var(--glow)), transparent), 0 16px 38px var(--shade)}
 .orn{position:relative; padding:1px; clip-path:var(--notch); background:var(--frame-grad); height:100%}
-.orn > .in{position:relative; height:100%; clip-path:var(--notch); box-shadow:var(--edge); background:radial-gradient(120% 80% at 50% -10%, var(--panel-tint), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
+.orn > .in{position:relative; height:100%; clip-path:var(--notch); box-shadow:var(--edge); background:radial-gradient(120% 80% at 50% -10%, var(--panel-hi), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
 .orn.flat > .in{background:var(--panel)}
 .orn > .in::after{content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; background:var(--grain) 0 0 / 180px; opacity:calc(.2 * var(--texture))}
 .orn > .in{isolation:isolate}
@@ -64,7 +61,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .cta:hover{filter:var(--cta-f-hover)}
 .gem{font:var(--t-control); letter-spacing:var(--tr-control); text-transform:uppercase; --h:46px; position:relative; display:inline-flex; align-items:center; justify-content:center; height:var(--h); padding:2px; color:var(--ink); cursor:pointer;
   clip-path:polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
-  background:var(--metal-tex), var(--metal-v); text-shadow:0 1px 0 color-mix(in oklch, var(--accent-dark) calc(100% * var(--depth)), transparent)}
+  background:var(--metal-tex), var(--metal-grad); text-shadow:0 1px 0 color-mix(in oklch, var(--accent-dark) calc(100% * var(--depth)), transparent)}
 .gem > span{position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; width:100%; height:100%; padding:0 34px;
   clip-path:inherit; background:var(--metal-tex), var(--accent-grad); box-shadow:inset 0 1px 0 oklch(100% 0 0 / .22); transition:filter var(--dur) var(--ease)}
 .gem > span::after{content:''; position:absolute; inset:0; background:linear-gradient(105deg, transparent 35%, oklch(100% 0 0 / .45) 50%, transparent 65%); transform:translateX(-120%)}
@@ -74,7 +71,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   background:var(--gem-grad); box-shadow:0 0 10px var(--glow-gem)}
 .gem::before{left:5px} .gem::after{right:5px}
 .gem.sm{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; --h:36px;} .gem.sm > span{padding:0 22px}
-.gem.lg{font:var(--t-control-lg); letter-spacing:var(--tr-control); text-transform:uppercase; --h:56px;} .gem.lg > span{padding:0 44px}
+.gem.lg{font:var(--t-control); letter-spacing:var(--tr-control); text-transform:uppercase; --h:56px;} .gem.lg > span{padding:0 44px}
 .gem.metal > span{background:var(--metal-tex), linear-gradient(180deg, var(--metal), var(--metal-2)); color:var(--on-metal); text-shadow:none}
 .cta:hover .gem{background:var(--metal-tex), linear-gradient(180deg, var(--metal-hi), var(--metal-2))}
 .cta:hover .gem > span{filter:brightness(1.18) saturate(1.15)}
@@ -86,12 +83,12 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .badge.metal{background:var(--metal-tex), var(--metal-grad); color:var(--on-metal); box-shadow:0 0 12px var(--glow-metal)}
 
 /* ── Seg: переключатель-сегмент ── */
-.seg{display:flex; padding:4px; gap:4px; background:var(--bg-2); clip-path:var(--notch); --cut:9px}
+.seg{display:flex; padding:4px; gap:4px; background:var(--panel); clip-path:var(--notch); --cut:9px}
 .seg button{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; padding:9px 20px; color:var(--muted); clip-path:var(--notch); --cut:7px; transition:color var(--dur-fast) var(--ease)}
 .seg button.on{color:var(--on-metal); background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 18px var(--glow-metal)}
 
 /* ── Field: поле поиска ── */
-.field{flex:1; display:flex; align-items:center; gap:10px; height:42px; padding:0 16px; background:var(--bg-2); clip-path:var(--notch); --cut:10px; color:var(--faint)}
+.field{flex:1; display:flex; align-items:center; gap:10px; height:42px; padding:0 16px; background:var(--panel); clip-path:var(--notch); --cut:10px; color:var(--faint)}
 .field input{font:var(--t-body); letter-spacing:var(--tr-body); flex:1; min-width:0; background:none; border:0; outline:0; color:var(--ink);}
 
 /* ── Logo ── */
@@ -106,7 +103,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   clip-path:polygon(8px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)}
 .nav a:hover{background:var(--panel-hi); color:var(--ink)}
 .nav a.on{color:var(--ink); background:linear-gradient(90deg, color-mix(in oklch, var(--metal-deep) 55%, transparent), transparent); box-shadow:inset 3px 0 0 var(--metal), inset 0 0 24px color-mix(in oklch, var(--metal) 8%, transparent)}
-.nav .ic{width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--bg-2); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 40%, transparent); flex:none}
+.nav .ic{width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--panel); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 40%, transparent); flex:none}
 .nav a.on .ic{box-shadow:inset 0 0 0 1px var(--metal), 0 0 14px var(--glow-metal)}
 .nav .ic svg{width:15px; height:15px}
 .sub-h{font:var(--t-eyebrow); letter-spacing:var(--tr-eyebrow); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin:18px 8px 8px; color:var(--metal)}
@@ -123,7 +120,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* ── Art: фон эмблемы игры. Тон задаёт --art-h (данные игры), яркость — тема ── */
 .art{--art-h:30; position:relative; aspect-ratio:4/3; border-radius:var(--radius); overflow:hidden; display:grid; place-items:center;
   background:radial-gradient(120% 90% at 50% 20%, oklch(calc(40% + var(--art-l)) calc(.13 * var(--art-c)) var(--art-h)), oklch(calc(18% + var(--art-l) * .5) calc(.05 * var(--art-c)) var(--art-h)));
-  box-shadow:inset 0 0 0 1px oklch(100% 0 0 / .06), inset 0 -40px 60px var(--shade-2)}
+  box-shadow:inset 0 0 0 1px oklch(100% 0 0 / .06), inset 0 -40px 60px var(--shade)}
 .grow .em.art{aspect-ratio:1; border-radius:8px}
 .art::before{content:''; position:absolute; inset:0; background:var(--engrave), var(--grain) 0 0 / 180px; opacity:calc(.4 + .6 * var(--texture));
   -webkit-mask-image:radial-gradient(70% 70% at 50% 45%, #000, transparent); mask-image:radial-gradient(70% 70% at 50% 45%, #000, transparent)}
@@ -137,7 +134,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* ── GameCard ── */
 .game{cursor:pointer}
 .game .in{padding:10px}
-.game h5{font:var(--t-heading-sm); letter-spacing:var(--tr-heading-sm); display:flex; align-items:center; gap:7px; margin:10px 2px 2px;}
+.game h5{font:var(--t-subtitle); letter-spacing:var(--tr-subtitle); display:flex; align-items:center; gap:7px; margin:10px 2px 2px;}
 .game h5::before{content:''; width:6px; height:6px; transform:rotate(45deg); background:var(--metal-grad); flex:none}
 .game .meta{font:var(--t-caption); letter-spacing:var(--tr-caption); display:flex; justify-content:space-between; margin:0 2px; color:var(--muted)}
 .game .meta b{color:var(--metal)}
@@ -198,7 +195,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .medal b{font:var(--t-eyebrow-sm); letter-spacing:var(--tr-eyebrow-sm); transform:rotate(-45deg); color:var(--faint)}
 .rung.done .medal{background:linear-gradient(135deg, color-mix(in oklch, var(--metal-deep) 70%, var(--panel)), var(--panel-2)); box-shadow:inset 0 0 0 1px var(--metal-2)}
 .rung.done .medal b{color:var(--metal)}
-.rung.cur .medal{background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 0 3px var(--bg-2), 0 0 0 4px var(--metal), 0 0 26px var(--glow-metal-strong)}
+.rung.cur .medal{background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 0 3px var(--panel), 0 0 0 4px var(--metal), 0 0 26px var(--glow-metal-strong)}
 .rung.cur .medal b{color:var(--on-metal)}
 .rung.cur::before{content:''; display:var(--fx); position:absolute; top:-6px; left:50%; width:56px; height:56px; margin-left:-28px; border-radius:50%; background:radial-gradient(var(--glow-metal), transparent 70%); animation:halo 3.2s ease-in-out infinite; will-change:opacity; z-index:-1}
 .rung span{font:var(--t-eyebrow-sm); letter-spacing:var(--tr-eyebrow-sm); color:var(--muted)}
@@ -216,11 +213,11 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .crest{position:relative; width:190px; height:230px}
 .crest > svg{position:absolute; inset:0; filter:var(--tf-glow)}
 .ava{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:96px; height:96px; border-radius:50%;
-  background:radial-gradient(80% 80% at 35% 25%, var(--accent-deep), var(--accent-dark) 70%, var(--bg-2))}
+  background:radial-gradient(80% 80% at 35% 25%, var(--accent-deep), var(--accent-dark) 70%, var(--panel))}
 .ava .emb{position:absolute; inset:0; margin:auto; width:92%; border-radius:50%}
 .ava .pt{position:absolute; inset:0; width:100%; height:100%; border-radius:50%}
 .ava .pt .pl{fill:var(--metal)} .ava .pt .ps{fill:var(--accent-dark)}
-.ava::before{content:''; position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none; box-shadow:inset 0 0 0 2px color-mix(in oklch, var(--metal) 70%, transparent), inset 0 -14px 22px var(--shade-2)}
+.ava::before{content:''; position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none; box-shadow:inset 0 0 0 2px color-mix(in oklch, var(--metal) 70%, transparent), inset 0 -14px 22px var(--shade)}
 .ava::after{content:''; display:var(--fx); position:absolute; inset:-10px; border-radius:50%; box-shadow:0 0 40px var(--glow-metal-strong); animation:halo 3.2s ease-in-out infinite; will-change:opacity; pointer-events:none}
 @keyframes halo{0%,100%{opacity:.35} 50%{opacity:1}}
 .online{font:var(--t-caption); letter-spacing:var(--tr-caption); position:absolute; left:50%; top:calc(52% + 58px); transform:translateX(-50%);   /* прямо под кружком портрета */ color:var(--muted); display:flex; align-items:center; gap:6px}
@@ -243,7 +240,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* ── Wallet ── */
 .wallet .in{position:relative; padding:18px; overflow:hidden}
 .wallet .coin{font:var(--t-label); letter-spacing:var(--tr-label); --coin-h:65; width:38px; height:38px; border-radius:50%; display:grid; place-items:center; color:#fff; background:var(--metal-tex), oklch(calc(66% + var(--art-l) * .6) calc(.04 + .11 * var(--art-c)) var(--coin-h)); box-shadow:inset 0 0 0 1px oklch(100% 0 0 / .18), 0 0 18px oklch(66% .15 var(--coin-h) / calc(.7 * var(--glow)))}
-.wallet .amt{font:var(--t-num-lg); letter-spacing:var(--tr-num); margin-top:14px;}
+.wallet .amt{font:var(--t-num-xl); letter-spacing:var(--tr-num); margin-top:14px;}
 .wallet .sub{font:var(--t-caption); letter-spacing:var(--tr-caption); margin-top:4px; color:var(--muted)}
 .wallet .glow{display:var(--fx); position:absolute; right:-30px; top:-30px; width:120px; height:120px; border-radius:50%; filter:blur(36px); opacity:.55; background:oklch(66% .15 var(--coin-h))}
 
