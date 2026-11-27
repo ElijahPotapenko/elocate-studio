@@ -39,7 +39,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .ornw::before{content:''; position:absolute; inset:3px; z-index:-1; border-radius:16px; pointer-events:none;
   box-shadow:0 14px 34px var(--shade), 0 0 18px color-mix(in oklch, var(--metal) calc(7% * var(--glow)), transparent); transition:box-shadow var(--dur) var(--ease)}
 .ornw.lit::before{box-shadow:0 0 34px var(--glow-metal-soft), 0 0 80px color-mix(in oklch, var(--accent) calc(24% * var(--glow)), transparent), 0 16px 38px var(--shade)}
-.orn{position:relative; padding:1px; clip-path:var(--notch); background:var(--frame-grad); height:100%}
+.orn{position:relative; padding:1px; clip-path:var(--notch); background:var(--frame-grad); height:100%; contain:layout paint}   /* перерисовка внутри панели не расползается наружу (и так обрезана clip-path) */
 .orn > .in{position:relative; height:100%; clip-path:var(--notch); box-shadow:var(--edge); background:radial-gradient(120% 80% at 50% -10%, var(--panel-hi), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
 .orn.flat > .in{background:var(--panel)}
 .orn > .in::after{content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; background:var(--grain) 0 0 / 180px; opacity:calc(.2 * var(--texture))}
@@ -57,8 +57,14 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .diamond{width:8px; height:8px; transform:rotate(45deg); background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 12px var(--glow-metal-strong); display:inline-block; flex:none}
 
 /* ── Gem: кнопка-самоцвет. .cta = обёртка свечения (у .gem свой clip-path срезал бы его) ── */
-.cta{display:inline-block; filter:var(--cta-f); transition:filter var(--dur) var(--ease)}   /* noir: none — фильтр не считается вовсе */
-.cta:hover{filter:var(--cta-f-hover)}
+.cta{position:relative; display:inline-block; isolation:isolate}
+/* свечение — подложка-градиент под кнопкой (рисуется один раз, на ховере меняется только opacity). Было: filter:drop-shadow
+   на обёртке магнитной кнопки — пересчитывался каждый кадр, пока кнопка ехала за мышью */
+.cta::before{content:''; position:absolute; inset:-14px -18px; z-index:-1; pointer-events:none; border-radius:40px;
+  background:radial-gradient(closest-side, color-mix(in oklch, var(--accent) calc(55% * var(--glow)), transparent), transparent);
+  opacity:.75; transition:opacity var(--dur) var(--ease); will-change:opacity}
+.cta:hover::before{opacity:1}
+.cta.metal::before{background:radial-gradient(closest-side, color-mix(in oklch, var(--metal) calc(45% * var(--glow)), transparent), transparent)}
 .gem{font:var(--t-control); letter-spacing:var(--tr-control); text-transform:uppercase; --h:46px; position:relative; display:inline-flex; align-items:center; justify-content:center; height:var(--h); padding:2px; color:var(--ink); cursor:pointer;
   clip-path:polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
   background:var(--metal-tex), var(--metal-grad); text-shadow:0 1px 0 color-mix(in oklch, var(--accent-dark) calc(100% * var(--depth)), transparent)}
@@ -242,7 +248,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .wallet .coin{font:var(--t-label); letter-spacing:var(--tr-label); --coin-h:65; width:38px; height:38px; border-radius:50%; display:grid; place-items:center; color:#fff; background:var(--metal-tex), oklch(calc(66% + var(--art-l) * .6) calc(.04 + .11 * var(--art-c)) var(--coin-h)); box-shadow:inset 0 0 0 1px oklch(100% 0 0 / .18), 0 0 18px oklch(66% .15 var(--coin-h) / calc(.7 * var(--glow)))}
 .wallet .amt{font:var(--t-num-xl); letter-spacing:var(--tr-num); margin-top:14px;}
 .wallet .sub{font:var(--t-caption); letter-spacing:var(--tr-caption); margin-top:4px; color:var(--muted)}
-.wallet .glow{display:var(--fx); position:absolute; right:-30px; top:-30px; width:120px; height:120px; border-radius:50%; filter:blur(36px); opacity:.55; background:oklch(66% .15 var(--coin-h))}
+.wallet .glow{display:var(--fx); position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; opacity:.55; pointer-events:none;
+  background:radial-gradient(closest-side, oklch(66% .15 var(--coin-h) / .8), oklch(66% .15 var(--coin-h) / .25) 55%, transparent)}   /* было filter:blur(36px) — дорого для видеокарты */
 
 /* ── CrownWheel: обод из шлифованного металла, лицо, свет, ступица, стрелка-маятник ── */
 .wheel-wrap{--chase:1.05s; position:relative; display:grid; place-items:center}
@@ -267,14 +274,14 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .face .ticks line{stroke:var(--metal-2); stroke-width:.7}
 .face .rim-in{fill:none; stroke:var(--metal); stroke-width:1.4}
 .lights .socket{fill:var(--well); stroke:var(--metal-deep); stroke-width:.8}
-.bulb{fill:var(--metal-shade); animation:chase var(--chase) steps(1) infinite; animation-delay:calc(var(--k) * var(--chase) / -3)}
-.bulb-halo{display:var(--fx); fill:color-mix(in oklch, var(--metal-hi) 50%, transparent); opacity:0; animation:chaseh var(--chase) steps(1) infinite; animation-delay:calc(var(--k) * var(--chase) / -3)}
-@keyframes chase{0%{fill:var(--metal-hi)} 33.3%,100%{fill:var(--metal-shade)}}
-@keyframes chaseh{0%{opacity:1} 33.3%,100%{opacity:0}}
-.wheel-wrap.won .bulb{animation:wonflash .3s steps(1) 7}
-.wheel-wrap.won .bulb-halo{animation:wonflashh .3s steps(1) 7}
-@keyframes wonflash{0%{fill:var(--metal-hi)} 50%{fill:var(--metal-shade)}}
-@keyframes wonflashh{0%{opacity:1} 50%{opacity:0}}
+.bulb{fill:var(--metal-shade)}
+.lamps{position:absolute; inset:0; pointer-events:none; z-index:1}
+.lamp-group{position:absolute; inset:0; opacity:0; will-change:opacity; animation:lamp var(--chase) steps(1) infinite; animation-delay:calc(var(--k) * var(--chase) / -3)}
+.lamps i{position:absolute; width:2.2%; aspect-ratio:1; margin:-1.1% 0 0 -1.1%; border-radius:50%; background:var(--metal-hi);
+  box-shadow:0 0 0 1.5px color-mix(in oklch, var(--metal-hi) 35%, transparent), 0 0 8px color-mix(in oklch, var(--metal-hi) calc(70% * var(--glow)), transparent)}
+@keyframes lamp{0%{opacity:1} 33.3%,100%{opacity:0}}
+.wheel-wrap.won .lamp-group{animation:lampwon .3s steps(1) 7}
+@keyframes lampwon{0%{opacity:1} 50%{opacity:0}}
 /* ступица: рифлёное кольцо + полированный купол (conic — блик поворачивается при наведении) */
 .spin-btn{left:50%; top:50%; z-index:2; width:31%; aspect-ratio:1; margin:-15.5% 0 0 -15.5%; border-radius:50%; display:grid; place-items:center;
   background:repeating-conic-gradient(var(--metal-2) 0 2.5deg, var(--metal-deep) 2.5deg 5deg); box-shadow:0 0 0 1.5px var(--metal-shade), 0 0 0 5px var(--well), 0 0 0 6px var(--metal-2), 0 10px 22px var(--shade)}
@@ -301,7 +308,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 /* ── Dust: поднимающиеся искры ── */
 .dust{display:var(--fx); position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden}
-.dust i{position:absolute; bottom:-10px; border-radius:50%; background:var(--metal-hi); box-shadow:0 0 8px var(--metal); opacity:0; animation:rise linear infinite; will-change:transform,opacity}
+.dust i{position:absolute; bottom:-10px; border-radius:50%; background:var(--metal-hi); opacity:0; animation:rise linear infinite; will-change:transform,opacity}
 @keyframes rise{0%{transform:translateY(0) translateX(0); opacity:0} 10%{opacity:.8} 90%{opacity:.5} 100%{transform:translateY(-105vh) translateX(30px); opacity:0}}
 
 /* ── Мелочи бренда ── */

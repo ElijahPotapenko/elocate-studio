@@ -4,6 +4,8 @@
    ============================================================ */
 
 :root {
+  /* плашка FPS (public/demos/_shared/fps.js) — в коже сайта */
+  --fps-bg: rgba(var(--bg-rgb), .88); --fps-fg: var(--text); --fps-ring: 0 0 0 1px var(--line-2); --fps-radius: 8px; --fps-good: var(--accent-lite);
   /* — палитра — */
   --bg:        #08080c;   /* near-black фон */
   --bg-soft:   #101019;   /* поверхность карточек/инпутов */

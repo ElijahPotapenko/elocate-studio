@@ -39,6 +39,8 @@
 .row{display:grid; grid-template-columns:330px 1fr; gap:22px}
 .stats{display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto 1fr; gap:16px}
 .span3{grid-column:1 / -1}
+/* секции ниже первого экрана: браузер не рисует их (и не крутит их анимации), пока они вне экрана */
+.main > .row, .main > .wallets, .main > .games-sec, .side{content-visibility:auto; contain-intrinsic-size:auto 600px}
 .wallets{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
 .games{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
 footer.foot{position:relative; z-index:1; max-width:1360px; margin:0 auto; padding:0 22px 40px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
@@ -158,5 +160,7 @@ function App() {
 
 createRoot(document.getElementById('root')).render(html`<${App}/>`);
 </script>
+<!-- FPS у курсора: localhost — всегда, прод — ?fps=1 или Shift+F -->
+<script type="module" src="/demos/_shared/fps.js"></script>
 </body>
 </html>

@@ -221,8 +221,12 @@ export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn
    Анимация: замах назад → разгон и долгое торможение с перекатом → пружинный возврат. Стрелка «щёлкает»
    на каждой границе сектора (прямо в DOM, без перерисовки React). Выигрыш: сектор вспыхивает, лампы мигают. */
 const C = 120;                                                       // центр в координатах SVG 240×240
-const BULBS = Array.from({ length: 24 }, (_, i) => { const a = (i * 15 - 90) * Math.PI / 180, x = C + 112 * Math.cos(a), y = C + 112 * Math.sin(a);
-  return html`<g key=${i} style=${{ '--k': i % 3 }}><circle class="socket" cx=${x} cy=${y} r="3.6"/><circle class="bulb-halo" cx=${x} cy=${y} r="6"/><circle class="bulb" cx=${x} cy=${y} r="2.3"/></g>`; });
+// Лампы: в SVG — статичные гнёзда и тусклые лампы; «огонь» — отдельные HTML-слои поверх, анимируется только opacity
+// (композитор, без перерисовки SVG). Раньше анимировался fill внутри SVG → колесо перерисовывалось целиком на каждом шаге.
+const LAMP_POS = Array.from({ length: 24 }, (_, i) => { const a = (i * 15 - 90) * Math.PI / 180; return [C + 112 * Math.cos(a), C + 112 * Math.sin(a)]; });
+const BULBS = LAMP_POS.map(([x, y], i) => html`<g key=${i}><circle class="socket" cx=${x} cy=${y} r="3.6"/><circle class="bulb" cx=${x} cy=${y} r="2.3"/></g>`);
+// 3 слоя (по фазе бегущего огня), в каждом 8 ламп: анимируется opacity группы — 3 текстуры вместо 24
+const LAMPS = html`<div class="lamps" aria-hidden="true">${[0, 1, 2].map((k) => html`<div key=${k} class="lamp-group" style=${{ '--k': k }}>${LAMP_POS.filter((_, i) => i % 3 === k).map(([x, y], i) => html`<i key=${i} style=${{ left: (x / 240 * 100) + '%', top: (y / 240 * 100) + '%' }}></i>`)}</div>`)}</div>`;
 const TICKS = Array.from({ length: 96 }, (_, i) => { const a = (i * 3.75 - 90) * Math.PI / 180, r1 = i % 4 ? 94 : 91;
   return html`<line key=${i} x1=${C + r1 * Math.cos(a)} y1=${C + r1 * Math.sin(a)} x2=${C + 97 * Math.cos(a)} y2=${C + 97 * Math.sin(a)}/>`; });
 export const PRIZES = [   // масти по кругу ♠ ♦ ♣ ♥ — строгая казино-разметка вместо картинок
@@ -276,6 +280,7 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
       <svg class="lights" viewBox="0 0 240 240" aria-hidden="true"><defs><radialGradient id="wl" cx=".32" cy=".26" r=".75">
         <stop offset="0" style=${{ stopColor: '#fff', stopOpacity: 0.16 }}/><stop offset=".45" style=${{ stopColor: '#fff', stopOpacity: 0 }}/><stop offset="1" style=${{ stopColor: '#000', stopOpacity: 0.35 }}/></radialGradient></defs>
         <circle cx=${C} cy=${C} r="101.5" fill="url(#wl)"/>${BULBS}</svg>
+      ${LAMPS}
       <button class="spin-btn" onClick=${spin} disabled=${spinning || locked} aria-label=${locked ? 'Next free spin is not ready yet' : 'Spin the wheel'}><span>${locked ? html`<${Icon} n="lock" w=${18}/>` : 'Spin'}</span></button>
       <div class="pointer" ref=${ptr}><svg viewBox="0 0 40 56" aria-hidden="true"><path class="pb" d="M20 55 L7 21 A15 15 0 1 1 33 21 Z"/><path class="pe" d="M20 49 L10 21 A11 11 0 1 1 30 21 Z"/><circle class="pg" cx="20" cy="16" r="5.5"/><circle class="ph" cx="18.2" cy="14.2" r="1.6"/></svg></div>
     </div>
@@ -343,7 +348,7 @@ export function ProfileCard({ name, title, level, avatar = 'morgane', status = '
 }
 
 /* ───────────────────────────── Атмосфера ───────────────────────────── */
-export function Dust({ n = 18 }) {
+export function Dust({ n = 12 }) {
   const dots = useMemo(() => Array.from({ length: n }, (_, i) => ({ left: (i * 37) % 100, d: 9 + (i * 7) % 11, delay: -((i * 13) % 20), s: 1 + (i % 3) })), [n]);
   return html`<div class="dust" aria-hidden="true">${dots.map((x, i) => html`<i key=${i} style=${{ left: x.left + '%', width: x.s * 2 + 'px', height: x.s * 2 + 'px', animationDuration: x.d + 's', animationDelay: x.delay + 's' }}></i>`)}</div>`;
 }

@@ -26,6 +26,8 @@
 
 <style>
 :root{
+  --fps-bg: var(--bg); --fps-fg: var(--ink); --fps-font: 700 12px/1.2 var(--font-display); --fps-radius: 10px;
+  --fps-ring: 0 0 0 2px var(--line-strong), 3px 3px 0 var(--line-strong); --fps-good: var(--mint); --fps-mid: var(--yellow); --fps-bad: var(--coral);
   /* — бумажно-белый фон + Мемфис-палитра (OKLCH, ни одного чистого #fff/#000) — */
   --bg: oklch(0.985 0.006 90);
   --bg-2: oklch(0.96 0.013 90);
@@ -404,5 +406,7 @@ function Bento(){
 }
 createRoot(document.getElementById('bentoMount')).render(html`<${Bento} />`);
 </script>
+<!-- FPS у курсора: localhost — всегда, прод — ?fps=1 или Shift+F -->
+<script type="module" src="/demos/_shared/fps.js"></script>
 </body>
 </html>

@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
+  --fps-bg: rgba(8, 8, 12, .86); --fps-fg: var(--text); --fps-font: 600 11px/1.3 var(--font-display); --fps-radius: 8px;
+  --fps-ring: 0 0 0 1px rgba(255, 255, 255, .12); --fps-good: var(--good);
   --bg:#08080c; --bg-soft:#101019; --bg-elev:#16161f;
   --text:#f3f3f7; --muted:#9aa0ac; --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.16);
   --accent:#2b9f4c; --accent-lite:#3fc568; --accent-ink:#03250f; --accent-glow:rgba(43,159,76,.45); --accent-soft:rgba(43,159,76,.12);
@@ -470,5 +472,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   document.documentElement.style.setProperty('--ease', 'linear');
 }
 </script>
+<!-- FPS у курсора: localhost — всегда, прод — ?fps=1 или Shift+F -->
+<script type="module" src="/demos/_shared/fps.js"></script>
 </body>
 </html>
