@@ -99,9 +99,10 @@ test.describe('Regnum design system', () => {
     await expect(page.locator('.side-tog')).toHaveAttribute('aria-expanded', 'true');
     await page.click('.side-tog');
     await expect(page.locator('.app.rail')).toHaveCount(1);
-    await expect(page.locator('.side .nav a .nl').first()).toBeHidden();
+    // подписи гаснут прозрачностью (анимация), иконки на месте; колонка контента расширяется по ходу анимации
+    await expect(page.locator('.side .nav a .nl').first()).toHaveCSS('opacity', '0');
     await expect(page.locator('.side .nav a .ic').first()).toBeVisible();
-    expect(await mainW()).toBeGreaterThan(w0 + 150);
+    await expect.poll(mainW).toBeGreaterThan(w0 + 150);
     await page.reload({ waitUntil: 'networkidle' });
     await expect(page.locator('.app.rail')).toHaveCount(1);
     await page.click('.side-tog');

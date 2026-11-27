@@ -614,6 +614,13 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .ws-light{position:absolute; z-index:-1; left:50%; top:56%; width:min(980px, 160vw); aspect-ratio:1; transform:translate(-50%, -50%); pointer-events:none; border-radius:50%;
   background:radial-gradient(closest-side, color-mix(in oklch, var(--accent) calc(24% * var(--glow)), transparent), transparent 62%)}
 .ws-light svg{position:absolute; inset:0; width:100%; height:100%}
+/* фон страницы-локации (Backdrop): на весь экран, за всем; слой неподвижен при прокрутке */
+.backdrop{position:fixed; inset:0; z-index:-1; pointer-events:none; will-change:transform; animation:bd-in .9s var(--ease) both}
+.backdrop img{width:100%; height:100%; object-fit:cover; object-position:50% 55%; display:block}
+.backdrop::after{content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, color-mix(in oklch, var(--bg) 88%, transparent), color-mix(in oklch, var(--bg) 58%, transparent) 28%, color-mix(in oklch, var(--bg) 62%, transparent) 64%, color-mix(in oklch, var(--bg) 92%, transparent)),
+    radial-gradient(75% 70% at 50% 45%, transparent 40%, color-mix(in oklch, var(--bg) 70%, transparent))}
+@keyframes bd-in{from{opacity:0}}
 /* пейзаж за колесом: картинка — статичный слой; тьма к краям и под заголовком — градиенты поверх (не mask, не filter) */
 .wheel-stage.has-art{padding:56px 0 48px}
 .ws-bg{position:absolute; z-index:-2; inset:0; pointer-events:none}

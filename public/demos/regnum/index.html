@@ -68,30 +68,29 @@ footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--
 /* ── панель в иконки (rail) — только на десктопе; на ≤900 px панель — шторка, rail не действует ── */
 .side-tog{display:none}
 @media (min-width: 901px){
-  .side{view-transition-name:rg-side}
   /* кнопка свернуть — в шапке слева от логотипа (на телефоне на этом месте бургер шторки) */
   .side-tog{display:grid; place-items:center; width:40px; height:40px; flex:none; border-radius:10px; margin-right:-2px;
     box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent); transition:background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease)}
   .side-tog:hover{background:var(--panel-hi); box-shadow:inset 0 0 0 1px var(--metal-dim)} .side-tog:focus-visible{outline:2px solid var(--metal); outline-offset:2px}
   .side-tog .ico{width:20px; height:20px; transition:transform var(--dur) var(--ease)}
+  /* сворачивание — настоящая анимация: колонка панели плавно сужается (grid-template-columns анимируется), иконки
+     стоят на месте (отступ слева = центр узкой колонки 76 px), подписи гаснут и обрезаются краем; разворот — подписи
+     проявляются с задержкой, когда ширина уже набрана. Ничего не прыгает: в свёрнутом виде меняется только прозрачность */
+  .app{transition:grid-template-columns .42s cubic-bezier(.32,.72,0,1)}
   .app.rail{grid-template-columns:76px 1fr}
-  .app.rail .side .in{padding:12px 8px}
+  .side .nav a, .side .grow, .side .sub-h{white-space:nowrap; overflow:hidden}
+  .side .grow{padding-left:12px}
+  .side .sub-h{transition:margin .42s cubic-bezier(.32,.72,0,1)}
+  .side .nl, .side .nav-soon, .side .grow .badge, .side .flourish{transition:opacity .22s var(--ease) .14s}
+  .app.rail .nl, .app.rail .nav-soon, .app.rail .grow .badge, .app.rail .side .flourish{opacity:0; transition-delay:0s; transition-duration:.12s}
+  .app.rail .sub-h{margin-left:20px}
   .app.rail .side-tog .ico{transform:scaleX(-1)}
-  .app.rail .nl, .app.rail .side .flourish, .app.rail .nav-soon, .app.rail .grow .badge{display:none}
-  .app.rail .nav a{justify-content:center; gap:0; padding:7px 0}
-  .app.rail .sub-h{justify-content:center; margin:16px 0 8px}
-  .app.rail .glist{align-items:center}
-  .app.rail .grow{justify-content:center; padding:5px; gap:0; border-radius:10px}
-  .app.rail .grow .em{width:34px; height:34px}
 }
 /* шапка на узком десктопе: без имени, подписи «Balance» и служебных ссылок (они есть в подвале) — иначе поиск сжимался в ноль
    и его текст наезжал на баланс; ещё уже — поиск своей строкой, как на телефоне */
 @media (min-width: 901px) and (max-width: 1199px){ .um-name, .bc-k, .links{display:none} }
 @media (min-width: 901px) and (max-width: 1060px){ .top{flex-wrap:wrap} .top .search{order:5; flex-basis:100%} .top .logo{margin-right:auto} }
-html[data-vt=rail]::view-transition-group(*){animation-duration:.34s; animation-timing-function:var(--ease)}
-html[data-vt=rail]::view-transition-old(rg-page), html[data-vt=rail]::view-transition-old(rg-side){animation:rg-x-out .34s var(--ease) both}
-html[data-vt=rail]::view-transition-new(rg-page), html[data-vt=rail]::view-transition-new(rg-side){animation:rg-x-in .34s var(--ease) both}
-@keyframes rg-x-out{to{opacity:0}} @keyframes rg-x-in{from{opacity:0}}
+
 @media (max-width: 900px){
   .app{grid-template-columns:1fr; padding:14px 14px 40px; gap:16px}
   .top-burger{display:block}
@@ -134,7 +133,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
 import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, SearchResults, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
-  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, WheelStage, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight, Icon } from './ds/components.js';
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, WheelStage, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight, Icon, Backdrop } from './ds/components.js';
 calmScroll(); initSpotlight();
 
 // ── данные ──
@@ -229,7 +228,7 @@ const Hall = () => html`
   <${Reveal}><${SectionHead} title="Your wallets"/><//>
   <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>`;
 const Casino = () => html`
-  <${Reveal}><${WheelStage} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp" text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
+  <${Reveal}><${WheelStage} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
   <${WinsTicker} wins=${WINS}/>
   <${Games}/>`;
 const Sports = () => html`<${Reveal}><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon"
@@ -248,17 +247,14 @@ function App() {
   const route = useRoute();
   const [menu, setMenu] = useState(false);
   const [rail, setRail] = useState(railStart);
-  const toggleRail = () => {
-    document.documentElement.dataset.vt = 'rail';   // свой переход: панель и контент плавно меняют ширину, без «смены страницы»
-    const t = viewTransition(() => setRail((r) => { try { localStorage.setItem(RAIL_KEY, r ? '0' : '1'); } catch {} return !r; }));
-    (t ? t.finished : Promise.resolve()).finally(() => { delete document.documentElement.dataset.vt; });
-  };
+  const toggleRail = () => setRail((r) => { try { localStorage.setItem(RAIL_KEY, r ? '0' : '1'); } catch {} return !r; });   // анимация — в CSS
   React.useEffect(() => { setMenu(false); }, [route]);
   React.useEffect(() => {   // меню открыто: страница под ним не прокручивается, Esc закрывает
     document.documentElement.classList.toggle('menu-open', menu);
     const k = (e) => { if (e.key === 'Escape') setMenu(false); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k);
   }, [menu]);
   return html`<${React.Fragment}>
+    ${route === 'casino' && html`<${Backdrop} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp"/>`}
     <${Dust}/>
     <div class=${'app' + (rail ? ' rail' : '')}>
       <${Top} q=${q} setQ=${setQ} route=${route} menu=${menu} setMenu=${setMenu} rail=${rail} toggleRail=${toggleRail}/>

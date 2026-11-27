@@ -68,6 +68,9 @@
 .board{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:20px}
 /* тяжёлые панели в начале лабы — свои слои: при прокрутке и ховере Firefox сдвигает их, а не перерисовывает (40 → 55 fps) */
 .board > *, .tcard{will-change:transform}
+/* витрина Backdrop: фон страницы показан в рамке — position:absolute вместо fixed */
+.bd-demo{position:relative; isolation:isolate; height:280px; border-radius:14px; overflow:hidden; display:grid; place-items:center}
+.bd-demo .backdrop{position:absolute}
 .knobs .in{padding:18px 20px}
 .kg{margin-bottom:14px} .kg h4{margin:0 0 8px; font:700 12px/1 var(--f-head); letter-spacing:.18em; color:var(--metal); text-transform:uppercase}
 .knob{display:grid; grid-template-columns:130px 1fr 52px; align-items:center; gap:12px; padding:5px 0; font-size:13px; color:var(--muted)}
@@ -129,7 +132,7 @@ import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline, notify } from '../ds/components.js';
 calmScroll(); initSpotlight();
-import { html, PH, LINE, SUITS, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, WheelStage, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, Backdrop, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, WheelStage, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -168,7 +171,7 @@ function BurgerDemo() { const [o, setO] = useState(false); return html`<${Burger
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'WheelStage', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger'];
+  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'WheelStage', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger', 'Backdrop'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -490,6 +493,10 @@ function App() {
           <${Story} id="wheel-stage" title="WheelStage" note="the wheel as the hero of a section, the way premium casinos do it: no frame, a big centred wheel on a light circle with still rays (static SVG, no masks), title in metal above, status pill and prize chips below. Used on Casino"
             code=${'<${WheelStage} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp" text="One free spin every day…" prizes={PRIZES}/>'}>
             <div class="w-full"><${WheelStage} art="../assets/wheel-glade.webp" artMobile="../assets/wheel-glade-m.webp" text="One free spin every day. Land a suit, take the prize."/></div>
+          <//>
+          <${Story} id="backdrop" title="Backdrop" note="a location for a whole page: the art covers the screen behind everything and stays still while the page scrolls (own layer, no repaint); darkened towards the header and edges with gradients on top (no mask, no filter) so cards and text stay readable. Fades in when the section opens. Used on Casino; shown here inside a frame"
+            code=${'<${Backdrop} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp"/>   // first child of the page, behind .app'}>
+            <div class="w-full bd-demo"><${Backdrop} art="../assets/wheel-glade.webp" artMobile="../assets/wheel-glade-m.webp"/><${Text} v="display" className="metal-text">Enchanted glade<//></div>
           <//>
           <${Story} id="wheel-panel" title="WheelPanel" note="compact version in a framed panel — for dashboards and side columns" code=${'<${WheelPanel} text="One free spin every day…" prizes={PRIZES}/>'}>
             <div class="w-full"><${WheelPanel} text="One free spin every day. Land a suit, take the prize."/></div>

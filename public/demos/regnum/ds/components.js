@@ -459,6 +459,9 @@ export function ProfileCard({ name, title, level, avatar = 'morgane', status = '
 }
 
 /* ───────────────────────────── Атмосфера ───────────────────────────── */
+// Фон страницы — картинка на весь экран за контентом (раздел-«локация»). Неподвижна при прокрутке: свой слой, браузер её
+// не перерисовывает; тьма к шапке и краям — градиенты поверх (не mask/filter). Проявляется плавно при входе в раздел
+export const Backdrop = ({ art, artMobile }) => html`<div class="backdrop" aria-hidden="true"><picture>${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt="" decoding="async"/></picture></div>`;
 export function Dust({ n = 12 }) {
   const dots = useMemo(() => Array.from({ length: n }, (_, i) => ({ left: (i * 37) % 100, d: 9 + (i * 7) % 11, delay: -((i * 13) % 20), s: 1 + (i % 3) })), [n]);
   return html`<div class="dust" aria-hidden="true">${dots.map((x, i) => html`<i key=${i} style=${{ left: x.left + '%', width: x.s * 2 + 'px', height: x.s * 2 + 'px', animationDuration: x.d + 's', animationDelay: x.delay + 's' }}></i>`)}</div>`;
