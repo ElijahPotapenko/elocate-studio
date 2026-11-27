@@ -500,7 +500,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* ── Loader: экран загрузки (статичный HTML в странице — рисуется до React) ── */
 .rg-loader{position:fixed; inset:0; z-index:9999; display:grid; place-items:center; background:var(--bg); transition:opacity .6s var(--ease), visibility .6s}
 .rg-loader.out{opacity:0; visibility:hidden}
-.rg-loader .rl-in{display:flex; flex-direction:column; align-items:center; gap:14px}
+.rg-loader .rl-in{display:flex; flex-direction:column; align-items:center; gap:14px; visibility:visible}   /* в странице скрыто до прихода этих стилей — без «голого» текста */
 .rg-loader .rl-crown{width:64px; height:64px; animation:rl-breathe 2.4s ease-in-out infinite}
 .rg-loader .rl-crown path{fill:var(--metal)} .rg-loader .rl-crown path:first-child{opacity:.35}
 .rg-loader .rl-word{font:var(--t-display); letter-spacing:.2em; padding-left:.2em; color:var(--metal-hi)}

@@ -2,14 +2,13 @@
 // Показывает кадры в секунду и худший кадр за полсекунды; цвет: ≥55 зелёный, ≥40 жёлтый, ниже — красный.
 // Кожа — у каждого проекта своя: переменные --fps-bg/-fg/-font/-tracking/-ring/-radius/-good/-mid/-bad в его :root
 // (запасные значения — нейтральная тёмная плашка). Механика общая, вид — локальный.
-// Включение: по умолчанию на localhost; на проде — ?fps=1 (запоминается), выключить — ?fps=0 или Shift+F.
+// Включение: по умолчанию ВЕЗДЕ (часть дизайна); выключить — ?fps=0 или Shift+F (запоминается), вернуть — ?fps=1.
 // Дёшево: позиция плашки обновляется в том же rAF (transform), текст — дважды в секунду.
 const KEY = 'elocate-fps';
 const store = { get() { try { return localStorage.getItem(KEY); } catch { return null; } }, set(v) { try { localStorage.setItem(KEY, v); } catch { /* приватный режим */ } } };
 const q = new URLSearchParams(location.search).get('fps');
 if (q === '1' || q === '0') store.set(q);
-const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-let on = store.get() ? store.get() === '1' : local;
+let on = store.get() ? store.get() === '1' : true;   // часть дизайна — видна везде, и на проде (слово Элайджи 2026-11-27)
 
 let el, raf = 0, frames = 0, worst = 0, last = 0, t0 = 0, mx = -1, my = -1, moved = true;
 function mount() {
