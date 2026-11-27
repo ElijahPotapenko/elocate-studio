@@ -436,31 +436,35 @@ export function initCrystal() {
       uniform float uSigma;    // радиус размытия в пикселях холста (= blur(10px) шапки)
       varying vec2 vUv;
       void main() {
-        // «матовое стекло» шапки над кристаллом — размытие по Гауссу 5×5 только в полосе под шапкой
-        if (uGlassH > 0.0 && vUv.y > 1.0 - uGlassH) {
+        vec2 d = vUv - 0.5;
+        vec2 offset = d * dot(d, d) * amount; // растёт как quadratic от расстояния до центра — у центра почти 0
+        float r = texture2D(tDiffuse, vUv - offset).r;
+        vec4 mid = texture2D(tDiffuse, vUv);
+        float b = texture2D(tDiffuse, vUv + offset).b;
+        vec4 col = vec4(r, mid.g, b, mid.a);
+        // «матовое стекло» шапки над кристаллом — Гаусс 5×5 в полосе под шапкой; к низу шапки размытие плавно сходит
+        // на нет (без резкой линии-границы, как была у CSS backdrop-filter)
+        float top = 1.0 - uGlassH;
+        if (uGlassH > 0.0 && vUv.y > top) {
           vec4 acc = vec4(0.0); float wsum = 0.0;
           for (int i = -2; i <= 2; i++) for (int j = -2; j <= 2; j++) {
             vec2 o = vec2(float(i), float(j)) * uSigma * 0.8;
             float w = exp(-dot(o, o) / (2.0 * uSigma * uSigma));
             acc += texture2D(tDiffuse, vUv + o * uTexel) * w; wsum += w;
           }
-          gl_FragColor = acc / wsum; return;
+          float k = smoothstep(top, top + uGlassH * 0.55, vUv.y);
+          col = mix(col, acc / wsum, k);
         }
-        vec2 d = vUv - 0.5;
-        vec2 offset = d * dot(d, d) * amount; // растёт как quadratic от расстояния до центра — у центра почти 0
-        float r = texture2D(tDiffuse, vUv - offset).r;
-        vec4 mid = texture2D(tDiffuse, vUv);
-        float b = texture2D(tDiffuse, vUv + offset).b;
-        gl_FragColor = vec4(r, mid.g, b, mid.a);
+        gl_FragColor = col;
       }
     `,
   });
   composer.addPass(dispersion);
 
-  // Firefox: CSS backdrop-filter шапки поверх анимированного WebGL-холста стоит ему >половины кадров (главная 25/19 →
-  // 60/59 без него; радиус и слои не влияют). Поэтому в Firefox стекло над кристаллом рисуем здесь, в последнем проходе
-  // (выше), а CSS-размытие шапки отключаем классом html.gl-glass (Header.astro). Chrome/Safari — без изменений (2026-11-27).
-  const GL_GLASS = /firefox/i.test(navigator.userAgent);
+  // Стекло шапки над кристаллом рисуем здесь, в последнем проходе (выше) — ОДИНАКОВО во всех браузерах. CSS backdrop-filter
+  // поверх анимированного WebGL-холста стоил Firefox больше половины кадров (главная 25/19 → 60/59 без него); класс
+  // html.gl-glass выключает CSS-размытие шапки (Header.astro). Без WebGL класса нет — остаётся CSS-стекло (запасной путь).
+  const GL_GLASS = true;
   if (GL_GLASS) document.documentElement.classList.add('gl-glass');
   function syncGlass(w, h) {
     if (!GL_GLASS) return;

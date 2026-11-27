@@ -67,11 +67,12 @@ const links = [
     inset: 0 0 auto 0;
     z-index: 100;
     backdrop-filter: blur(10px);
-    background: linear-gradient(180deg, rgba(var(--bg-rgb), 0.7), rgba(var(--bg-rgb), 0));
-    border-bottom: 1px solid transparent;
+    /* затемнение под меню: плотнее сверху, к низу сходит на нет */
+    background: linear-gradient(180deg, rgba(var(--bg-rgb), 0.88), rgba(var(--bg-rgb), 0.55) 45%, rgba(var(--bg-rgb), 0));
+    border-bottom: 0;
   }
-  /* Firefox: стекло над кристаллом рисует WebGL (crystal.js, html.gl-glass) — CSS-размытие поверх анимированного
-     холста стоило ему больше половины кадров */
+  /* стекло над кристаллом рисует WebGL (crystal.js, html.gl-glass) — во всех браузерах одинаково; CSS-размытие
+     поверх анимированного холста стоило Firefox больше половины кадров. Без WebGL — остаётся CSS-стекло */
   :global(html.gl-glass) .site-header {
     backdrop-filter: none;
   }
