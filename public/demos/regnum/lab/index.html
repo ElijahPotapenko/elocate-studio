@@ -66,6 +66,8 @@
 .code button:hover{color:var(--metal)}
 /* пульт */
 .board{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:20px}
+/* тяжёлые панели в начале лабы — свои слои: при прокрутке и ховере Firefox сдвигает их, а не перерисовывает (40 → 55 fps) */
+.board > *, .tcard{will-change:transform}
 .knobs .in{padding:18px 20px}
 .kg{margin-bottom:14px} .kg h4{margin:0 0 8px; font:700 12px/1 var(--f-head); letter-spacing:.18em; color:var(--metal); text-transform:uppercase}
 .knob{display:grid; grid-template-columns:130px 1fr 52px; align-items:center; gap:12px; padding:5px 0; font-size:13px; color:var(--muted)}

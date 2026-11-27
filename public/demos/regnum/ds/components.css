@@ -47,8 +47,10 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .orn.sheen{overflow:hidden}
 .orn.sheen::after{content:''; display:var(--fx); position:absolute; top:0; bottom:0; left:0; width:45%; pointer-events:none; z-index:2;
   background:linear-gradient(105deg, transparent, color-mix(in oklch, var(--metal-hi) 12%, transparent) 50%, transparent); transform:translateX(-110%);
-  animation:sheen 7s var(--ease) infinite; will-change:transform}
-@keyframes sheen{0%{transform:translateX(-110%)} 55%,100%{transform:translateX(330%)}}
+  visibility:hidden; animation:sheen 3.8s var(--ease) .6s 1 both}
+/* блик проходит ОДИН раз при появлении панели, в покое слой скрыт. Был бесконечным (и повторялся на ховере): движущийся
+   слой под скруглённой обрезкой стоил Firefox до 10 fps при движении мыши — само его присутствие тоже (2026-11-27) */
+@keyframes sheen{0%{transform:translateX(-110%); visibility:visible} 99.9%{transform:translateX(330%); visibility:visible} 100%{visibility:hidden}}
 .cr{position:absolute; width:28px; height:28px; pointer-events:none; opacity:var(--ornament); z-index:1; background:var(--metal);
   -webkit-mask:var(--corner) center / contain no-repeat; mask:var(--corner) center / contain no-repeat}
 .cr.tl{top:6px; left:6px} .cr.tr{top:6px; right:6px; transform:scaleX(-1)} .cr.bl{bottom:6px; left:6px; transform:scaleY(-1)} .cr.br{bottom:6px; right:6px; transform:scale(-1,-1)}
@@ -184,7 +186,11 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .game .ornw{transition:transform var(--dur) var(--ease)}
 .game:hover .ornw{transform:translateY(-4px)}
 .game:hover .art .emb{transform:scale(1.06)}
-.game:hover .ornw::before{box-shadow:0 0 26px var(--glow-metal), 0 16px 34px var(--shade)}
+/* сияние при наведении — заранее нарисованный слой, проявляется opacity (композитор). Было: смена box-shadow с размытием
+   на ховере → Firefox перерисовывал тень каждой карточки на входе/выходе курсора */
+.game .ornw::after{content:''; position:absolute; inset:3px; z-index:-1; border-radius:16px; pointer-events:none; opacity:0;
+  box-shadow:0 0 26px var(--glow-metal), 0 16px 34px var(--shade); transition:opacity var(--dur) var(--ease)}
+.game:hover .ornw::after{opacity:1}
 .game .orn{transition:background var(--dur) var(--ease)}
 
 /* ── SectionHead ── */
@@ -291,8 +297,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   background:radial-gradient(closest-side, oklch(66% .15 var(--coin-h) / .8), oklch(66% .15 var(--coin-h) / .25) 55%, transparent)}   /* было filter:blur(36px) — дорого для видеокарты */
 
 /* ── CrownWheel: обод из шлифованного металла, лицо, свет, ступица, стрелка-маятник ── */
-.wheel-wrap{--chase:1.05s; position:relative; display:grid; place-items:center}
-.wheel-wrap.fast{--chase:.27s}
+.wheel-wrap{position:relative; display:grid; place-items:center}
 .wheel-glow{display:var(--fx); position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(400px,115%); aspect-ratio:1; border-radius:50%; pointer-events:none;
   background:radial-gradient(circle, color-mix(in oklch, var(--metal) calc(30% * var(--glow)), transparent) 0 34%, color-mix(in oklch, var(--accent) calc(30% * var(--glow)), transparent) 48%, transparent 70%)}
 .wheel{position:relative; z-index:1; width:min(320px,82%); aspect-ratio:1}
@@ -316,13 +321,6 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .face .rim-in{fill:none; stroke:var(--metal); stroke-width:1.4}
 .lights .socket{fill:var(--well); stroke:var(--metal-deep); stroke-width:.8}
 .bulb{fill:var(--metal-shade)}
-.lamps{position:absolute; inset:0; pointer-events:none; z-index:1}
-.lamp-group{position:absolute; inset:0; opacity:0; will-change:opacity; animation:lamp var(--chase) steps(1) infinite; animation-delay:calc(var(--k) * var(--chase) / -3)}
-.lamps i{position:absolute; width:2.2%; aspect-ratio:1; margin:-1.1% 0 0 -1.1%; border-radius:50%; background:var(--metal-hi);
-  box-shadow:0 0 0 1.5px color-mix(in oklch, var(--metal-hi) 35%, transparent), 0 0 8px color-mix(in oklch, var(--metal-hi) calc(70% * var(--glow)), transparent)}
-@keyframes lamp{0%{opacity:1} 33.3%,100%{opacity:0}}
-.wheel-wrap.won .lamp-group{animation:lampwon .3s steps(1) 7}
-@keyframes lampwon{0%{opacity:1} 50%{opacity:0}}
 /* ступица: рифлёное кольцо + полированный купол (conic — блик поворачивается при наведении) */
 .spin-btn{left:50%; top:50%; z-index:2; width:31%; aspect-ratio:1; margin:-15.5% 0 0 -15.5%; border-radius:50%; display:grid; place-items:center;
   background:repeating-conic-gradient(var(--metal-2) 0 2.5deg, var(--metal-deep) 2.5deg 5deg); box-shadow:0 0 0 1.5px var(--metal-shade), 0 0 0 5px var(--well), 0 0 0 6px var(--metal-2), 0 10px 22px var(--shade)}
@@ -516,7 +514,6 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 @keyframes rl-breathe{50%{transform:translateY(-3px); opacity:.85}}
 
 /* ── Облегчённый режим (autoQuality или ?quality=lite): что ещё дорогое — гасим ── */
-[data-quality="lite"] .lamp-group{animation-duration:2.4s}
 [data-quality="lite"] .ticker-track{animation-play-state:paused}
 [data-quality="lite"] .spot > .orn > .in::before, [data-quality="lite"] .perk.spot::before{display:none}   /* lite: без пятна света — только подъём и кант */
 [data-quality="lite"] .game:hover .art .emb{transform:none}
