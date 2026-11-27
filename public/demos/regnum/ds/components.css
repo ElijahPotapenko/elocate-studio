@@ -207,8 +207,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .meter-head h4{font:var(--t-subtitle); letter-spacing:var(--tr-subtitle); margin:0;}
 .meter-head span{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--muted)}
 .track{position:relative; height:26px; border-radius:6px; background:var(--well); overflow:hidden; box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
-.fill{position:absolute; inset:0 auto 0 0; overflow:hidden; background:linear-gradient(90deg, var(--metal-2), var(--gem) 45%, var(--info));
-  box-shadow:0 0 22px color-mix(in oklch, var(--gem) calc(70% * var(--glow)), transparent), 0 0 40px color-mix(in oklch, var(--info) calc(45% * var(--glow)), transparent)}
+.fill{position:absolute; inset:0 auto 0 0; overflow:hidden; background:linear-gradient(90deg, var(--metal-2), var(--accent) 55%, var(--accent-2));   /* из металла в акцент темы (было в голубой --gem/--info — чужой цвет в эльфийской палитре) */
+  box-shadow:0 0 22px color-mix(in oklch, var(--accent) calc(60% * var(--glow)), transparent), 0 0 40px color-mix(in oklch, var(--accent-2) calc(35% * var(--glow)), transparent)}
 .fill::after{content:''; position:absolute; inset:0; left:-17px; background:repeating-linear-gradient(-45deg, oklch(100% 0 0 / .14) 0 6px, transparent 6px 12px)}
 @keyframes stripes{to{transform:translateX(16.97px)}}
 .ticks{font:var(--t-caption); letter-spacing:var(--tr-caption); display:flex; justify-content:space-between; margin-top:8px; color:var(--muted)}
@@ -251,7 +251,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 .perk .pv{font:var(--t-num-md); letter-spacing:var(--tr-num);}
 .perk .pl{font:var(--t-caption); letter-spacing:var(--tr-caption); margin-top:6px; color:var(--muted)}
-.perk.next{box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--accent) 45%, transparent)} .perk.next .pv{background:none; color:var(--gem); -webkit-text-fill-color:var(--gem)}
+.perk.next{box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--accent) 45%, transparent)}   /* «следующая ступень» — только кант и бейдж; заголовок тем же металлом, что у соседей */
 .perk .lock{position:absolute; top:8px; right:8px}
 
 /* ── Crest + Avatar (гербовый щит с портретом) ── */
