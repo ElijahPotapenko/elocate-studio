@@ -137,7 +137,7 @@
   --t-display:    800 calc(clamp(30px, 4vw, 48px) * var(--ts))/1.05 var(--f-display); --tr-display: .01em;
   --t-title:      700 calc(20px * var(--ts))/1.2 var(--f-display);                 --tr-title: .04em;
   --t-subtitle:   700 calc(16px * var(--ts))/1.2 var(--f-head);                  --tr-subtitle: .02em;
-  --t-eyebrow:    700 calc(12px * var(--ts))/1 var(--f-head);                    --tr-eyebrow: .18em;   /* + uppercase */
+  --t-eyebrow:    700 calc(12px * var(--ts))/1 var(--f-head);                    --tr-eyebrow: .1em;   /* + uppercase · было .18em — капитель разваливалась на отдельные буквы */
   --t-eyebrow-sm: 700 calc(12px * var(--ts))/1.2 var(--f-head);                  --tr-eyebrow-sm: .04em;
   --t-num-xl:     800 calc(28px * var(--ts))/1 var(--f-head);                    --tr-num: .01em;
   --t-num-md:     800 calc(17px * var(--ts))/1.1 var(--f-head);
