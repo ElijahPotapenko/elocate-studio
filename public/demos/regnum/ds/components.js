@@ -306,6 +306,9 @@ export function autoQuality({ delay = 1500, threshold = 50 } = {}) {
   const pref = ls() || 'auto';
   if (pref === 'lite' || pref === 'high') { root.dataset.quality = pref; return; }
   try { const s = sessionStorage.getItem(K); if (s) { root.dataset.quality = s; return; } } catch { /* без памяти */ }
+  // Firefox: декор (пыль, свет, ховеры) стоит ему в разы дороже, чем Chromium (мышь 12 fps против 55 в lite), а замер простоя
+  // этого не видит — сразу lite. Полный режим — вручную ?quality=high.
+  if (/firefox/i.test(navigator.userAgent)) { root.dataset.quality = 'lite'; try { sessionStorage.setItem(K, 'lite'); } catch { /* */ } return; }
   setTimeout(() => { let n = 0, t0 = 0; const f = (t) => { if (!t0) t0 = t; if (++n < 90) return requestAnimationFrame(f);
     const fps = n * 1000 / (t - t0), v = fps < threshold ? 'lite' : 'high'; root.dataset.quality = v; try { sessionStorage.setItem(K, v); } catch { /* */ } };
     requestAnimationFrame(f); }, delay);
@@ -317,12 +320,17 @@ export const Loader = ({ note = 'Preparing the court…', progress = 0.6, inline
 
 /* ───────────────────────────── Аккаунт ───────────────────────────── */
 // Живой обратный отсчёт: «2d 14:03:22» / «23:59:41». Тикает раз в секунду, без перерисовки остального.
-const fmt = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
-  const p = (x) => String(x).padStart(2, '0'); return (d ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(s); };
-export function Countdown({ to, prefix = '' }) {
+// precision 'm' (по умолчанию): «2d 14h 03m», обновление раз в минуту — каждое обновление будит перерисовку страницы,
+// в Firefox на тяжёлой странице секундный тик стоил ~30 fps. 's' — «14:03:22», раз в секунду (для коротких отсчётов).
+const fmt = (ms, precision) => { const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  const p = (x) => String(x).padStart(2, '0');
+  return precision === 's' ? (d ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(s) : (d ? d + 'd ' : '') + (d || h ? h + 'h ' : '') + p(m) + 'm'; };
+export function Countdown({ to, prefix = '', precision = 'm' }) {
   const [now, setNow] = useState(Date.now());
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
-  return html`<span class="countdown">${prefix}<time>${fmt(to - now)}</time></span>`;
+  useEffect(() => { const step = precision === 's' ? 1000 : 60000;
+    let t = setTimeout(function tick() { setNow(Date.now()); t = setTimeout(tick, step - (Date.now() % step)); }, step - (Date.now() % step));
+    return () => clearTimeout(t); }, [precision]);
+  return html`<span class="countdown">${prefix}<time>${fmt(to - now, precision)}</time></span>`;
 }
 // Баланс в шапке: сумма + быстрый депозит
 export const BalanceChip = ({ amount, label = 'Balance' }) => html`<div class="balance-chip"><span class="bc-k">${label}</span><span class="bc-v metal-text">${amount}</span>
