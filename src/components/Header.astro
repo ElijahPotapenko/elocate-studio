@@ -70,6 +70,11 @@ const links = [
     background: linear-gradient(180deg, rgba(var(--bg-rgb), 0.7), rgba(var(--bg-rgb), 0));
     border-bottom: 1px solid transparent;
   }
+  /* Firefox: стекло над кристаллом рисует WebGL (crystal.js, html.gl-glass) — CSS-размытие поверх анимированного
+     холста стоило ему больше половины кадров */
+  :global(html.gl-glass) .site-header {
+    backdrop-filter: none;
+  }
   .bar {
     display: flex;
     align-items: center;

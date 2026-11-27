@@ -420,7 +420,7 @@ export function initCrystal() {
   // комментарий у gemMat) — этот шейдер даёт тот же ВИЗУАЛЬНЫЙ признак (цветная окантовка на силуэте)
   // одним дешёвым fullscreen-пассом, без зависимости от хрупкого transmission.
   const dispersion = new ShaderPass({
-    uniforms: { tDiffuse: { value: null }, amount: { value: 0.07 } },
+    uniforms: { tDiffuse: { value: null }, amount: { value: 0.07 }, uGlassH: { value: 0 }, uTexel: { value: new THREE.Vector2(1, 1) }, uSigma: { value: 10 } },
     vertexShader: `
       varying vec2 vUv;
       void main() {
@@ -431,8 +431,21 @@ export function initCrystal() {
     fragmentShader: `
       uniform sampler2D tDiffuse;
       uniform float amount;
+      uniform float uGlassH;   // доля высоты кадра под шапкой (сверху); 0 — стекло выключено
+      uniform vec2 uTexel;     // 1 / размер холста в пикселях
+      uniform float uSigma;    // радиус размытия в пикселях холста (= blur(10px) шапки)
       varying vec2 vUv;
       void main() {
+        // «матовое стекло» шапки над кристаллом — размытие по Гауссу 5×5 только в полосе под шапкой
+        if (uGlassH > 0.0 && vUv.y > 1.0 - uGlassH) {
+          vec4 acc = vec4(0.0); float wsum = 0.0;
+          for (int i = -2; i <= 2; i++) for (int j = -2; j <= 2; j++) {
+            vec2 o = vec2(float(i), float(j)) * uSigma * 0.8;
+            float w = exp(-dot(o, o) / (2.0 * uSigma * uSigma));
+            acc += texture2D(tDiffuse, vUv + o * uTexel) * w; wsum += w;
+          }
+          gl_FragColor = acc / wsum; return;
+        }
         vec2 d = vUv - 0.5;
         vec2 offset = d * dot(d, d) * amount; // растёт как quadratic от расстояния до центра — у центра почти 0
         float r = texture2D(tDiffuse, vUv - offset).r;
@@ -443,6 +456,21 @@ export function initCrystal() {
     `,
   });
   composer.addPass(dispersion);
+
+  // Firefox: CSS backdrop-filter шапки поверх анимированного WebGL-холста стоит ему >половины кадров (главная 25/19 →
+  // 60/59 без него; радиус и слои не влияют). Поэтому в Firefox стекло над кристаллом рисуем здесь, в последнем проходе
+  // (выше), а CSS-размытие шапки отключаем классом html.gl-glass (Header.astro). Chrome/Safari — без изменений (2026-11-27).
+  const GL_GLASS = /firefox/i.test(navigator.userAgent);
+  if (GL_GLASS) document.documentElement.classList.add('gl-glass');
+  function syncGlass(w, h) {
+    if (!GL_GLASS) return;
+    const hdr = document.querySelector('.site-header');
+    const hh = hdr ? hdr.getBoundingClientRect().height : 0;
+    const pw = canvas.width || Math.round(w * currentPR), ph = canvas.height || Math.round(h * currentPR);
+    dispersion.uniforms.uGlassH.value = Math.min(1, hh / h);
+    dispersion.uniforms.uTexel.value.set(1 / pw, 1 / ph);
+    dispersion.uniforms.uSigma.value = 10 * (pw / w);
+  }
 
   let lastW = 0, lastH = 0;
   function resize() {
@@ -476,6 +504,7 @@ export function initCrystal() {
     renderer.setSize(w, h, false);
     composer.setSize(w, h);
     bloom.resolution.set(w, h);
+    syncGlass(w, h);
   }
 
   // ── оптимизация: самоадаптивный pixelRatio — на fullscreen-канвасе (весь экран, не компактный
@@ -504,6 +533,7 @@ export function initCrystal() {
           currentPR = Math.max(MIN_PR, currentPR - 0.3);
           renderer.setPixelRatio(currentPR);
           composer.setPixelRatio(currentPR);
+          syncGlass(lastW, lastH);
         }
       }
     }
