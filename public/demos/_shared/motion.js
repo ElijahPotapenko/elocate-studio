@@ -16,7 +16,7 @@ import htm from 'htm';
 const html = htm.bind(React.createElement);
 
 /** Кнопка/ссылка, тянущаяся к курсору. Цвет и форма — через `className`, не здесь. */
-export function MagneticCTA({ label, href, className, strength = 0.28, spring = { damping: 18, stiffness: 260 }, tapScale = 0, children }) {
+export function MagneticCTA({ label, href, onClick, className, strength = 0.28, spring = { damping: 18, stiffness: 260 }, tapScale = 0, children }) {
   const x = useMotionValue(0), y = useMotionValue(0);
   const sx = useSpring(x, spring);
   const sy = useSpring(y, spring);
@@ -30,7 +30,7 @@ export function MagneticCTA({ label, href, className, strength = 0.28, spring = 
     ? { whileHover: { scale: 1 + tapScale }, whileTap: { scale: 1 - tapScale }, transition: { type: 'spring', ...spring } }
     : {};
   return html`
-    <${motion.a} href=${href} class=${className} style=${{ x: sx, y: sy }}
+    <${motion.a} href=${href} onClick=${onClick} class=${className} style=${{ x: sx, y: sy }}
       onMouseMove=${onMove} onMouseLeave=${onLeave} ...${tapProps}>
       ${label}${children || null}
     <//>

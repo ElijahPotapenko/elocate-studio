@@ -57,7 +57,7 @@
 .wallets{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
 .games{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
 footer.foot{position:relative; z-index:1; max-width:1360px; margin:0 auto; padding:0 22px 40px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
-footer.foot a{text-decoration:underline}
+footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--ease)} footer.foot a:hover{color:var(--metal)}
 @media (max-width: 1100px){ .games{grid-template-columns:repeat(3,1fr)} .row{grid-template-columns:1fr} }
 @media (max-width: 900px){
   .app{grid-template-columns:1fr; padding:14px 14px 40px; gap:16px}

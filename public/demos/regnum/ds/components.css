@@ -171,7 +171,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .emb{display:block}
 
 /* ── GameCard ── */
-.game{cursor:pointer}
+.game{display:block; cursor:pointer}   /* ссылка: клик открывает игру (в демо — тост) */
+.game:focus-visible{outline:2px solid var(--metal); outline-offset:3px; border-radius:var(--radius)}
 .game .in{padding:10px}
 .game h5{font:var(--t-subtitle); letter-spacing:var(--tr-subtitle); display:flex; align-items:center; gap:7px; margin:10px 2px 2px;}
 .game h5::before{content:''; width:6px; height:6px; transform:rotate(45deg); background:var(--metal-grad); flex:none}
@@ -208,7 +209,6 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .fill{position:absolute; inset:0 auto 0 0; overflow:hidden; background:linear-gradient(90deg, var(--metal-2), var(--gem) 45%, var(--info));
   box-shadow:0 0 22px color-mix(in oklch, var(--gem) calc(70% * var(--glow)), transparent), 0 0 40px color-mix(in oklch, var(--info) calc(45% * var(--glow)), transparent)}
 .fill::after{content:''; position:absolute; inset:0; left:-17px; background:repeating-linear-gradient(-45deg, oklch(100% 0 0 / .14) 0 6px, transparent 6px 12px)}
-.meter:hover .fill::after{animation:stripes 1.1s linear infinite}   /* полоски бегут только под рукой — в покое не анимируем (в Firefox это перерисовка обрезанной полосы каждый кадр) */
 @keyframes stripes{to{transform:translateX(16.97px)}}
 .ticks{font:var(--t-caption); letter-spacing:var(--tr-caption); display:flex; justify-content:space-between; margin-top:8px; color:var(--muted)}
 .ticks .hit{color:var(--metal)}
@@ -226,7 +226,6 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .vbar{position:relative; height:12px; border-radius:6px; background:var(--well); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent), inset 0 2px 4px var(--shade)}
 .vbar > i{position:absolute; inset:2px auto 2px 2px; border-radius:4px; overflow:hidden; background:var(--metal-tex), linear-gradient(90deg, var(--metal-deep), var(--metal) 70%, var(--metal-hi)); box-shadow:0 0 14px var(--glow-metal)}
 .vbar > i::after{content:''; display:var(--fx); position:absolute; top:0; bottom:0; width:40%; background:linear-gradient(90deg, transparent, oklch(100% 0 0 / .55), transparent); transform:translateX(-120%); animation:vshine 1.8s var(--ease) 1.5s 1 both; will-change:transform}
-.vipc:hover .vbar > i::after{animation:vshine2 1.6s var(--ease) 1 both}   /* блик — один раз после заполнения и один раз при наведении (не бесконечно) */
 @keyframes vshine{0%{transform:translateX(-120%)} 100%{transform:translateX(320%)}}
 @keyframes vshine2{0%{transform:translateX(-120%)} 100%{transform:translateX(320%)}}
 .vbar .tip{position:absolute; top:50%; width:14px; height:14px; margin-left:-7px; transform:translateY(-50%) rotate(45deg); background:var(--metal-hi); box-shadow:0 0 0 2px var(--metal-deep), 0 0 16px var(--glow-metal-strong)}
@@ -248,7 +247,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .perks{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:auto}
 .perk{position:relative; padding:12px 12px 11px; border-radius:var(--radius); background:linear-gradient(180deg, color-mix(in oklch, var(--panel-hi) 90%, transparent), color-mix(in oklch, var(--panel) 90%, transparent));
   box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); transition:box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease)}
-.perk:hover{transform:translateY(-2px); box-shadow:inset 0 0 0 1px var(--metal-2), 0 0 18px var(--glow-metal-soft)}
+
 .perk .pv{font:var(--t-num-md); letter-spacing:var(--tr-num);}
 .perk .pl{font:var(--t-caption); letter-spacing:var(--tr-caption); margin-top:6px; color:var(--muted)}
 .perk.next{box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--accent) 45%, transparent)} .perk.next .pv{background:none; color:var(--gem); -webkit-text-fill-color:var(--gem)}
@@ -365,7 +364,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .pay-chip{display:grid; place-items:center; width:52px; height:34px; border-radius:8px; background:color-mix(in oklch, var(--panel-hi) 70%, transparent);
   box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); transition:box-shadow var(--dur-fast), background var(--dur-fast)}
 .pay-chip svg{width:24px; height:24px; fill:var(--ink); opacity:.88; transition:fill var(--dur-fast), opacity var(--dur-fast)}
-.pay-chip:hover{background:var(--ink)} .pay-chip:hover svg{fill:var(--brand); opacity:1}
+
 
 /* ── HeroBanner (паттерн) ── */
 .hero .in{display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:10px; padding:34px 36px; min-height:330px; overflow:hidden;
@@ -526,3 +525,19 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 @media (max-width:640px){ .perks{grid-template-columns:1fr} .medal{width:36px; height:36px} .ladder::before,.ladder::after{top:17px} }
 @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+/* ── Закон интерактива: ховер = обещание клика. Есть действие → есть отклик под курсором; нет действия → нет ховера
+   (статистика, кошельки, бонусы, полосы, значки оплаты — без ховера). Ниже — отклик тем, кто нажимается, но молчал ── */
+.logo{transition:filter var(--dur-fast) var(--ease)} .logo:hover{filter:var(--tf-glow) brightness(1.15)}
+.seg button:not(.on):hover{color:var(--ink); background:color-mix(in oklch, var(--panel-hi) 80%, transparent)}
+.bc-add{transition:filter var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease)} .bc-add:hover{filter:brightness(1.15); transform:scale(1.06)}
+.um-bell{transition:box-shadow var(--dur-fast) var(--ease)} .um-bell:hover{box-shadow:inset 0 0 0 1px var(--metal-2)}
+.um-me .um-name{transition:color var(--dur-fast) var(--ease)} .um-me:hover .um-name{color:var(--metal-hi)}
+.um-me .um-ava{transition:box-shadow var(--dur-fast) var(--ease)} .um-me:hover .um-ava{box-shadow:0 0 0 2px var(--metal-2)}
+
+/* тост — подтверждение действия */
+.rg-toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); z-index:200; max-width:min(92vw, 460px); padding:12px 18px; border-radius:10px;
+  font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--ink); background:color-mix(in oklch, var(--panel) 94%, transparent);
+  box-shadow:inset 0 0 0 1px var(--metal-2), 0 12px 32px var(--shade); transform:translate(-50%, 12px); opacity:0; pointer-events:none;
+  transition:opacity var(--dur-fast) var(--ease), transform var(--dur) var(--ease)}
+.rg-toast.on{opacity:1; transform:translate(-50%, 0)}

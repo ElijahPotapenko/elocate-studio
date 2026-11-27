@@ -33,6 +33,14 @@ export function initSpotlight(selector = '.spot') {
   addEventListener('scroll', () => { if (el) rect = el.getBoundingClientRect(); }, { passive: true });
 }
 
+/* ── Тост: короткое подтверждение действия внизу экрана (одно сообщение за раз, само уходит) ── */
+let toastEl = null, toastT = 0;
+export function toast(text) {
+  if (!toastEl) { toastEl = document.createElement('div'); toastEl.className = 'rg-toast'; toastEl.setAttribute('role', 'status'); toastEl.setAttribute('aria-live', 'polite'); document.body.appendChild(toastEl); }
+  toastEl.textContent = text; toastEl.classList.remove('on'); void toastEl.offsetWidth; toastEl.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 2600);
+}
+
 /* ── Цвета темы → hex (canvas-confetti понимает только hex/rgb) ── */
 function themeHex(vars) {
   const c = document.createElement('canvas'); c.width = c.height = 1; const g = c.getContext('2d', { willReadFrequently: true });

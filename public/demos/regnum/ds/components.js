@@ -8,9 +8,9 @@ import React, { useState, useRef, useId, useMemo, useEffect } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, html } from '../../_shared/motion.js';
 import { LINE, SUITS, PH, PORTRAITS, BRANDS } from './icons.js';
-import { viewTransition, initSpotlight, celebrate, revealHeadline } from './effects.js';
+import { viewTransition, initSpotlight, celebrate, revealHeadline, toast } from './effects.js';
 
-export { LINE, SUITS, PH, PORTRAITS, BRANDS, html, viewTransition, initSpotlight, celebrate, revealHeadline };
+export { LINE, SUITS, PH, PORTRAITS, BRANDS, html, viewTransition, initSpotlight, celebrate, revealHeadline, toast };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -108,7 +108,7 @@ export function Gem({ label, href = '#', tone = 'accent', size = 'md', magnetic 
   const cls = 'gem' + (size !== 'md' ? ' ' + size : '') + (tone === 'metal' ? ' metal' : '');
   const inner = html`<span>${label}</span>`;
   return html`<span class=${'cta' + (tone === 'metal' ? ' metal' : '')}>${magnetic
-    ? html`<${MagneticCTA} className=${cls} href=${href} label=${inner} strength=${0.22}/>`
+    ? html`<${MagneticCTA} className=${cls} href=${href} onClick=${onClick} label=${inner} strength=${0.22}/>`
     : html`<a class=${cls} href=${href} onClick=${onClick}>${inner}</a>`}</span>`;
 }
 
@@ -155,21 +155,24 @@ export const Art = ({ hue, framed, className = '', children }) => html`<div clas
 
 /* ───────────────────────────── Навигация ───────────────────────────── */
 export const NavItem = ({ icon, label, on, href = '#' }) => html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
-export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#"><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
+// клик по игре: в демо — подсказка, что игра откроется в полной сборке (href="#" раньше уводил на главную)
+const openGame = (game) => (e) => { e.preventDefault(); toast(`${game.name} — opens in the full build`); };
+export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#" onClick=${openGame(game)}><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
 export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
 
 /* ───────────────────────────── Карточки и данные ───────────────────────────── */
 export const GameCard = ({ game, tilt = false }) => {   // tilt — 3D-наклон за мышью; по умолчанию выключен (дорого в Firefox), подъём при наведении — в CSS
   const body = html`<${Orn} spot><${Art} hue=${game.hue} framed>${game.badge && html`<${Badge} kind=${game.badge} className="tag"/>`}<${Emblem} k=${game.k}/><//>
     <h5>${game.name}</h5><div class="meta"><span>${game.studio || 'Regnum Originals'}</span><b>RTP ${game.rtp}</b></div><//>`;
-  return tilt ? html`<${TiltCard} className="game" maxTilt=${8} hoverY=${-4}>${body}<//>` : html`<div class="game">${body}</div>`;
+  return tilt ? html`<${TiltCard} className="game" maxTilt=${8} hoverY=${-4}>${body}<//>`
+    : html`<a class="game" href="#" aria-label=${'Play ' + game.name} onClick=${openGame(game)}>${body}</a>`;
 };
 
-export const Stat = ({ k, to, prefix = '', delta }) => html`<${Orn} className="stat" spot><div class="k">${k}</div><div class="v metal-text">${prefix}<${CountUp} to=${to} locale/></div>${delta && html`<div class="d">${delta}</div>`}<//>`;
+export const Stat = ({ k, to, prefix = '', delta }) => html`<${Orn} className="stat"><div class="k">${k}</div><div class="v metal-text">${prefix}<${CountUp} to=${to} locale/></div>${delta && html`<div class="d">${delta}</div>`}<//>`;
 
 export function Meter({ title, value, min = 1, max = 5, className = '' }) {
   const ticks = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-  return html`<${Orn} className=${'meter ' + className} spot><div class="meter-head"><h4>${title}</h4><span>${value.toFixed(1)}× active</span></div>
+  return html`<${Orn} className=${'meter ' + className}><div class="meter-head"><h4>${title}</h4><span>${value.toFixed(1)}× active</span></div>
     <div class="track"><${motion.div} class="fill" initial=${{ width: 0 }} whileInView=${{ width: `${(value - min) / (max - min) * 100}%` }} viewport=${{ once: true }} transition=${{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}/></div>
     <div class="ticks">${ticks.map((x) => html`<span key=${x} class=${x <= value ? 'hit' : ''}>${x}×</span>`)}</div><//>`;
 }
@@ -183,10 +186,10 @@ export function Ladder({ rungs, cur }) {
   return html`<div class="ladder" style=${{ '--n': n, '--done': done + '%' }}>${rungs.map(([num, t], i) => html`<div key=${num} class=${'rung ' + (i < cur ? 'done' : i === cur ? 'cur' : '')}><div class="medal"><b>${num}</b></div><span>${t}</span></div>`)}</div>`;
 }
 
-export const Perk = ({ value, label, lock }) => html`<div class=${'perk spot' + (lock ? ' next' : '')}><div class="pv metal-text">${value}</div><div class="pl">${label}</div>${lock && html`<${Badge} className="lock">${lock}<//>`}</div>`;
+export const Perk = ({ value, label, lock }) => html`<div class=${'perk' + (lock ? ' next' : '')}><div class="pv metal-text">${value}</div><div class="pl">${label}</div>${lock && html`<${Badge} className="lock">${lock}<//>`}</div>`;
 
 export function VipCard({ level, next, points, goal, rungs, cur, perks, className = 'span3' }) {
-  return html`<${Orn} className=${'vipc ' + className} spot><div class="vip-head"><${Crown} size=${42}/><div class="t"><h4>VIP level ${level} → ${level + 1}</h4><small>${(goal - points).toLocaleString('en')} points to ${next}</small></div>
+  return html`<${Orn} className=${'vipc ' + className}><div class="vip-head"><${Crown} size=${42}/><div class="t"><h4>VIP level ${level} → ${level + 1}</h4><small>${(goal - points).toLocaleString('en')} points to ${next}</small></div>
       <div class="pts metal-text"><${CountUp} to=${points} locale/><small> / ${goal.toLocaleString('en')}</small></div></div>
     <${VipBar} pct=${Math.round(points / goal * 100)}/>
     <${Ladder} rungs=${rungs} cur=${cur}/>
@@ -212,7 +215,7 @@ export function Tabs({ items, value, onChange }) {
 
 export const GhostButton = ({ icon, label, onClick, href = '#' }) => html`<a class="ghost-btn" href=${href} onClick=${onClick}>${icon && html`<${Icon} n=${icon} w=${14}/>`}<span>${label}</span></a>`;
 
-export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn} className="wallet" spot><span class="glow" style=${{ '--coin-h': hue }}></span>
+export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn} className="wallet"><span class="glow" style=${{ '--coin-h': hue }}></span>
   <div class="coin" style=${{ '--coin-h': hue }}>${sym}</div><div class="amt">${amount}</div><div class="sub">${sub}</div>
   ${actions && html`<div class="wallet-actions"><${GhostButton} icon="arrowDown" label="Deposit"/><${GhostButton} icon="arrowUp" label="Withdraw"/></div>`}<//>`;
 
@@ -368,7 +371,7 @@ export function HeroBanner({ eyebrow, title, text, pay, cta = 'Join now', second
   ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
   <div class="hero-copy"><div class="hero-top"><span class="eyebrow">${eyebrow}</span>${endsAt && html`<span class="hero-timer"><${Countdown} to=${endsAt} prefix="Ends in "/></span>`}</div>
     <h1 ref=${h1}>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
-    <div class="hero-actions"><${Gem} label=${cta} magnetic/>${secondary && html`<a class="hero-link" href="#">${secondary}</a>`}</div>
+    <div class="hero-actions"><${Gem} label=${cta} magnetic onClick=${(e) => { e.preventDefault(); celebrate(e.currentTarget, { big: true }); toast('Bonus claimed — 50% up to €500 is on your balance'); }}/>${secondary && html`<a class="hero-link" href="#">${secondary}</a>`}</div>
     ${slides > 1 && html`<div class="dots" aria-label=${`Promo ${slide + 1} of ${slides}`}>${Array.from({ length: slides }, (_, i) => html`<i key=${i} class=${i === slide ? 'on' : ''}></i>`)}</div>`}</div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
 }
