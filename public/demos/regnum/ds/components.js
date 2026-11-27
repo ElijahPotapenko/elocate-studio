@@ -83,12 +83,13 @@ export function typeAudit(root = document.body) {
   probe.remove();
   const near = (a, b, weight = true) => a.f === b.f && Math.abs(a.z - b.z) < 0.6 && (!weight || a.w === b.w);
   const roleOf = (g, weight) => { const m = refs.find(([, r]) => near(g, r, weight)); return m && m[0]; };
-  const out = { total: 0, on: 0, roles: {}, off: [] };
+  const out = { total: 0, on: 0, roles: {}, off: [], small: [] };   // small — текст мельче 11px (нечитаемо)
   for (const el of root.querySelectorAll('*')) {
     if (el.closest('svg, script, style, pre, code, .no-audit')) continue;
     const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
     if (!own || !el.getClientRects().length) continue;
     const g = sig(getComputedStyle(el)); out.total++;
+    if (g.z < 10.9) out.small.push(`${el.tagName.toLowerCase()} «${el.textContent.trim().slice(0, 24)}» ${g.z}px`);
     let role = roleOf(g, true);
     if (!role && /^(B|STRONG|EM|I)$/.test(el.tagName)) role = roleOf(g, false);
     if (role) { out.on++; out.roles[role] = (out.roles[role] || 0) + 1; }

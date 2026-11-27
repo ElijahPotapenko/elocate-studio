@@ -272,7 +272,7 @@ function App() {
         </section>
 
         <section class="grp" id="type"><h2><${Diamond}/>Typography</h2>
-          <p>Three families (<code>--f-logo</code>, <code>--f-head</code>, <code>--f-body</code>, swapped by themes) and 18 <b>text roles</b> — like text styles in Figma.
+          <p>Four families (<code>--f-logo</code>, <code>--f-display</code> — the theme's decorative face, only for display/title, <code>--f-head</code> — readable caps for everything small, <code>--f-body</code>). Nothing below 11px; numeric captions use the body face and 18 <b>text roles</b> — like text styles in Figma.
             Components use only roles: <code>font: var(--t-role)</code> + <code>letter-spacing: var(--tr-…)</code>. The <b>Type scale</b> knob in the playground scales them all.</p>
           <${TypeScale}/>
           <${Story} id="text" title="Text" note="any copy outside components — pick a role, never a raw size" code=${'<${Text} v="eyebrow">Welcome to the court<//>\n<${Text} v="display" as="h1">200 free spins<//>\n<${Text} v="caption">Regnum Originals<//>'}>

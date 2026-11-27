@@ -13,6 +13,7 @@ test.describe('Regnum design system', () => {
       const r = await page.evaluate(async () => (await import('/demos/regnum/ds/components.js')).typeAudit());
       expect(r.total).toBeGreaterThan(100);
       expect(r.off, r.off.join('\n')).toEqual([]);
+      expect(r.small, 'текст мельче 11px:\n' + r.small.join('\n')).toEqual([]);
     });
   }
 

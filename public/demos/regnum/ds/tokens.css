@@ -33,7 +33,7 @@
   --fx: none;                          /* декор-эффекты (пыль, блики, ореолы): none | block */
   --tf-glow: none; --cta-f: none; --cta-f-hover: none;   /* фильтры-свечения: none = браузер их не считает */
   --cut: 4px;      --ornament: .4;
-  --f-logo: 'Cinzel', serif; --f-head: 'Cinzel', serif;   /* Cormorant SC тонок на 11–13px — не читался */
+  --f-logo: 'Cinzel', serif; --f-display: 'Cinzel', serif; --f-head: 'Cinzel', serif;   /* Cormorant SC тонок на 11–13px — не читался */
 }
 /* ── Royal: королевская ночь — золото, рубин, свечения, пыль ── */
 [data-theme="royal"]{
@@ -47,7 +47,7 @@
   --cta-f: drop-shadow(0 0 10px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
   --cta-f-hover: drop-shadow(0 0 12px var(--glow-accent-strong)) drop-shadow(0 0 32px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
   --cut: 12px; --ornament: .8;
-  --f-logo: 'Cinzel Decorative', serif; --f-head: 'Cinzel', serif;
+  --f-logo: 'Cinzel Decorative', serif; --f-display: 'Cinzel', serif; --f-head: 'Cinzel', serif;
 }
 /* ── Фэнтези-черновики ── */
 [data-theme="elven"]{   /* Эльфийский лес: лунное серебро-золото, изумруд, хвоя */
@@ -61,7 +61,7 @@
   --cta-f: drop-shadow(0 0 10px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
   --cta-f-hover: drop-shadow(0 0 12px var(--glow-accent-strong)) drop-shadow(0 0 32px var(--glow-accent));
   --cut: 16px; --ornament: .9;
-  --f-logo: 'Uncial Antiqua', serif; --f-head: 'Cormorant SC', serif;
+  --f-logo: 'Uncial Antiqua', serif; --f-display: 'Cormorant SC', serif; --f-head: 'Cinzel', serif;   /* Cormorant — только крупно */
 }
 [data-theme="arcane"]{  /* Тайная магия: серебро-лёд, аметист, индиго */
   --metal-h: 215; --metal-c: .05;
@@ -74,7 +74,7 @@
   --cta-f: drop-shadow(0 0 10px var(--glow-accent)) drop-shadow(0 6px 12px var(--shade));
   --cta-f-hover: drop-shadow(0 0 12px var(--glow-accent-strong)) drop-shadow(0 0 32px var(--glow-accent));
   --cut: 10px; --ornament: .7;
-  --f-logo: 'Almendra SC', serif; --f-head: 'Cinzel', serif;
+  --f-logo: 'Almendra SC', serif; --f-display: 'Almendra SC', serif; --f-head: 'Cinzel', serif;
 }
 
 /* ── 2. ВЫВОДЫ (из ручек). Объявлены на :root И на любом [data-theme] — поэтому тему можно
@@ -137,15 +137,17 @@
   --amb-2: color-mix(in oklch, oklch(78% .13 var(--metal-h)) calc(14% * var(--glow)), transparent);
   --amb-3: color-mix(in oklch, oklch(50% .16 var(--magic-h)) calc(14% * var(--glow)), transparent);
   --amb-4: color-mix(in oklch, oklch(55% .13 var(--pos-h)) calc(10% * var(--glow)), transparent);
-  /* ТИПОГРАФИКА — роли текста (как text styles в Figma). Компоненты берут ТОЛЬКО их: font:var(--t-…) + letter-spacing:var(--tr-…).
+  /* ТИПОГРАФИКА — роли текста. Правила: ничего мельче 11px; декоративный --f-display (шрифт темы) — только display/title,
+     всё мелкое — читаемым --f-head/--f-body; цифры-подписи (деления, мета) — Manrope, не капитель.
+     Роли (как text styles в Figma). Компоненты берут ТОЛЬКО их: font:var(--t-…) + letter-spacing:var(--tr-…).
      Аудит typeAudit() (components.js) и тест проверяют, что любой текст на странице стоит на одной из ролей. */
   --t-logo:       900 calc(clamp(24px, 1.6vw + 18px, 30px) * var(--ts))/1 var(--f-logo);   /* 24 на телефоне → 30 на десктопе */                    --tr-logo: .02em;
-  --t-display:    800 calc(clamp(30px, 4vw, 48px) * var(--ts))/1.05 var(--f-head); --tr-display: .01em;
-  --t-title:      700 calc(20px * var(--ts))/1.2 var(--f-head);                  --tr-title: .04em;
+  --t-display:    800 calc(clamp(30px, 4vw, 48px) * var(--ts))/1.05 var(--f-display); --tr-display: .01em;
+  --t-title:      700 calc(20px * var(--ts))/1.2 var(--f-display);                 --tr-title: .04em;
   --t-subtitle:   700 calc(16px * var(--ts))/1.2 var(--f-head);                  --tr-subtitle: .02em;
   --t-heading-sm: 700 calc(14px * var(--ts))/1.25 var(--f-head);                 --tr-heading-sm: .02em;
   --t-eyebrow:    700 calc(12px * var(--ts))/1 var(--f-head);                    --tr-eyebrow: .18em;   /* + uppercase */
-  --t-eyebrow-sm: 700 calc(11px * var(--ts))/1.2 var(--f-head);                  --tr-eyebrow-sm: .06em;
+  --t-eyebrow-sm: 700 calc(12px * var(--ts))/1.2 var(--f-head);                  --tr-eyebrow-sm: .04em;
   --t-num-xl:     800 calc(28px * var(--ts))/1 var(--f-head);                    --tr-num: .01em;
   --t-num-lg:     800 calc(22px * var(--ts))/1 var(--f-head);
   --t-num-md:     800 calc(17px * var(--ts))/1.1 var(--f-head);
@@ -153,7 +155,7 @@
   --t-label:      700 calc(14px * var(--ts))/1.3 var(--f-body);                  --tr-label: .005em;
   --t-body-sm:    600 calc(13px * var(--ts))/1.45 var(--f-body);                 --tr-body-sm: 0;
   --t-caption:    600 calc(12px * var(--ts))/1.35 var(--f-body);                 --tr-caption: .01em;
-  --t-micro:      800 calc(10px * var(--ts))/1 var(--f-body);                    --tr-micro: .06em;     /* + uppercase */
+  --t-micro:      800 calc(11px * var(--ts))/1 var(--f-body);                    --tr-micro: .05em;     /* + uppercase */
   --t-control-lg: 800 calc(16px * var(--ts))/1 var(--f-head);                    --tr-control: .14em;   /* + uppercase */
   --t-control:    800 calc(14px * var(--ts))/1 var(--f-head);
   --t-control-sm: 800 calc(12px * var(--ts))/1 var(--f-head);
