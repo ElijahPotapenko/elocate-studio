@@ -35,6 +35,7 @@ export const KNOBS = [
   { v: '--pos-h', label: 'Positive hue', min: 0, max: 360, step: 1, group: 'Signals' },
   { v: '--magic-h', label: 'Magic hue', min: 0, max: 360, step: 1, group: 'Signals' },
   { v: '--sig-c', label: 'Signal chroma', min: 0, max: 0.2, step: 0.005, group: 'Signals' },
+  { v: '--ts', label: 'Type scale', min: 0.85, max: 1.2, step: 0.01, group: 'Type' },
   { v: '--glow', label: 'Glow strength', min: 0, max: 2, step: 0.05, group: 'Light & form' },
   { v: '--depth', label: 'Shadow depth', min: 0, max: 1.5, step: 0.05, group: 'Light & form' },
   { v: '--texture', label: 'Texture', min: 0, max: 1.5, step: 0.05, group: 'Light & form' },
@@ -66,6 +67,35 @@ const uid = () => useId().replace(/[^a-zA-Z0-9]/g, '');
 // Панель со срезанными углами. lit — ореол, sheen — блик, deco — завитки по углам, flat — плоское тело
 export const Orn = ({ className = '', flat, lit, sheen, deco, children, style }) => html`<div class=${'ornw ' + (lit ? 'lit ' : '') + className} style=${style}>
   <div class=${'orn' + (flat ? ' flat' : '') + (sheen ? ' sheen' : '')}><div class="in">${deco && html`<i class="cr tl"></i><i class="cr tr"></i><i class="cr bl"></i><i class="cr br"></i>`}${children}</div></div></div>`;
+
+// ── Текст: роли = text styles (tokens.css → --t-*). Любой текст интерфейса — одна из них ──
+export const TYPE_ROLES = ["logo", "display", "title", "subtitle", "heading-sm", "eyebrow", "eyebrow-sm", "num-xl", "num-lg", "num-md", "body", "label", "body-sm", "caption", "micro", "control-lg", "control", "control-sm"];
+export const Text = ({ v = 'body', as = 'span', className = '', children, style }) => html`<${as} class=${'t-' + v + (className ? ' ' + className : '')} style=${style}>${children}<//>`;
+
+// Аудит шрифтов: каждый элемент с собственным текстом должен совпасть с одной из ролей (семейство + размер + жирность).
+// Эталоны снимаются с невидимых проб .t-* в том же документе (тот же вьюпорт, та же тема, тот же --ts).
+// Встроенное выделение (b/strong/em) сверяется с родителем без учёта жирности. SVG-текст (колесо) вне шкалы.
+export function typeAudit(root = document.body) {
+  const probe = document.createElement('div'); probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;left:-9999px';
+  document.body.appendChild(probe);
+  const sig = (cs) => ({ f: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(), z: parseFloat(cs.fontSize), w: cs.fontWeight });
+  const refs = TYPE_ROLES.map((r) => { const e = document.createElement('span'); e.className = 't-' + r; e.textContent = 'Ag'; probe.appendChild(e); return [r, sig(getComputedStyle(e))]; });
+  probe.remove();
+  const near = (a, b, weight = true) => a.f === b.f && Math.abs(a.z - b.z) < 0.6 && (!weight || a.w === b.w);
+  const roleOf = (g, weight) => { const m = refs.find(([, r]) => near(g, r, weight)); return m && m[0]; };
+  const out = { total: 0, on: 0, roles: {}, off: [] };
+  for (const el of root.querySelectorAll('*')) {
+    if (el.closest('svg, script, style, pre, code, .no-audit')) continue;
+    const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+    if (!own || !el.getClientRects().length) continue;
+    const g = sig(getComputedStyle(el)); out.total++;
+    let role = roleOf(g, true);
+    if (!role && /^(B|STRONG|EM|I)$/.test(el.tagName)) role = roleOf(g, false);
+    if (role) { out.on++; out.roles[role] = (out.roles[role] || 0) + 1; }
+    else out.off.push(`${el.tagName.toLowerCase()}.${(el.className && el.className.baseVal === undefined ? el.className : '').toString().split(' ')[0]} «${el.textContent.trim().slice(0, 24)}» ${g.f} ${g.z}px ${g.w}`);
+  }
+  return out;
+}
 
 export const Diamond = () => html`<span class="diamond"></span>`;
 export const MetalText = ({ children, as = 'span' }) => html`<${as} class="metal-text">${children}<//>`;

@@ -10,6 +10,7 @@
 
 /* ── 1. РУЧКИ. Общие (не зависят от темы) ── */
 :root{
+  --ts: 1;                             /* масштаб всей шкалы текста: .9 — плотнее, 1.1 — крупнее */
   --f-body: 'Manrope', system-ui, sans-serif;
   --ease: cubic-bezier(.22,1,.36,1);
   --dur-fast: .2s; --dur: .35s; --dur-slow: .6s;
@@ -136,6 +137,26 @@
   --amb-2: color-mix(in oklch, oklch(78% .13 var(--metal-h)) calc(14% * var(--glow)), transparent);
   --amb-3: color-mix(in oklch, oklch(50% .16 var(--magic-h)) calc(14% * var(--glow)), transparent);
   --amb-4: color-mix(in oklch, oklch(55% .13 var(--pos-h)) calc(10% * var(--glow)), transparent);
+  /* ТИПОГРАФИКА — роли текста (как text styles в Figma). Компоненты берут ТОЛЬКО их: font:var(--t-…) + letter-spacing:var(--tr-…).
+     Аудит typeAudit() (components.js) и тест проверяют, что любой текст на странице стоит на одной из ролей. */
+  --t-logo:       900 calc(clamp(24px, 1.6vw + 18px, 30px) * var(--ts))/1 var(--f-logo);   /* 24 на телефоне → 30 на десктопе */                    --tr-logo: .02em;
+  --t-display:    800 calc(clamp(30px, 4vw, 48px) * var(--ts))/1.05 var(--f-head); --tr-display: .01em;
+  --t-title:      700 calc(20px * var(--ts))/1.2 var(--f-head);                  --tr-title: .04em;
+  --t-subtitle:   700 calc(16px * var(--ts))/1.2 var(--f-head);                  --tr-subtitle: .02em;
+  --t-heading-sm: 700 calc(14px * var(--ts))/1.25 var(--f-head);                 --tr-heading-sm: .02em;
+  --t-eyebrow:    700 calc(12px * var(--ts))/1 var(--f-head);                    --tr-eyebrow: .18em;   /* + uppercase */
+  --t-eyebrow-sm: 700 calc(11px * var(--ts))/1.2 var(--f-head);                  --tr-eyebrow-sm: .06em;
+  --t-num-xl:     800 calc(28px * var(--ts))/1 var(--f-head);                    --tr-num: .01em;
+  --t-num-lg:     800 calc(22px * var(--ts))/1 var(--f-head);
+  --t-num-md:     800 calc(17px * var(--ts))/1.1 var(--f-head);
+  --t-body:       500 calc(15px * var(--ts))/1.5 var(--f-body);                  --tr-body: 0;
+  --t-label:      700 calc(14px * var(--ts))/1.3 var(--f-body);                  --tr-label: .005em;
+  --t-body-sm:    600 calc(13px * var(--ts))/1.45 var(--f-body);                 --tr-body-sm: 0;
+  --t-caption:    600 calc(12px * var(--ts))/1.35 var(--f-body);                 --tr-caption: .01em;
+  --t-micro:      800 calc(10px * var(--ts))/1 var(--f-body);                    --tr-micro: .06em;     /* + uppercase */
+  --t-control-lg: 800 calc(16px * var(--ts))/1 var(--f-head);                    --tr-control: .14em;   /* + uppercase */
+  --t-control:    800 calc(14px * var(--ts))/1 var(--f-head);
+  --t-control-sm: 800 calc(12px * var(--ts))/1 var(--f-head);
   /* форма */
   --notch: polygon(var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut));
   --radius: 10px; --radius-sm: 4px;

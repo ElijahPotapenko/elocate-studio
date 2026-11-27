@@ -28,9 +28,9 @@
 #root{position:relative; z-index:1}
 .app{display:grid; grid-template-columns:268px 1fr; gap:22px; max-width:1360px; margin:0 auto; padding:18px 22px 60px}
 .top{grid-column:1 / -1; display:flex; align-items:center; gap:18px}
-.auth{display:flex; align-items:center; gap:14px; font-weight:700; color:var(--muted)}
+.auth{display:flex; align-items:center; gap:14px; font:var(--t-label); color:var(--muted)}
 .links{display:flex; gap:14px; white-space:nowrap}
-.back{font-size:12px; color:var(--faint)} .back:hover{color:var(--metal)}
+.back{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)} .back:hover{color:var(--metal)}
 .back.lab{color:var(--metal); text-shadow:0 0 10px var(--glow-metal)}
 .side .in{padding:18px 12px}
 .main{display:flex; flex-direction:column; gap:22px; min-width:0}
@@ -39,7 +39,7 @@
 .span3{grid-column:1 / -1}
 .wallets{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
 .games{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
-footer.foot{position:relative; z-index:1; max-width:1360px; margin:0 auto; padding:0 22px 40px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--faint)}
+footer.foot{position:relative; z-index:1; max-width:1360px; margin:0 auto; padding:0 22px 40px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
 footer.foot a{text-decoration:underline}
 @media (max-width: 1100px){ .games{grid-template-columns:repeat(3,1fr)} .row{grid-template-columns:1fr} }
 @media (max-width: 900px){
@@ -49,7 +49,7 @@ footer.foot a{text-decoration:underline}
 }
 @media (max-width: 640px){
   .games{grid-template-columns:repeat(2,1fr)} .wallets{grid-template-columns:1fr} .stats{grid-template-columns:1fr 1fr}
-  .stats .stat:first-child{grid-column:1 / -1} .logo{font-size:24px} .links .back:not(.lab){display:none}
+  .stats .stat:first-child{grid-column:1 / -1} .links .back:not(.lab){display:none}
 }
 </style>
 </head>

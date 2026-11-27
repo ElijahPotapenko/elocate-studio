@@ -89,6 +89,13 @@ input[type=range]::-moz-range-thumb{width:14px; height:14px; border:0; border-ra
 .sw i{display:block; height:64px}
 .sw div{padding:8px 10px; font:600 12px/1.3 ui-monospace, Menlo, monospace; color:var(--muted)}
 .sw.wide{grid-column:span 2}
+.ts{padding:6px 20px}
+.ts-row{display:grid; grid-template-columns:210px minmax(0,1fr) 250px; gap:20px; align-items:center; padding:14px 0; border-bottom:1px solid color-mix(in oklch, var(--metal-dim) 14%, transparent)}
+.ts-row:last-child{border-bottom:0}
+.ts-meta{display:grid; gap:3px} .ts-meta b{font:700 13px/1.2 ui-monospace, Menlo, monospace; color:var(--ink)} .ts-meta span{font-size:12px; color:var(--faint)}
+.ts-meta code{font:500 11px/1.2 ui-monospace, Menlo, monospace; color:var(--metal)}
+.ts-spec{font:500 11px/1.4 ui-monospace, Menlo, monospace; color:var(--faint); text-align:right}
+@media (max-width: 900px){ .ts-row{grid-template-columns:1fr} .ts-spec{text-align:left} }
 .type-row{display:grid; grid-template-columns:160px 1fr; gap:20px; align-items:baseline; padding:14px 0; border-bottom:1px solid color-mix(in oklch, var(--metal-dim) 15%, transparent)}
 .type-row small{font:600 12px/1.4 ui-monospace, Menlo, monospace; color:var(--faint)}
 .icons{display:grid; grid-template-columns:repeat(auto-fill, minmax(96px,1fr)); gap:12px; width:100%}
@@ -109,6 +116,7 @@ footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
+import { Text, TYPE_ROLES, typeAudit } from '../ds/components.js';
 import { html, PH, LINE, SUITS, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
@@ -121,16 +129,38 @@ const RUNGS = [['V', 'Baroness'], ['VI', 'Countess'], ['VII', 'Duchess'], ['VIII
 const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label: 'Crown points boost' }, { value: 'Royal chest', label: 'Unlocks at Princess', lock: 'LV 8' }];
 const copy = (t) => { try { navigator.clipboard.writeText(t); } catch { /* без буфера — текст виден на экране */ } };
 
+// ── Шкала текста: каждая роль — образец + фактические значения (снимаются со страницы, поэтому верны в любой теме) ──
+const ROLE_NOTE = { logo: 'brand mark', display: 'hero headline', title: 'section · card title', subtitle: 'panel heading', 'heading-sm': 'card name', eyebrow: 'overline · caps',
+  'eyebrow-sm': 'tiny caps · ticks', 'num-xl': 'key figures', 'num-lg': 'amounts', 'num-md': 'small figures', body: 'paragraph', label: 'nav · inputs', 'body-sm': 'lists · secondary',
+  caption: 'meta · hints', micro: 'badges · chips', 'control-lg': 'big button', control: 'button', 'control-sm': 'small button · segmented' };
+const ROLE_SAMPLE = { logo: 'Regnum', display: '200 free spins', title: 'Royal games', subtitle: 'Royal multiplier', 'heading-sm': "Dragon's Hoard", eyebrow: 'Welcome to the court',
+  'eyebrow-sm': 'Duchess · 3×', 'num-xl': '€12,480', 'num-lg': '4,120 USDT', 'num-md': '4,820', body: 'Claim the throne bonus on your first deposit.', label: 'Live casino',
+  'body-sm': 'Sir Aldric won €380 in Royal Flush', caption: 'Regnum Originals · RTP 96.4%', micro: 'New', 'control-lg': 'Claim', control: 'Join now', 'control-sm': 'Spin' };
+function TypeScale() {
+  const [specs, setSpecs] = useState({});
+  const look = document.documentElement.getAttribute('data-theme') + document.documentElement.getAttribute('style');
+  useEffect(() => { const o = {}; document.querySelectorAll('.ts-row [data-role]').forEach((e) => { const c = getComputedStyle(e);
+    o[e.dataset.role] = `${c.fontFamily.split(',')[0].replace(/"/g, '')} · ${Math.round(parseFloat(c.fontSize) * 10) / 10}px · ${c.fontWeight} · ${c.letterSpacing === 'normal' ? '0' : c.letterSpacing}`; }); setSpecs(o); }, [look]);
+  return html`<${Orn} flat><div class="ts">${TYPE_ROLES.map((r) => html`<div key=${r} class="ts-row">
+      <div class="ts-meta"><b>${r}</b><span>${ROLE_NOTE[r]}</span><code>var(--t-${r})</code></div>
+      <div class=${'t-' + r + (r === 'logo' || r.startsWith('num') ? ' metal-text' : '')} data-role=${r} style=${{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>${ROLE_SAMPLE[r]}</div>
+      <div class="ts-spec">${specs[r] || ''}</div></div>`)}</div><//>`;
+}
+
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard'];
+  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
+  const [ta, setTa] = useState(null);
+  useEffect(() => { const t = setTimeout(() => { const stages = document.querySelectorAll('.stage'); const all = { total: 0, on: 0, off: [] };
+    stages.forEach((st) => { const r = typeAudit(st); all.total += r.total; all.on += r.on; all.off.push(...r.off); }); setTa(all); }, 1800); return () => clearTimeout(t); }, []);
   return html`<${Orn} flat><div style=${{ padding: '18px 20px' }}>
     <div style=${{ font: '700 15px/1.3 var(--f-head)', marginBottom: '12px' }}>${comps.length - miss.length} / ${comps.length} components documented ${miss.length ? html`<span style=${{ color: 'var(--gem)' }}>· missing: ${miss.join(', ')}</span>` : html`<span style=${{ color: 'var(--pos)' }}>· 100%</span>`}</div>
     <div style=${{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>${comps.map((k) => html`<${Badge} key=${k} kind=${STORIED.includes(k) ? 'metal' : 'new'}>${k}<//>`)}</div>
+    ${ta && html`<div style=${{ marginTop: '18px', font: '700 15px/1.3 var(--f-head)' }}>Typography: ${ta.on} / ${ta.total} text elements in stories sit on a role ${ta.off.length ? html`<span style=${{ color: 'var(--gem)' }}>· off-scale: ${ta.off.slice(0, 6).join(' · ')}</span>` : html`<span style=${{ color: 'var(--pos)' }}>· 100%</span>`}</div>`}
   </div><//>`;
 }
 
@@ -143,7 +173,7 @@ function Story({ id, title, note, code, col, children }) {
     ${code && html`<pre class="code">${code}<button onClick=${() => { copy(code); setOk(true); setTimeout(() => setOk(false), 1200); }}>${ok ? 'Copied' : 'Copy'}</button></pre>`}
   <//></div>`;
 }
-const Lbl = ({ t, children }) => html`<div>${children}<span class="lbl">${t}</span></div>`;
+const Lbl = ({ t, children }) => html`<div>${children}<span class="lbl no-audit">${t}</span></div>`;
 
 // ── Пульт: ручки токенов ──
 function readKnob(k) { const x = getComputedStyle(document.documentElement).getPropertyValue(k.v).trim(); return k.type === 'switch' ? x : parseFloat(x); }
@@ -182,7 +212,7 @@ function Board({ look, setLook }) {
 
 const TOC = [
   ['Start', [['playground', 'Playground'], ['themes', 'Themes']]],
-  ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['iconography', 'Iconography']]],
+  ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['text', 'Text'], ['iconography', 'Iconography']]],
   ['Components', [['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
     ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['logo', 'Logo · Flourish'], ['suits', 'Suits'], ['pay', 'Pay row'], ['ticker', 'Wins ticker'], ['guilloche', 'Guilloche'], ['section', 'Section head']]],
   ['Patterns', [['hero', 'Hero banner'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
@@ -242,19 +272,18 @@ function App() {
         </section>
 
         <section class="grp" id="type"><h2><${Diamond}/>Typography</h2>
-          <p>Three roles: <code>--f-logo</code>, <code>--f-head</code>, <code>--f-body</code>. Themes may swap them (Noir → Cinzel + Cormorant SC, Royal → Cinzel Decorative + Cinzel, Elven → Uncial Antiqua, Arcane → Almendra SC).</p>
-          <${Orn} flat><div style=${{ padding: '8px 20px' }}>
-            <div class="type-row"><small>--f-logo · 900</small><div class="metal-text" style=${{ font: '900 44px/1 var(--f-logo)' }}>Regnum</div></div>
-            <div class="type-row"><small>--f-head · 800</small><div style=${{ font: '800 32px/1.1 var(--f-head)' }}>100% up to €500</div></div>
-            <div class="type-row"><small>--f-head · eyebrow</small><div class="eyebrow">Welcome to the court</div></div>
-            <div class="type-row"><small>--f-body · 15/1.5</small><div style=${{ color: 'var(--muted)' }}>Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift.</div></div>
-          </div><//>
+          <p>Three families (<code>--f-logo</code>, <code>--f-head</code>, <code>--f-body</code>, swapped by themes) and 18 <b>text roles</b> — like text styles in Figma.
+            Components use only roles: <code>font: var(--t-role)</code> + <code>letter-spacing: var(--tr-…)</code>. The <b>Type scale</b> knob in the playground scales them all.</p>
+          <${TypeScale}/>
+          <${Story} id="text" title="Text" note="any copy outside components — pick a role, never a raw size" code=${'<${Text} v="eyebrow">Welcome to the court<//>\n<${Text} v="display" as="h1">200 free spins<//>\n<${Text} v="caption">Regnum Originals<//>'}>
+            <div style=${{ display: 'grid', gap: '10px' }}><${Text} v="eyebrow">Welcome to the court<//><${Text} v="display" as="div">200 <span class="metal-text">free spins</span><//><${Text} v="body-sm" style=${{ color: 'var(--muted)' }}>Claim the throne bonus on your first deposit.<//><${Text} v="caption" style=${{ color: 'var(--faint)' }}>Play responsibly · 18+<//></div>
+          <//>
         </section>
 
         <section class="grp" id="iconography"><h2><${Diamond}/>Iconography</h2>
           <p>Emblems — <a href="https://phosphoricons.com" style=${{ textDecoration: 'underline' }}>Phosphor</a> duotone (MIT), painted as metal from tokens. Portraits — Lorelei (CC0). Line icons — 24×24 stroke in <code>--metal</code>.</p>
           <${Story} id="icons-ph" title="Emblem" note=${Object.keys(PH).length + ' icons — game art (MIT)'} code=${"<${Emblem} k=\"crown\"/>   // keys: " + Object.keys(PH).join(', ')}>
-            <div class="icons">${Object.keys(PH).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption>${k}</figcaption></figure>`)}</div>
+            <div class="icons">${Object.keys(PH).map((k, i) => html`<figure key=${k}><${Art} hue=${(i * 47) % 360} framed><${Emblem} k=${k}/><//><figcaption class="no-audit">${k}</figcaption></figure>`)}</div>
           <//>
           <${Story} id="icons-line" title="Icon (line)" code=${'<${Icon} n="casino" w={20}/>'}>
             ${Object.keys(LINE).map((k) => html`<${Lbl} key=${k} t=${k}><${Icon} n=${k} w=${24}/><//>`)}
@@ -266,7 +295,7 @@ function App() {
 
           <${Story} id="orn" title="Orn" note="notched panel: frame gradient + body. lit · sheen · deco · flat"
             code=${'<${Orn} lit sheen deco>…<//>\n// lit — halo (box-shadow on ::before, drawn once) · sheen — light sweep · deco — corner filigree (mask, recolours with --metal) · flat — plain body'}>
-            ${[['plain', {}], ['lit', { lit: true }], ['sheen', { sheen: true }], ['deco', { deco: true }], ['lit + sheen + deco', { lit: true, sheen: true, deco: true }]].map(([t, p]) => html`<${Lbl} key=${t} t=${t}><${Orn} ...${p} style=${{ width: '170px', height: '110px' }}><div style=${{ padding: '18px', color: 'var(--muted)', fontSize: '13px' }}>Panel</div><//><//>`)}
+            ${[['plain', {}], ['lit', { lit: true }], ['sheen', { sheen: true }], ['deco', { deco: true }], ['lit + sheen + deco', { lit: true, sheen: true, deco: true }]].map(([t, p]) => html`<${Lbl} key=${t} t=${t}><${Orn} ...${p} style=${{ width: '170px', height: '110px' }}><div class="t-body-sm" style=${{ padding: '18px', color: 'var(--muted)' }}>Panel</div><//><//>`)}
           <//>
 
           <${Story} id="gem" title="Gem" note="gem button. tone: accent | metal · size: sm | md | lg · magnetic"
@@ -330,7 +359,7 @@ function App() {
           <//>
 
           <${Story} id="logo" title="Logo · Crown · Flourish · MetalText" code=${'<${Logo} name="Regnum"/>\n<${Crown} size={42}/>\n<${Flourish}/>\n<${MetalText}>€500<//>'}>
-            <${Logo}/><${Crown} size=${42}/><div class="w-280"><${Flourish}/></div><span style=${{ font: '800 28px/1 var(--f-head)' }}><${MetalText}>€500<//></span>
+            <${Logo}/><${Crown} size=${42}/><div class="w-280"><${Flourish}/></div><span class="t-num-xl"><${MetalText}>€500<//></span>
           <//>
 
           <${Story} id="suits" title="Suit" note="own paths, 100×100 — crisp at 14px" code=${'<${Suit} s="spade" w={18}/>   // spade · heart · diamond · club'}>
