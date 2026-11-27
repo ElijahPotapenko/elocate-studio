@@ -92,7 +92,8 @@ export function typeAudit(root = document.body) {
     const g = sig(getComputedStyle(el)); out.total++;
     if (g.z < 10.9) out.small.push(`${el.tagName.toLowerCase()} «${el.textContent.trim().slice(0, 24)}» ${g.z}px`);
     let role = roleOf(g, true);
-    if (!role && /^(B|STRONG|EM|I)$/.test(el.tagName)) role = roleOf(g, false);
+    // акцент <b>/<em> — та же роль, другой вес; так же и куски текста ВНУТРИ акцента (слова SplitText в заголовке)
+    if (!role && el.closest('b, strong, em, i')) role = roleOf(g, false);
     if (role) { out.on++; out.roles[role] = (out.roles[role] || 0) + 1; }
     else out.off.push(`${el.tagName.toLowerCase()}.${(el.className && el.className.baseVal === undefined ? el.className : '').toString().split(' ')[0]} «${el.textContent.trim().slice(0, 24)}» ${g.f} ${g.z}px ${g.w}`);
   }
