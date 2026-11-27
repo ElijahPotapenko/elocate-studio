@@ -417,7 +417,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .soon-art img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 30%}
 .soon-art::after{content:''; position:absolute; inset:0; background:radial-gradient(48% 62% at 50% 50%, color-mix(in oklch, var(--panel) 88%, transparent), color-mix(in oklch, var(--panel) 55%, transparent) 70%, color-mix(in oklch, var(--panel) 80%, transparent))}
 .soon-in{position:relative; z-index:1; display:grid; justify-items:center; gap:12px; text-align:center; max-width:560px}
-.soon-in h2{margin:0} .soon-in p{margin:0 0 8px; max-width:440px; font:var(--t-body); color:var(--ink)}
+.soon-in h2{margin:0}
+@media (min-width: 901px){ .soon-in{max-width:none} .soon-in h2{white-space:nowrap} }   /* заголовок заглушки — одной строкой на десктопе */ .soon-in p{margin:0 0 8px; max-width:440px; font:var(--t-body); color:var(--ink)}
 .soon .ghost-btn{background:color-mix(in oklch, var(--panel) 70%, transparent); color:var(--ink)}
 @media (max-width: 900px){ .soon .in{aspect-ratio:auto; min-height:300px; padding:32px 20px} }
 
