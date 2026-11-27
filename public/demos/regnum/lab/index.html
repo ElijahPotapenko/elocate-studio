@@ -117,7 +117,7 @@ import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit } from '../ds/components.js';
-import { html, PH, LINE, SUITS, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -150,7 +150,7 @@ function TypeScale() {
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton'];
+  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -213,7 +213,7 @@ function Board({ look, setLook }) {
 const TOC = [
   ['Start', [['playground', 'Playground'], ['themes', 'Themes']]],
   ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['text', 'Text'], ['iconography', 'Iconography']]],
-  ['Components', [['account', 'Account'], ['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
+  ['Components', [['loader', 'Loader'], ['account', 'Account'], ['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
     ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['logo', 'Logo · Flourish'], ['suits', 'Suits'], ['pay', 'Pay row'], ['ticker', 'Wins ticker'], ['guilloche', 'Guilloche'], ['section', 'Section head']]],
   ['Patterns', [['hero', 'Hero banner'], ['hero-art', 'Hero · art'], ['wheel-panel', 'Wheel panel'], ['rank', 'Rank plate'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
 ];
@@ -356,6 +356,10 @@ function App() {
           <${Story} id="wheel" title="CrownWheel" note="lights are pure CSS; spin lands exactly on the prize" code=${'<${CrownWheel} prizes={[{ label: \'50 FS\', suit: \'spade\' }, …]} onWin={(p) => …}/>   // или просто строки: [\'×2\', \'×3\', …]'}>
             <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel}/></div>
             <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel} prizes=${['×2', '×3', '×5', '×10', '×20', '×50']}/></div>
+          <//>
+
+          <${Story} id="loader" title="Loader" note="splash while fonts, hero art and the app load; in the demo it is static HTML so it paints before React" code=${'<${Loader} note="Preparing the court…" progress={0.6}/>'}>
+            <div style=${{ position: 'relative', width: '100%', height: '260px', borderRadius: '12px', overflow: 'hidden', transform: 'translateZ(0)' }}><${Loader} progress=${0.6}/></div>
           <//>
 
           <${Story} id="account" title="BalanceChip · UserMenu · Countdown · GhostButton" note="logged-in header and account actions" code=${'<${BalanceChip} amount="€12,480"/>\n<${UserMenu} name="Lady Morgane" unread={3}/>\n<${Countdown} to={Date.now() + 86400e3} prefix="Ends in "/>\n<${GhostButton} icon="arrowDown" label="Deposit"/>'}>

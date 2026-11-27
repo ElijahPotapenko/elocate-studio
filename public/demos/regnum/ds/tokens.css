@@ -71,6 +71,9 @@
   --f-logo: 'Almendra SC', serif; --f-display: 'Almendra SC', serif; --f-head: 'Cinzel', serif;
 }
 
+/* ── Облегчённое качество: ставится autoQuality(), если кадров мало (или ?quality=lite). Как «качество графики» в играх ── */
+[data-quality="lite"]{ --fx: none; --glow: .45; --texture: .25; }
+
 /* ── 2. ВЫВОДЫ (из ручек). Объявлены на :root И на любом [data-theme] — поэтому тему можно
    включить и на отдельном блоке (лаба ставит темы рядом), выводы пересчитаются на месте ── */
 :root, [data-theme]{

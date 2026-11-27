@@ -288,6 +288,25 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
   </div>`;
 }
 
+/* ───────────────────────────── Качество графики ───────────────────────────── */
+// Как «качество» в играх: после загрузки меряем ~1.5 с кадров; меньше 50 — включаем lite (без пыли, бликов, ореолов,
+// фонового света; мягче тени и фактура). ?quality=lite|high|auto — вручную (запоминается). Решение auto — на сессию.
+export function autoQuality({ delay = 1500, threshold = 50 } = {}) {
+  const root = document.documentElement, K = 'regnum-quality';
+  const ls = (v) => { try { return v === undefined ? localStorage.getItem(K) : localStorage.setItem(K, v); } catch { return null; } };
+  const q = new URLSearchParams(location.search).get('quality'); if (q) ls(q);
+  const pref = ls() || 'auto';
+  if (pref === 'lite' || pref === 'high') { root.dataset.quality = pref; return; }
+  try { const s = sessionStorage.getItem(K); if (s) { root.dataset.quality = s; return; } } catch { /* без памяти */ }
+  setTimeout(() => { let n = 0, t0 = 0; const f = (t) => { if (!t0) t0 = t; if (++n < 90) return requestAnimationFrame(f);
+    const fps = n * 1000 / (t - t0), v = fps < threshold ? 'lite' : 'high'; root.dataset.quality = v; try { sessionStorage.setItem(K, v); } catch { /* */ } };
+    requestAnimationFrame(f); }, delay);
+}
+// Экран загрузки. В странице он — статичный HTML (рисуется до React); компонент — для лабы и других страниц.
+export const Loader = ({ note = 'Preparing the court…', progress = 0.6, inline = false }) => html`<div class=${'rg-loader' + (inline ? ' inline' : '')} role="status" aria-live="polite">
+  <div class="rl-in"><svg class="rl-crown" viewBox="0 0 256 256" aria-hidden="true"><path d=${PH.crown[0]}/><path d=${PH.crown[1]}/></svg>
+    <div class="rl-word">Regnum</div><div class="rl-bar" style=${{ '--p': progress }}><i></i></div><div class="rl-note">${note}</div></div></div>`;
+
 /* ───────────────────────────── Аккаунт ───────────────────────────── */
 // Живой обратный отсчёт: «2d 14:03:22» / «23:59:41». Тикает раз в секунду, без перерисовки остального.
 const fmt = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
@@ -316,7 +335,7 @@ export const WinsTicker = ({ wins, speed = 3.2 }) => html`<${VelocityMarquee} cl
 /* ───────────────────────────── Паттерны (собраны из компонентов) ───────────────────────────── */
 // Баннер: текст слева, что угодно справа (колесо). Фон — гильош-гравировка.
 // art — иллюстрация справа (растворяется в фоне к тексту), artMobile — версия для телефона (встаёт сверху)
-export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', secondary, endsAt, slides = 0, slide = 0, aside, art, artMobile, artAlt = '' }) => html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit sheen deco>
+export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', secondary, endsAt, slides = 0, slide = 0, aside, art, artMobile, artAlt = '' }) => html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit deco>
   ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
   <div class="hero-copy"><div class="hero-top"><span class="eyebrow">${eyebrow}</span>${endsAt && html`<span class="hero-timer"><${Countdown} to=${endsAt} prefix="Ends in "/></span>`}</div>
     <h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
