@@ -13,6 +13,10 @@ export const LINE = {
   wallet: 'M3 6h15v3h3v11H3zM16 13h3',
   search: 'M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14zM20 20l-3.5-3.5',
   lock: 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3',
+  bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0',
+  plus: 'M12 5v14M5 12h14',
+  arrowUp: 'M12 19V5M6 11l6-6 6 6',
+  arrowDown: 'M12 5v14M6 13l6 6 6-6',
 };
 
 // Масти — свои контуры, viewBox 100×100: строгие, читаются на 14 px.

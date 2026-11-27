@@ -331,6 +331,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 /* HeroBanner с иллюстрацией: картинка справа, левый край растворяется в фоне под текстом */
 .hero.has-art .in{grid-template-columns:minmax(0, .9fr) minmax(0, 1.1fr); min-height:400px; background:var(--panel)}
+.hero.has-art p{max-width:390px}
 .hero-art{display:block; position:absolute; inset:0 0 0 34%; z-index:0; pointer-events:none}
 .hero-art img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 18%;
   -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 30%); mask-image:linear-gradient(90deg, transparent 0, #000 30%)}
@@ -356,6 +357,50 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   .wp-copy p{margin-inline:auto} .wp-prizes{grid-template-columns:repeat(2, minmax(0, 1fr)); margin-inline:auto}
   .wheel-panel .wheel{width:min(260px, 76%)}
 }
+
+/* ── Аккаунт: баланс, игрок, отсчёт, тихие кнопки ── */
+.countdown time{font-variant-numeric:tabular-nums}
+.balance-chip{display:flex; align-items:center; gap:10px; height:42px; padding:0 6px 0 14px; border-radius:var(--radius); background:var(--panel);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
+.bc-k{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
+.bc-v{font:var(--t-num-md); letter-spacing:var(--tr-num)}
+.bc-add{display:grid; place-items:center; width:30px; height:30px; border-radius:8px; background:var(--metal-tex), var(--accent-grad)}
+.bc-add .ico{stroke:var(--ink)}
+.user-menu{display:flex; align-items:center; gap:10px}
+.um-bell{position:relative; display:grid; place-items:center; width:42px; height:42px; border-radius:var(--radius); background:var(--panel); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
+.um-bell i{position:absolute; top:6px; right:6px; min-width:16px; height:16px; padding:0 4px; border-radius:8px; display:grid; place-items:center;
+  font:var(--t-micro); letter-spacing:0; font-style:normal; color:var(--ink); background:var(--accent)}
+.um-me{display:flex; align-items:center; gap:8px}
+.um-ava{width:38px; height:38px; border-radius:50%; overflow:hidden; background:radial-gradient(80% 80% at 35% 25%, var(--accent-deep), var(--accent-dark)); box-shadow:0 0 0 1.5px var(--metal-2)}
+.um-ava svg{width:100%; height:100%} .um-ava .pl{fill:var(--metal)} .um-ava .ps{fill:var(--accent-dark)}
+.um-name{font:var(--t-label); letter-spacing:var(--tr-label); color:var(--ink)}
+.ghost-btn{display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 11px; border-radius:8px; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--muted);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); transition:color var(--dur-fast), box-shadow var(--dur-fast)}
+.ghost-btn:hover{color:var(--ink); box-shadow:inset 0 0 0 1px var(--metal-2)}
+.ghost-btn .ico{stroke:currentColor}
+.wallet-actions{display:flex; gap:8px; margin-top:16px; position:relative}
+.field{position:relative}
+.field input::-webkit-search-cancel-button{display:none}
+.field-x{display:grid; place-items:center; width:22px; height:22px; border-radius:50%; font:var(--t-label); color:var(--muted); background:var(--panel-hi)}
+/* HeroBanner: строка над заголовком, действия, точки слайдов */
+.hero-top{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.hero-timer{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--ink); padding:5px 10px; border-radius:999px; background:color-mix(in oklch, var(--panel) 70%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent)}
+.hero-actions{display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+.hero-link{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--muted); text-decoration:underline; text-underline-offset:3px; text-decoration-color:color-mix(in oklch, var(--metal-dim) 50%, transparent)}
+.hero-link:hover{color:var(--ink)}
+.dots{display:flex; gap:6px; margin-top:22px}
+.dots i{width:18px; height:3px; border-radius:2px; background:color-mix(in oklch, var(--metal-dim) 40%, transparent)} .dots i.on{width:34px; background:var(--metal-tex), var(--metal-grad)}
+@media (max-width: 900px){ .hero-top, .hero-actions, .dots{justify-content:center} }
+/* WheelPanel: статус ежедневного спина */
+.wp-status{display:inline-flex; align-items:center; gap:8px; margin:0 0 16px; font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--pos)}
+.wp-status .dot{width:8px; height:8px; border-radius:50%; background:var(--pos); box-shadow:0 0 10px var(--glow-pos)}
+.wp-status.wait{color:var(--muted)} .wp-status b{color:var(--ink)}
+.wp-status time{color:var(--ink)}
+.spin-btn .ico{stroke:var(--on-metal)}
+/* Пустое состояние списка */
+.empty{grid-column:1 / -1; padding:40px 20px; text-align:center; font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--muted);
+  border-radius:var(--radius); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 22%, transparent)}
 
 /* ── ProfileCard (паттерн): герб сверху → имя → факты → табы прижаты к низу ── */
 .profile .in{display:flex; flex-direction:column; align-items:center; padding:28px 22px 22px; text-align:center}

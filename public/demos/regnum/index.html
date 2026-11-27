@@ -27,8 +27,10 @@
 /* Раскладка СТРАНИЦЫ демо. Все компоненты и цвета — в ds/ (токены → компоненты); тут только сетка и места. */
 #root{position:relative; z-index:1}
 .app{display:grid; grid-template-columns:268px 1fr; gap:22px; max-width:1360px; margin:0 auto; padding:18px 22px 60px}
-.top{grid-column:1 / -1; display:flex; align-items:center; gap:18px}
-.auth{display:flex; align-items:center; gap:14px; font:var(--t-label); color:var(--muted)}
+.top{grid-column:1 / -1; display:flex; align-items:center; gap:14px}
+.games-sec{display:flex; flex-direction:column; gap:16px; scroll-margin-top:20px}
+.games-bar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.games-count{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
 .links{display:flex; gap:14px; white-space:nowrap}
 .back{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)} .back:hover{color:var(--metal)}
 .back.lab{color:var(--metal); text-shadow:0 0 10px var(--glow-metal)}
@@ -45,9 +47,10 @@ footer.foot a{text-decoration:underline}
 @media (max-width: 900px){
   .app{grid-template-columns:1fr; padding:14px 14px 40px; gap:16px}
   .side{order:2} .main{order:1}
-  .top{flex-wrap:wrap; gap:12px} .field{order:3; flex-basis:100%} .auth .lnk{display:none}
+  .top{flex-wrap:wrap; gap:10px} .top .field{order:5; flex-basis:100%} .um-name{display:none} .top .logo{margin-right:auto}
 }
 @media (max-width: 640px){
+  .top .seg{display:none} .bc-k{display:none} .links{display:none} .um-bell{display:none} .top{gap:8px}
   .games{grid-template-columns:repeat(2,1fr)} .wallets{grid-template-columns:1fr} .stats{grid-template-columns:1fr 1fr}
   .stats .stat:first-child{grid-column:1 / -1} .links .back:not(.lab){display:none}
 }
@@ -59,19 +62,19 @@ footer.foot a{text-decoration:underline}
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
-import { html, Orn, Gem, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard,
-  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard } from './ds/components.js';
+import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard,
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu } from './ds/components.js';
 
 // ── данные ──
 const GAMES = [
-  { name: "Dragon's Hoard", k: 'flame', hue: 30, rtp: '96.4%', badge: 'new' },
-  { name: 'Crown Jewels', k: 'sparkle', hue: 250, rtp: '97.1%', badge: 'hot' },
-  { name: "Knight's Gambit", k: 'horse', hue: 60, rtp: '95.8%' },
-  { name: 'Royal Flush', k: 'spade', hue: 160, rtp: '98.2%', badge: 'hot' },
-  { name: 'Golden Chalice', k: 'trophy', hue: 300, rtp: '96.9%', badge: 'new' },
-  { name: "Queen's Garden", k: 'flower-lotus', hue: 10, rtp: '96.1%' },
-  { name: 'Midnight Joust', k: 'sword', hue: 270, rtp: '95.5%', badge: 'new' },
-  { name: 'Emerald Throne', k: 'crown', hue: 150, rtp: '97.6%' },
+  { name: "Dragon's Hoard", k: 'flame', hue: 30, rtp: '96.4%', badge: 'new', type: 'slots' },
+  { name: 'Crown Jewels', k: 'sparkle', hue: 250, rtp: '97.1%', badge: 'hot', type: 'slots' },
+  { name: "Knight's Gambit", k: 'horse', hue: 60, rtp: '95.8%', type: 'table' },
+  { name: 'Royal Flush', k: 'spade', hue: 160, rtp: '98.2%', badge: 'hot', type: 'table' },
+  { name: 'Golden Chalice', k: 'trophy', hue: 300, rtp: '96.9%', badge: 'new', type: 'slots' },
+  { name: "Queen's Garden", k: 'flower-lotus', hue: 10, rtp: '96.1%', type: 'slots' },
+  { name: 'Midnight Joust', k: 'sword', hue: 270, rtp: '95.5%', badge: 'new', type: 'live' },
+  { name: 'Emerald Throne', k: 'crown', hue: 150, rtp: '97.6%', type: 'live' },
 ];
 const WINS = [['Lady Morgane', '€1,240', "Dragon's Hoard"], ['Sir Aldric', '€380', 'Royal Flush'], ['Baron K.', '€9,700', 'Crown Jewels'], ['Duchess Ivy', '€615', "Queen's Garden"], ['Lord Ferren', '€2,030', 'Emerald Throne']];
 const RUNGS = [['V', 'Baroness'], ['VI', 'Countess'], ['VII', 'Duchess'], ['VIII', 'Princess'], ['IX', 'Queen']];
@@ -79,13 +82,14 @@ const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label
 const COINS = [['₿', 65, '0.0425 BTC', '≈ €2,610'], ['₮', 170, '4,120 USDT', '≈ €3,800'], ['€', 260, '€6,070', 'Main wallet']];
 
 // ── разделы страницы ──
-function Top() {
+function Top({ q, setQ }) {
   const [tab, setTab] = useState('casino');
   return html`<header class="top">
     <${Logo}/>
     <${Seg} items=${['sport', 'casino']} value=${tab} onChange=${setTab}/>
-    <${Field} placeholder="Search the royal library of games…"/>
-    <div class="auth"><a class="lnk" href="#">Sign in</a><${Gem} label="Join" tone="metal" size="sm"/></div>
+    <${Field} placeholder="Search games…" value=${q} onChange=${(v) => { setQ(v); if (v) document.getElementById('games')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}/>
+    <${BalanceChip} amount="€12,480"/>
+    <${UserMenu} name="Lady Morgane" unread=${3}/>
     <div class="links"><a class="back lab" href="lab/index.html">✦ Lab</a><a class="back" href="/#work">← Elocate</a></div>
   </header>`;
 }
@@ -102,8 +106,10 @@ function Side() {
 }
 
 const PAY = [['VISA', 'oklch(45% 0.15 260)'], ['MC', 'oklch(62% 0.19 40)'], ['ETH', 'oklch(55% 0.13 270)'], ['₮', 'oklch(62% 0.13 170)'], ['₿', 'oklch(72% 0.16 65)']];
-const Hero = () => html`<${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
-  text="Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift." pay=${PAY}
+const PROMO_ENDS = Date.now() + ((2 * 24 + 14) * 3600 + 3 * 60) * 1000;   // акция «уикенда» — 2 дня 14 часов
+const Hero = () => html`<${HeroBanner} eyebrow="Weekend reload" endsAt=${PROMO_ENDS} title=${html`50% up to <b class="metal-text">€500</b><br/>+ 100 free spins`}
+  text="Your Duchess reload is ready: top up by Sunday and the court doubles half of it — free spins land on Dragon's Hoard." pay=${PAY}
+  cta="Claim bonus" secondary="Bonus terms" slides=${3} slide=${0}
   art="assets/hero-elves.webp" artMobile="assets/hero-elves-m.webp" artAlt="The elven king and queen on a golden throne before their forest castle"/>`;
 
 const Profile = () => html`<${ProfileCard} name="Lady Morgane" title="Duchess" level="VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/>`;
@@ -116,11 +122,25 @@ const Stats = () => html`<div class="stats">
   <${VipCard} level=${7} next="Princess" points=${4820} goal=${6000} rungs=${RUNGS} cur=${2} perks=${PERKS}/>
 </div>`;
 
+const TYPES = ['all', 'slots', 'table', 'live'];
+function Games({ q, setQ }) {
+  const [type, setType] = useState('all');
+  const qq = q.trim().toLowerCase();
+  const list = GAMES.filter((g) => (type === 'all' || g.type === type) && (!qq || g.name.toLowerCase().includes(qq)));
+  return html`<section id="games" class="games-sec">
+    <${Reveal}><${SectionHead} title="Royal games"/><//>
+    <div class="games-bar"><${Seg} items=${TYPES} value=${type} onChange=${setType}/><span class="games-count">${list.length} of ${GAMES.length}${qq ? html` · “${q.trim()}”` : ''}</span></div>
+    <div class="games">${list.length ? list.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${GameCard} game=${g}/><//>`)
+      : html`<div class="empty">No games match “${q.trim()}” in ${type === 'all' ? 'the library' : type}. <a href="#" onClick=${(e) => { e.preventDefault(); setQ(''); setType('all'); }} style=${{ textDecoration: 'underline' }}>Clear filters</a></div>`}</div>
+  </section>`;
+}
+
 function App() {
+  const [q, setQ] = useState('');
   return html`<${React.Fragment}>
     <${Dust}/>
     <div class="app">
-      <${Top}/>
+      <${Top} q=${q} setQ=${setQ}/>
       <${Side}/>
       <main class="main">
         <${Reveal}><${Hero}/><//>
@@ -129,11 +149,10 @@ function App() {
         <${Reveal}><div class="row"><${Profile}/><${Stats}/></div><//>
         <${Reveal}><${SectionHead} title="Your wallets"/><//>
         <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>
-        <${Reveal}><${SectionHead} title="Royal games"/><//>
-        <div class="games">${GAMES.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${GameCard} game=${g}/><//>`)}</div>
+        <${Games} q=${q} setQ=${setQ}/>
       </main>
     </div>
-    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio.</span><span>Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · Play responsibly · 18+</span></footer>
+    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio. <a href="lab/index.html">Design system lab</a> · <a href="/#work">Elocate</a></span><span>Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · Play responsibly · 18+</span></footer>
   <//>`;
 }
 

@@ -4,7 +4,7 @@
 // поэтому смена темы перекрашивает и иконки, и колесо, и рамки.
 // Механика (пружины, наклон, счётчики) — общая, из ../../_shared/motion.js.
 // ════════════════════════════════════════════════════════════════════════════════════════
-import React, { useState, useRef, useId, useMemo } from 'react';
+import React, { useState, useRef, useId, useMemo, useEffect } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, VelocityMarquee, html } from '../../_shared/motion.js';
 import { LINE, SUITS, PH, PORTRAITS } from './icons.js';
@@ -143,7 +143,8 @@ export function Seg({ items, value, onChange }) {
   return html`<nav class="seg">${items.map((t) => html`<button key=${t} class=${value === t ? 'on' : ''} onClick=${() => onChange(t)}>${t.toUpperCase()}</button>`)}</nav>`;
 }
 
-export const Field = ({ placeholder }) => html`<label class="field"><${Icon} n="search" w=${16}/><input placeholder=${placeholder}/></label>`;
+export const Field = ({ placeholder, value, onChange }) => html`<label class="field"><${Icon} n="search" w=${16}/><input type="search" placeholder=${placeholder} aria-label=${placeholder}
+  value=${value} onInput=${onChange && ((e) => onChange(e.target.value))}/>${value && onChange && html`<button class="field-x" aria-label="Clear" onClick=${(e) => { e.preventDefault(); onChange(''); }}>×</button>`}</label>`;
 
 export const SectionHead = ({ title }) => html`<div class="sec-head"><${Diamond}/><h2 class="metal-text">${title}</h2><span class="line"></span></div>`;
 
@@ -207,7 +208,11 @@ export function Tabs({ items, value, onChange }) {
   return html`<div class="ptabs">${items.map(([k, l]) => html`<button key=${k} class=${value === k ? 'on' : ''} onClick=${() => onChange(k)}><${Icon} n=${k} w=${20}/>${l}</button>`)}</div>`;
 }
 
-export const Wallet = ({ sym, hue, amount, sub }) => html`<${Orn} className="wallet"><span class="glow" style=${{ '--coin-h': hue }}></span><div class="coin" style=${{ '--coin-h': hue }}>${sym}</div><div class="amt">${amount}</div><div class="sub">${sub}</div><//>`;
+export const GhostButton = ({ icon, label, onClick, href = '#' }) => html`<a class="ghost-btn" href=${href} onClick=${onClick}>${icon && html`<${Icon} n=${icon} w=${14}/>`}<span>${label}</span></a>`;
+
+export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn} className="wallet"><span class="glow" style=${{ '--coin-h': hue }}></span>
+  <div class="coin" style=${{ '--coin-h': hue }}>${sym}</div><div class="amt">${amount}</div><div class="sub">${sub}</div>
+  ${actions && html`<div class="wallet-actions"><${GhostButton} icon="arrowDown" label="Deposit"/><${GhostButton} icon="arrowUp" label="Withdraw"/></div>`}<//>`;
 
 /* ───────────────────────────── Колесо ─────────────────────────────
    Слои (снизу вверх): обод из шлифованного металла (CSS conic — свет «бегает» по кругу) →
@@ -226,7 +231,7 @@ export const PRIZES = [   // масти по кругу ♠ ♦ ♣ ♥ — ст
 ];
 const norm = (p) => (typeof p === 'string' ? { label: p } : p);
 
-export function CrownWheel({ prizes = PRIZES, onWin }) {
+export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
   const list0 = prizes.length, face = useRef(null), ptr = useRef(null), rot = useRef(-180 / list0), lastSeg = useRef(0);   // в покое стрелка — в середине сектора
   const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null), [party, setParty] = useState(false);
   const list = useMemo(() => prizes.map(norm), [prizes]);
@@ -241,7 +246,7 @@ export function CrownWheel({ prizes = PRIZES, onWin }) {
     }
   };
   async function spin() {
-    if (spinning) return;
+    if (spinning || locked) return;
     const pick = Math.floor(Math.random() * list.length);
     const base = rot.current - (rot.current % 360);
     const target = base + 360 * 6 + (360 - pick * seg - seg / 2);
@@ -271,12 +276,29 @@ export function CrownWheel({ prizes = PRIZES, onWin }) {
       <svg class="lights" viewBox="0 0 240 240" aria-hidden="true"><defs><radialGradient id="wl" cx=".32" cy=".26" r=".75">
         <stop offset="0" style=${{ stopColor: '#fff', stopOpacity: 0.16 }}/><stop offset=".45" style=${{ stopColor: '#fff', stopOpacity: 0 }}/><stop offset="1" style=${{ stopColor: '#000', stopOpacity: 0.35 }}/></radialGradient></defs>
         <circle cx=${C} cy=${C} r="101.5" fill="url(#wl)"/>${BULBS}</svg>
-      <button class="spin-btn" onClick=${spin} disabled=${spinning} aria-label="Spin the wheel"><span>Spin</span></button>
+      <button class="spin-btn" onClick=${spin} disabled=${spinning || locked} aria-label=${locked ? 'Next free spin is not ready yet' : 'Spin the wheel'}><span>${locked ? html`<${Icon} n="lock" w=${18}/>` : 'Spin'}</span></button>
       <div class="pointer" ref=${ptr}><svg viewBox="0 0 40 56" aria-hidden="true"><path class="pb" d="M20 55 L7 21 A15 15 0 1 1 33 21 Z"/><path class="pe" d="M20 49 L10 21 A11 11 0 1 1 30 21 Z"/><circle class="pg" cx="20" cy="16" r="5.5"/><circle class="ph" cx="18.2" cy="14.2" r="1.6"/></svg></div>
     </div>
     ${win != null && !spinning && html`<${motion.div} class="win" initial=${{ opacity: 0, y: 10, scale: 0.92 }} animate=${{ opacity: 1, y: 0, scale: 1 }} transition=${{ type: 'spring', stiffness: 260, damping: 18 }}>★ You won ${list[win].label}<//>`}
   </div>`;
 }
+
+/* ───────────────────────────── Аккаунт ───────────────────────────── */
+// Живой обратный отсчёт: «2d 14:03:22» / «23:59:41». Тикает раз в секунду, без перерисовки остального.
+const fmt = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  const p = (x) => String(x).padStart(2, '0'); return (d ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(s); };
+export function Countdown({ to, prefix = '' }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  return html`<span class="countdown">${prefix}<time>${fmt(to - now)}</time></span>`;
+}
+// Баланс в шапке: сумма + быстрый депозит
+export const BalanceChip = ({ amount, label = 'Balance' }) => html`<div class="balance-chip"><span class="bc-k">${label}</span><span class="bc-v metal-text">${amount}</span>
+  <a class="bc-add" href="#" aria-label="Deposit"><${Icon} n="plus" w=${14}/></a></div>`;
+// Игрок в шапке: колокольчик с непрочитанными + мини-портрет
+export const UserMenu = ({ avatar = 'morgane', name, unread = 0 }) => html`<div class="user-menu">
+  <button class="um-bell" aria-label=${`Notifications${unread ? ', ' + unread + ' unread' : ''}`}><${Icon} n="bell" w=${18}/>${unread > 0 && html`<i>${unread}</i>`}</button>
+  <a class="um-me" href="#" aria-label=${name}><span class="um-ava">${PORTRAITS[avatar] ? html`<svg viewBox="0 0 980 980" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: PORTRAITS[avatar] }}></svg>` : null}</span><span class="um-name">${name}</span></a></div>`;
 
 /* ───────────────────────────── Мелочи бренда ───────────────────────────── */
 export const Suit = ({ s = 'spade', w = 16 }) => html`<svg class="suit" width=${w} height=${w} viewBox="0 0 100 100" aria-hidden="true"><path d=${SUITS[s]}/></svg>`;
@@ -289,16 +311,24 @@ export const WinsTicker = ({ wins, speed = 3.2 }) => html`<${VelocityMarquee} cl
 /* ───────────────────────────── Паттерны (собраны из компонентов) ───────────────────────────── */
 // Баннер: текст слева, что угодно справа (колесо). Фон — гильош-гравировка.
 // art — иллюстрация справа (растворяется в фоне к тексту), artMobile — версия для телефона (встаёт сверху)
-export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', aside, art, artMobile, artAlt = '' }) => html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit sheen deco>
+export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', secondary, endsAt, slides = 0, slide = 0, aside, art, artMobile, artAlt = '' }) => html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit sheen deco>
   ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
-  <div class="hero-copy"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}<${Gem} label=${cta} magnetic/></div>
+  <div class="hero-copy"><div class="hero-top"><span class="eyebrow">${eyebrow}</span>${endsAt && html`<span class="hero-timer"><${Countdown} to=${endsAt} prefix="Ends in "/></span>`}</div>
+    <h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
+    <div class="hero-actions"><${Gem} label=${cta} magnetic/>${secondary && html`<a class="hero-link" href="#">${secondary}</a>`}</div>
+    ${slides > 1 && html`<div class="dots" aria-label=${`Promo ${slide + 1} of ${slides}`}>${Array.from({ length: slides }, (_, i) => html`<i key=${i} class=${i === slide ? 'on' : ''}></i>`)}</div>`}</div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
 
 // Секция колеса: колесо + описание и список призов (масть · приз)
-export const WheelPanel = ({ eyebrow = 'Daily ritual', title = 'Crown Wheel', text, prizes = PRIZES }) => html`<${Orn} className="wheel-panel" lit deco><${Guilloche}/>
-  <div class="wp-wheel"><${CrownWheel} prizes=${prizes}/></div>
+// После спина колесо запирается до следующего дня: статус показывает обратный отсчёт (как в настоящих продуктах).
+export function WheelPanel({ eyebrow = 'Daily ritual', title = 'Crown Wheel', text, prizes = PRIZES, cooldownMs = 24 * 3600e3 }) {
+  const [nextAt, setNextAt] = useState(null), [won, setWon] = useState(null);
+  return html`<${Orn} className="wheel-panel" lit deco><${Guilloche}/>
+  <div class="wp-wheel"><${CrownWheel} prizes=${prizes} locked=${!!nextAt} onWin=${(p) => { setWon(p); setTimeout(() => setNextAt(Date.now() + cooldownMs), 2600); }}/></div>
   <div class="wp-copy"><div class="eyebrow">${eyebrow}</div><h2 class="t-display">${title}</h2>${text && html`<p>${text}</p>`}
+    <div class=${'wp-status' + (nextAt ? ' wait' : '')}>${nextAt ? html`${won && html`<b>${won}</b> added to your account · `}Next free spin in <${Countdown} to=${nextAt}/>` : html`<i class="dot"></i>1 free spin ready`}</div>
     <ul class="wp-prizes">${prizes.map((p, i) => { const q = typeof p === 'string' ? { label: p } : p; return html`<li key=${q.label + i}>${q.suit && html`<${Suit} s=${q.suit} w=${13}/>`}<span>${q.label}</span></li>`; })}</ul></div><//>`;
+}
 // Карточка профиля: герб с портретом, статус, имя, ранг, табы
 // Табличка титула: корона · ТИТУЛ капителью · ромбик · уровень
 export const RankPlate = ({ title, level }) => html`<div class="rank"><${Crown} size=${15}/><span class="rt">${title}</span>${level && html`<i class="rs"></i><span class="rl">${level}</span>`}</div>`;
