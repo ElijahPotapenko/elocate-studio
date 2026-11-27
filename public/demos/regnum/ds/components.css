@@ -329,11 +329,44 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   .hero .guilloche{right:50%; top:auto; bottom:-10%; transform:translateX(50%); width:520px}
 }
 
+/* HeroBanner с иллюстрацией: картинка справа, левый край растворяется в фоне под текстом */
+.hero.has-art .in{grid-template-columns:minmax(0, .9fr) minmax(0, 1.1fr); min-height:400px; background:var(--panel)}
+.hero-art{display:block; position:absolute; inset:0 0 0 34%; z-index:0; pointer-events:none}
+.hero-art img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 18%;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 30%); mask-image:linear-gradient(90deg, transparent 0, #000 30%)}
+.hero-art::after{content:''; position:absolute; inset:0; background:linear-gradient(0deg, color-mix(in oklch, var(--panel) 55%, transparent), transparent 35%)}
+@media (max-width: 900px){
+  .hero.has-art .in{grid-template-columns:1fr; padding-top:0; min-height:0}
+  .hero-art{position:relative; inset:auto; order:-1; height:250px; margin:0 -22px 4px}
+  .hero-art img{object-position:50% 22%; -webkit-mask-image:linear-gradient(180deg, #000 62%, transparent); mask-image:linear-gradient(180deg, #000 62%, transparent)}
+  .hero-art::after{display:none}
+}
+
+/* WheelPanel: колесо + описание и призы */
+.wheel-panel .in{position:relative; display:grid; grid-template-columns:minmax(260px, 360px) 1fr; gap:36px; align-items:center; padding:30px 40px; overflow:hidden}
+.wheel-panel .guilloche{position:absolute; left:-4%; top:50%; width:520px; transform:translateY(-50%)}
+.wp-wheel, .wp-copy{position:relative; z-index:1}
+.wp-copy h2{margin:12px 0 8px}
+.wp-copy p{margin:0 0 20px; max-width:460px; font:var(--t-body); color:var(--muted)}
+.wp-prizes{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; max-width:520px}
+.wp-prizes li{display:flex; align-items:center; gap:8px; padding:9px 11px; border-radius:var(--radius); font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--ink);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 28%, transparent); background:color-mix(in oklch, var(--panel-hi) 55%, transparent)}
+@media (max-width: 900px){
+  .wheel-panel .in{grid-template-columns:1fr; padding:26px 22px; text-align:center; gap:22px}
+  .wp-copy p{margin-inline:auto} .wp-prizes{grid-template-columns:repeat(2, minmax(0, 1fr)); margin-inline:auto}
+  .wheel-panel .wheel{width:min(260px, 76%)}
+}
+
 /* ── ProfileCard (паттерн): герб сверху → имя → факты → табы прижаты к низу ── */
 .profile .in{display:flex; flex-direction:column; align-items:center; padding:28px 22px 22px; text-align:center}
 .profile .crest{flex:none; margin-top:4px}
 .profile h3{font:var(--t-title); letter-spacing:var(--tr-title); margin:14px 0 4px;}
-.profile .rank{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--metal)}
+/* RankPlate */
+.rank{display:inline-flex; align-items:center; gap:8px; margin-top:2px}
+.rank .crown{flex:none; transform:translateY(-1px)}
+.rank .rt{font:var(--t-eyebrow); letter-spacing:var(--tr-eyebrow); text-transform:uppercase; color:var(--metal)}
+.rank .rs{width:5px; height:5px; transform:rotate(45deg); background:var(--metal-dim); flex:none}
+.rank .rl{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--muted)}
 .profile .flourish{margin:16px 0 12px}
 .facts{display:grid; grid-template-columns:repeat(3,1fr); width:100%; margin:0}
 .facts > div{padding:2px 6px}

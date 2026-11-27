@@ -60,7 +60,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
 import { html, Orn, Gem, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard,
-  Wallet, CrownWheel, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, ProfileCard } from './ds/components.js';
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard } from './ds/components.js';
 
 // ── данные ──
 const GAMES = [
@@ -103,9 +103,10 @@ function Side() {
 
 const PAY = [['VISA', 'oklch(45% 0.15 260)'], ['MC', 'oklch(62% 0.19 40)'], ['ETH', 'oklch(55% 0.13 270)'], ['₮', 'oklch(62% 0.13 170)'], ['₿', 'oklch(72% 0.16 65)']];
 const Hero = () => html`<${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
-  text="Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift." pay=${PAY} aside=${html`<${CrownWheel}/>`}/>`;
+  text="Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift." pay=${PAY}
+  art="assets/hero-elves.webp" artMobile="assets/hero-elves-m.webp" artAlt="The elven king and queen on a golden throne before their forest castle"/>`;
 
-const Profile = () => html`<${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/>`;
+const Profile = () => html`<${ProfileCard} name="Lady Morgane" title="Duchess" level="VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/>`;
 
 const Stats = () => html`<div class="stats">
   <${Stat} k="Balance" to=${12480} prefix="€" delta="▲ €1,240 today"/>
@@ -124,6 +125,7 @@ function App() {
       <main class="main">
         <${Reveal}><${Hero}/><//>
         <${WinsTicker} wins=${WINS}/>
+        <${Reveal}><${WheelPanel} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
         <${Reveal}><div class="row"><${Profile}/><${Stats}/></div><//>
         <${Reveal}><${SectionHead} title="Your wallets"/><//>
         <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>

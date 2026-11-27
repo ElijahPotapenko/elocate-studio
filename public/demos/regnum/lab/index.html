@@ -117,7 +117,7 @@ import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit } from '../ds/components.js';
-import { html, PH, LINE, SUITS, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, RankPlate, WheelPanel, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -150,7 +150,7 @@ function TypeScale() {
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text'];
+  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -215,7 +215,7 @@ const TOC = [
   ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['text', 'Text'], ['iconography', 'Iconography']]],
   ['Components', [['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
     ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['logo', 'Logo · Flourish'], ['suits', 'Suits'], ['pay', 'Pay row'], ['ticker', 'Wins ticker'], ['guilloche', 'Guilloche'], ['section', 'Section head']]],
-  ['Patterns', [['hero', 'Hero banner'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
+  ['Patterns', [['hero', 'Hero banner'], ['hero-art', 'Hero · art'], ['wheel-panel', 'Wheel panel'], ['rank', 'Rank plate'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
 ];
 const SW = [
   ['Surface', ['bg', 'well', 'panel', 'panel-2', 'panel-hi']],
@@ -393,8 +393,18 @@ function App() {
             <div class="w-full"><${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
               text="Claim the throne bonus on your first deposit — and spin the Crown Wheel for one more royal gift." pay=${PAY} aside=${html`<${CrownWheel}/>`}/></div>
           <//>
-          <${Story} id="profile" title="ProfileCard" code=${'<${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7"\n  facts={[[\'2021\', \'Member since\'], [\'1,284\', \'Games played\'], [\'€9.7k\', \'Best win\']]}\n  tabs={[[\'dash\',\'Dashboard\'], …]}/>'}>
-            <div style=${{ width: '330px', maxWidth: '100%' }}><${ProfileCard} name="Lady Morgane" rank="♛ Duchess · VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/></div>
+          <${Story} id="hero-art" title="HeroBanner · art" note="illustration on the right, fades into the panel under the copy; mobile version stacks on top" code=${'<${HeroBanner} eyebrow="…" title={…} text="…" pay={PAY}\n  art="assets/hero-elves.webp" artMobile="assets/hero-elves-m.webp" artAlt="…"/>'}>
+            <div class="w-full"><${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
+              text="Claim the throne bonus on your first deposit." pay=${PAY} art="../assets/hero-elves.webp" artMobile="../assets/hero-elves-m.webp" artAlt="Elven king and queen"/></div>
+          <//>
+          <${Story} id="wheel-panel" title="WheelPanel" code=${'<${WheelPanel} text="One free spin every day…" prizes={PRIZES}/>'}>
+            <div class="w-full"><${WheelPanel} text="One free spin every day. Land a suit, take the prize."/></div>
+          <//>
+          <${Story} id="rank" title="RankPlate" note="crown · title in caps · level" code=${'<${RankPlate} title="Duchess" level="VIP level 7"/>'}>
+            <${RankPlate} title="Duchess" level="VIP level 7"/><${RankPlate} title="Queen" level="VIP level 9"/><${RankPlate} title="Baroness"/>
+          <//>
+          <${Story} id="profile" title="ProfileCard" code=${'<${ProfileCard} name="Lady Morgane" title="Duchess" level="VIP level 7"\n  facts={[[\'2021\', \'Member since\'], [\'1,284\', \'Games played\'], [\'€9.7k\', \'Best win\']]}\n  tabs={[[\'dash\',\'Dashboard\'], …]}/>'}>
+            <div style=${{ width: '330px', maxWidth: '100%' }}><${ProfileCard} name="Lady Morgane" title="Duchess" level="VIP level 7" facts=${[['2021', 'Member since'], ['1,284', 'Games played'], ['€9.7k', 'Best win']]} tabs=${[['dash', 'Dashboard'], ['shield', 'Safety'], ['wallet', 'Wallet']]}/></div>
           <//>
         </section>
 

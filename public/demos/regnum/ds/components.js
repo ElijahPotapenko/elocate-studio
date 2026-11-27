@@ -288,15 +288,26 @@ export const WinsTicker = ({ wins, speed = 3.2 }) => html`<${VelocityMarquee} cl
 
 /* ───────────────────────────── Паттерны (собраны из компонентов) ───────────────────────────── */
 // Баннер: текст слева, что угодно справа (колесо). Фон — гильош-гравировка.
-export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', aside }) => html`<${Orn} className="hero" lit sheen deco><${Guilloche}/>
+// art — иллюстрация справа (растворяется в фоне к тексту), artMobile — версия для телефона (встаёт сверху)
+export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', aside, art, artMobile, artAlt = '' }) => html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit sheen deco>
+  ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
   <div class="hero-copy"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}<${Gem} label=${cta} magnetic/></div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
+
+// Секция колеса: колесо + описание и список призов (масть · приз)
+export const WheelPanel = ({ eyebrow = 'Daily ritual', title = 'Crown Wheel', text, prizes = PRIZES }) => html`<${Orn} className="wheel-panel" lit deco><${Guilloche}/>
+  <div class="wp-wheel"><${CrownWheel} prizes=${prizes}/></div>
+  <div class="wp-copy"><div class="eyebrow">${eyebrow}</div><h2 class="t-display">${title}</h2>${text && html`<p>${text}</p>`}
+    <ul class="wp-prizes">${prizes.map((p, i) => { const q = typeof p === 'string' ? { label: p } : p; return html`<li key=${q.label + i}>${q.suit && html`<${Suit} s=${q.suit} w=${13}/>`}<span>${q.label}</span></li>`; })}</ul></div><//>`;
 // Карточка профиля: герб с портретом, статус, имя, ранг, табы
-export function ProfileCard({ name, rank, avatar = 'morgane', status = 'Online', facts, tabs }) {
+// Табличка титула: корона · ТИТУЛ капителью · ромбик · уровень
+export const RankPlate = ({ title, level }) => html`<div class="rank"><${Crown} size=${15}/><span class="rt">${title}</span>${level && html`<i class="rs"></i><span class="rl">${level}</span>`}</div>`;
+
+export function ProfileCard({ name, title, level, avatar = 'morgane', status = 'Online', facts, tabs }) {
   const [tab, setTab] = useState(tabs[0][0]);
   return html`<${Orn} className="profile" lit deco>
     <${Crest}><${Avatar} k=${avatar}/><${Presence} label=${status}/><//>
-    <h3>${name}</h3><div class="rank">${rank}</div>
+    <h3>${name}</h3><${RankPlate} title=${title} level=${level}/>
     ${facts && html`<${Flourish} w=${90}/><dl class="facts">${facts.map(([v, l]) => html`<div key=${l}><dt class="metal-text">${v}</dt><dd>${l}</dd></div>`)}</dl>`}
     <${Tabs} items=${tabs} value=${tab} onChange=${setTab}/><//>`;
 }
