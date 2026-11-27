@@ -3,6 +3,23 @@ import { test, expect } from '@playwright/test';
 // Regnum DS: любой текст демо стоит на одной из ролей типографики (tokens.css → --t-*).
 // typeAudit() живёт в самой дизайн-системе — тест вызывает её в странице на трёх ширинах.
 test.describe('Regnum design system', () => {
+  // страж синтаксиса: лишняя скобка в CSS молча выбрасывает СЛЕДУЮЩЕЕ правило (так сломалась бегущая строка —
+  // от удалённого правила остался хвост). Число блоков в файле = числу правил, которые принял браузер
+  test('css: every rule of ds/*.css is parsed by the browser', async ({ page }) => {
+    await page.goto('/demos/regnum/index.html', { waitUntil: 'load' });
+    for (const f of ['tokens.css', 'components.css']) {
+      const r = await page.evaluate(async (f) => {
+        const txt = (await (await fetch('/demos/regnum/ds/' + f)).text()).replace(/\/\*[\s\S]*?\*\//g, '');
+        const open = (txt.match(/{/g) || []).length, close = (txt.match(/}/g) || []).length;
+        const ss = [...document.styleSheets].find((s) => (s.href || '').endsWith('/ds/' + f));
+        let n = 0; const walk = (rs: CSSRuleList) => { for (const x of Array.from(rs)) { if (!x.cssText.includes('{')) continue; /* @import и т.п. — без блока */ n++; const k = (x as CSSGroupingRule).cssRules; if (k && !(x as CSSStyleRule).selectorText) walk(k); } };
+        walk(ss!.cssRules); return { open, close, parsed: n };
+      }, f);
+      expect(r.open, `${f}: скобки { и } не сходятся`).toBe(r.close);
+      expect(r.parsed, `${f}: браузер принял ${r.parsed} правил из ${r.open}`).toBe(r.open);
+    }
+  });
+
   for (const [w, h] of [[1440, 1000], [820, 1100], [390, 844]] as const) {
     test(`typography: every text on the demo uses a type role @${w}px`, async ({ page }) => {
       test.slow();

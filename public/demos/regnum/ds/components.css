@@ -335,7 +335,6 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .pointer{z-index:3; left:calc(50% - 15px); top:-5%; width:30px; transform-origin:50% 28%}
 .pointer .pb{fill:var(--metal-shade)} .pointer .pe{fill:var(--metal)} .pointer .pg{fill:var(--accent); stroke:var(--metal-hi); stroke-width:1}
 .pointer .ph{fill:oklch(100% 0 0 / .7)}
-  background:var(--metal-tex), var(--metal-grad); border-radius:8px; corner-shape:bevel; filter:var(--tf-glow)}
 
 /* ── Ticker ── */
 .ticker{position:relative; overflow:hidden; white-space:nowrap; padding:12px 0}
@@ -359,7 +358,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .flourish{display:flex; justify-content:center; margin:-4px 0 12px; opacity:.85}
 .flourish .fl{fill:none; stroke:var(--metal-dim); stroke-width:1} .flourish .fd{fill:var(--metal)}
 .pay{display:flex; gap:8px; flex-wrap:wrap}
-.pay-chip{display:grid; place-items:center; width:52px; height:34px; border-radius:8px; background:var(--ink);   /* светлая плашка: фирменные цвета (тёмный Visa, серый Ethereum) читаются */
+.pay-chip{display:grid; place-items:center; width:52px; height:34px; border-radius:8px; background:color-mix(in oklch, var(--panel-hi) 55%, transparent);   /* прозрачная плашка, знаки — в фирменных цветах */
   box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
 .pay-chip svg{width:24px; height:24px; fill:var(--brand)}   /* логотипы — в фирменных цветах по умолчанию */
 

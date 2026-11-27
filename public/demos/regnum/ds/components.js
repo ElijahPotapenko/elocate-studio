@@ -363,8 +363,9 @@ export const Burger = ({ open, onClick, controls = 'side-nav', label = 'Menu' })
 export const Suit = ({ s = 'spade', w = 16 }) => html`<svg class="suit" width=${w} height=${w} viewBox="0 0 100 100" aria-hidden="true"><path d=${SUITS[s]}/></svg>`;
 // орнамент-разделитель: две линии и ромб
 export const Flourish = ({ w = 70 }) => html`<div class="flourish"><svg width=${w} height="18" viewBox="0 0 70 18" aria-hidden="true"><path class="fl" d="M0 9 H26 M44 9 H70"/><path class="fd" d="M35 1 L41 9 L35 17 L29 9 Z"/></svg></div>`;
-// платёжные методы: настоящие логотипы (Simple Icons) в фирменных цветах на светлой плашке; без ховера — нажимать нечего
-export const PayRow = ({ items = ['visa', 'mastercard', 'ethereum', 'tether', 'bitcoin'] }) => html`<div class="pay" role="list" aria-label="Payment methods">${items.map((k) => html`<span key=${k} class="pay-chip" role="listitem" title=${BRANDS[k].name} aria-label=${BRANDS[k].name} style=${{ '--brand': BRANDS[k].hex }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d=${BRANDS[k].d}/></svg></span>`)}</div>`;
+// платёжные методы: фирменные цвета на прозрачной плашке (Simple Icons; Mastercard и Ethereum — свои многоцветные знаки); без ховера
+export const PayRow = ({ items = ['visa', 'mastercard', 'ethereum', 'tether', 'bitcoin'] }) => html`<div class="pay" role="list" aria-label="Payment methods">${items.map((k) => html`<span key=${k} class="pay-chip" role="listitem" title=${BRANDS[k].name} aria-label=${BRANDS[k].name} style=${{ '--brand': BRANDS[k].fill || BRANDS[k].hex }}>${BRANDS[k].svg
+    ? html`<svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: BRANDS[k].svg }}></svg>` : html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d=${BRANDS[k].d}/></svg>`}</span>`)}</div>`;
 // Бегущая строка — чистая CSS-анимация (композитор), две копии трека, сдвиг на -50%. Было: rAF-скрипт каждый кадр
 // (VelocityMarquee) — в Firefox каждое изменение заставляло перерисовать всю страницу (простой 9 fps → 49).
 export const WinsTicker = ({ wins, duration = 38 }) => { const row = wins.map(([who, amt, g], i) => html`<span key=${i} class="t"><${Diamond}/>${who} won <b>${amt}</b> in ${g}</span>`);
