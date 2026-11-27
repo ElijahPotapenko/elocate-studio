@@ -19,7 +19,11 @@ export function initCrystal() {
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    // antialias:false — MSAA основного буфера при EffectComposer ничего не сглаживает (сцена рисуется в render-target, на экран
+    // копируется полноэкранный квад), но стоит памяти и времени на каждом кадре; вид не меняется (2026-11-27)
+    // alpha:false — фон и так залит непрозрачным цветом сайта (setClearColor(--bg, 1)), прозрачность холста не видна, но
+    // заставляла браузер каждый кадр смешивать полноэкранный холст со страницей (Firefox на macOS — особенно дорого)
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
   } catch (e) { return; } // WebGL недоступен — просто нет кристалла, страница не ломается
   // кап был 1 (жалоба «пикселизация, мыльная текстура»), подняли до 1.5 — но это было ДО fullscreen-
   // канваса (весь экран, не компактный квадрат). Проверка топологии: сам кристалл дешёвый (призма с
@@ -513,31 +517,8 @@ export function initCrystal() {
     fpsEl.textContent = liveFps + ' fps';
   }
 
-  // ── FPS-метка возле курсора — чисто по приколу (Элайджа: «курсор не кастомный, но пусть будет»).
-  // Кастомного курсора на сайте нет (см. cursor.js — отключён), поэтому просто плавающая подпись,
-  // которая идёт за системным курсором; на тач-устройствах pointermove от мыши не приходит — там
-  // элемент просто никогда не появляется, ничего не ломает.
-  let fpsEl = null;
-  if (!reduced) {
-    fpsEl = document.createElement('div');
-    fpsEl.textContent = '… fps';
-    Object.assign(fpsEl.style, {
-      position: 'fixed', left: '0', top: '0', zIndex: '9999',
-      font: '11px/1 ui-monospace, "SF Mono", Menlo, monospace',
-      color: 'var(--accent, #2b9f4c)',
-      background: 'rgba(0,0,0,.45)',
-      padding: '2px 5px', borderRadius: '4px',
-      pointerEvents: 'none', transform: 'translate(14px, 14px)',
-      opacity: '0', transition: 'opacity .2s',
-    });
-    document.body.appendChild(fpsEl);
-    addEventListener('pointermove', (e) => {
-      if (e.pointerType !== 'mouse') return;   // палец на телефоне тоже шлёт pointermove — метка fps только для мыши
-      fpsEl.style.opacity = '1';
-      fpsEl.style.left = e.clientX + 'px';
-      fpsEl.style.top = e.clientY + 'px';
-    }, { passive: true });
-  }
+  // FPS-метка кристалла убрана (2026-11-27): общий счётчик у курсора — public/demos/_shared/fps.js (на всех проектах)
+  const fpsEl = null;
 
   let running = false, rafId = 0;
   function animate(ts) {
