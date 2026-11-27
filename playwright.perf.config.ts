@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const GPU = ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist'];
+
 // Общий пул перф-тестов (perf/): `npm run perf`. Отчёт — perf/results/REPORT.md, эталон — perf/baseline.json
 // (`npm run perf:baseline` — принять текущие цифры). Функциональные тесты (`npm test`) — отдельно и быстрые.
 // workers: 1 — замеры кадров не делят машину с соседними тестами.
@@ -15,10 +17,11 @@ export default defineConfig({
   webServer: { command: 'npm run dev', url: 'http://localhost:4321', reuseExistingServer: true, timeout: 30_000 },
   projects: [
     // слабый ноутбук: Chromium, процессор ×4 медленнее
-    { name: 'chromium-cpu4x', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, metadata: { cpu: 4 } },
+    // GPU включён (иначе WebGL/three.js считается программно в SwiftShader — нереальные цифры)
+    { name: 'chromium-cpu4x', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, launchOptions: { args: GPU } }, metadata: { cpu: 4 } },
     // Firefox — основной браузер Элайджи; в headless рисует программно (худший случай отрисовки)
     { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: { width: 1440, height: 900 } } },
     // телефон среднего класса: узкий экран + процессор ×4
-    { name: 'mobile-cpu4x', use: { ...devices['Pixel 7'] }, metadata: { cpu: 4 } },
+    { name: 'mobile-cpu4x', use: { ...devices['Pixel 7'], launchOptions: { args: GPU } }, metadata: { cpu: 4 } },
   ],
 });
