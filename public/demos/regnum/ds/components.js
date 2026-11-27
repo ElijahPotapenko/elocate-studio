@@ -6,7 +6,7 @@
 // ════════════════════════════════════════════════════════════════════════════════════════
 import React, { useState, useRef, useId, useMemo, useEffect } from 'react';
 import { motion, animate } from 'framer-motion';
-import { MagneticCTA, TiltCard, CountUp, VelocityMarquee, html } from '../../_shared/motion.js';
+import { MagneticCTA, TiltCard, CountUp, html } from '../../_shared/motion.js';
 import { LINE, SUITS, PH, PORTRAITS } from './icons.js';
 
 export { LINE, SUITS, PH, PORTRAITS, html };
@@ -152,7 +152,7 @@ export const SectionHead = ({ title }) => html`<div class="sec-head"><${Diamond}
 export const Art = ({ hue, framed, className = '', children }) => html`<div class=${'art ' + (framed ? 'framed ' : '') + className} style=${{ '--art-h': hue }}>${children}</div>`;
 
 /* ───────────────────────────── Навигация ───────────────────────────── */
-export const NavItem = ({ icon, label, on }) => html`<a class=${on ? 'on' : ''} href="#"><span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
+export const NavItem = ({ icon, label, on, href = '#' }) => html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}><span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
 export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#"><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
 export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
 
@@ -288,6 +288,14 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
   </div>`;
 }
 
+/* ───────────────────────────── Спокойная прокрутка ───────────────────────────── */
+// Пока страница едет — декоративные бесконечные анимации на паузе (html.is-scrolling), через 150 мс после остановки
+// оживают. В Firefox анимации во время прокрутки заставляли перерисовывать тяжёлую страницу: прокрутка 5 fps → 35.
+export function calmScroll({ idle = 150 } = {}) {
+  const root = document.documentElement; let t = 0;
+  addEventListener('scroll', () => { if (!t) root.classList.add('is-scrolling'); clearTimeout(t); t = setTimeout(() => { root.classList.remove('is-scrolling'); t = 0; }, idle); }, { passive: true });
+}
+
 /* ───────────────────────────── Качество графики ───────────────────────────── */
 // Как «качество» в играх: после загрузки меряем ~1.5 с кадров; меньше 50 — включаем lite (без пыли, бликов, ореолов,
 // фонового света; мягче тени и фактура). ?quality=lite|high|auto — вручную (запоминается). Решение auto — на сессию.
@@ -330,7 +338,10 @@ export const Suit = ({ s = 'spade', w = 16 }) => html`<svg class="suit" width=${
 export const Flourish = ({ w = 70 }) => html`<div class="flourish"><svg width=${w} height="18" viewBox="0 0 70 18" aria-hidden="true"><path class="fl" d="M0 9 H26 M44 9 H70"/><path class="fd" d="M35 1 L41 9 L35 17 L29 9 Z"/></svg></div>`;
 // платёжные методы: бренд-цвет гасится ручкой --art-c (как обложки игр)
 export const PayRow = ({ items }) => html`<div class="pay">${items.map(([t, c]) => html`<i key=${t} style=${{ '--b': c }}>${t}</i>`)}</div>`;
-export const WinsTicker = ({ wins, speed = 3.2 }) => html`<${VelocityMarquee} className="ticker" baseSpeed=${speed} renderTrack=${() => wins.map(([who, amt, g], i) => html`<span key=${i} class="t"><${Diamond}/>${who} won <b>${amt}</b> in ${g}</span>`)}/>`;
+// Бегущая строка — чистая CSS-анимация (композитор), две копии трека, сдвиг на -50%. Было: rAF-скрипт каждый кадр
+// (VelocityMarquee) — в Firefox каждое изменение заставляло перерисовать всю страницу (простой 9 fps → 49).
+export const WinsTicker = ({ wins, duration = 38 }) => { const row = wins.map(([who, amt, g], i) => html`<span key=${i} class="t"><${Diamond}/>${who} won <b>${amt}</b> in ${g}</span>`);
+  return html`<div class="ticker" style=${{ '--dur': duration + 's' }}><div class="ticker-track"><div class="ticker-row">${row}</div><div class="ticker-row" aria-hidden="true">${row}</div></div></div>`; };
 
 /* ───────────────────────────── Паттерны (собраны из компонентов) ───────────────────────────── */
 // Баннер: текст слева, что угодно справа (колесо). Фон — гильош-гравировка.

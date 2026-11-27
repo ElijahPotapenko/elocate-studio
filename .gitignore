@@ -17,3 +17,6 @@ playwright-report/
 .env.*
 cv-src/*.png
 cover-src/.tmp/
+
+# перф-отчёты (эталон perf/baseline.json — в репе)
+perf/results/

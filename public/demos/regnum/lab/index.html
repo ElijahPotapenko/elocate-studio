@@ -116,7 +116,8 @@ footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
-import { Text, TYPE_ROLES, typeAudit } from '../ds/components.js';
+import { Text, TYPE_ROLES, typeAudit, calmScroll } from '../ds/components.js';
+calmScroll();
 import { html, PH, LINE, SUITS, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';

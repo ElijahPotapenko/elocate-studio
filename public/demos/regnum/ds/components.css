@@ -38,9 +38,9 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .ornw{position:relative; isolation:isolate}
 .ornw::before{content:''; position:absolute; inset:3px; z-index:-1; border-radius:16px; pointer-events:none;
   box-shadow:0 14px 34px var(--shade), 0 0 18px color-mix(in oklch, var(--metal) calc(7% * var(--glow)), transparent); transition:box-shadow var(--dur) var(--ease)}
-.ornw.lit::before{box-shadow:0 0 34px var(--glow-metal-soft), 0 0 80px color-mix(in oklch, var(--accent) calc(24% * var(--glow)), transparent), 0 16px 38px var(--shade)}
-.orn{position:relative; padding:1px; clip-path:var(--notch); background:var(--frame-grad); height:100%; contain:layout paint}   /* перерисовка внутри панели не расползается наружу (и так обрезана clip-path) */
-.orn > .in{position:relative; height:100%; clip-path:var(--notch); box-shadow:var(--edge); background:radial-gradient(120% 80% at 50% -10%, var(--panel-hi), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
+.ornw.lit::before{box-shadow:0 0 22px var(--glow-metal-soft), 0 0 44px color-mix(in oklch, var(--accent) calc(20% * var(--glow)), transparent), 0 12px 26px var(--shade)}
+.orn{position:relative; padding:1px; border-radius:var(--cut); corner-shape:bevel; background:var(--frame-grad); height:100%; contain:layout paint}   /* перерисовка внутри панели не расползается наружу (и так обрезана clip-path) */
+.orn > .in{position:relative; height:100%; border-radius:calc(var(--cut) - 1px); corner-shape:bevel; overflow:hidden; box-shadow:var(--edge); background:radial-gradient(120% 80% at 50% -10%, var(--panel-hi), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
 .orn.flat > .in{background:var(--panel)}
 .orn > .in::after{content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; background:var(--grain) 0 0 / 180px; opacity:calc(.2 * var(--texture))}
 .orn > .in{isolation:isolate}
@@ -53,11 +53,15 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   -webkit-mask:var(--corner) center / contain no-repeat; mask:var(--corner) center / contain no-repeat}
 .cr.tl{top:6px; left:6px} .cr.tr{top:6px; right:6px; transform:scaleX(-1)} .cr.bl{bottom:6px; left:6px; transform:scaleY(-1)} .cr.br{bottom:6px; right:6px; transform:scale(-1,-1)}
 
+/* corner-shape:bevel (Chrome 139+) даёт срезанные углы БЕЗ clip-path-масок. Где не поддерживается (Firefox) —
+   мягкое скругление: маски на ~40 панелях стоили Firefox ×2.5 по кадрам */
+@supports not (corner-shape: bevel){ .orn{border-radius:calc(var(--cut) * .75)} .orn > .in{border-radius:calc(var(--cut) * .75 - 1px)} }
+
 /* ── Diamond: ромбик-маркер ── */
 .diamond{width:8px; height:8px; transform:rotate(45deg); background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 12px var(--glow-metal-strong); display:inline-block; flex:none}
 
 /* ── Gem: кнопка-самоцвет. .cta = обёртка свечения (у .gem свой clip-path срезал бы его) ── */
-.cta{position:relative; display:inline-block; isolation:isolate}
+.cta{position:relative; display:inline-block; isolation:isolate; will-change:transform}
 /* свечение — подложка-градиент под кнопкой (рисуется один раз, на ховере меняется только opacity). Было: filter:drop-shadow
    на обёртке магнитной кнопки — пересчитывался каждый кадр, пока кнопка ехала за мышью */
 .cta::before{content:''; position:absolute; inset:-14px -18px; z-index:-1; pointer-events:none; border-radius:40px;
@@ -89,12 +93,12 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .badge.metal{background:var(--metal-tex), var(--metal-grad); color:var(--on-metal); box-shadow:0 0 12px var(--glow-metal)}
 
 /* ── Seg: переключатель-сегмент ── */
-.seg{display:flex; padding:4px; gap:4px; background:var(--panel); clip-path:var(--notch); --cut:9px}
-.seg button{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; padding:9px 20px; color:var(--muted); clip-path:var(--notch); --cut:7px; transition:color var(--dur-fast) var(--ease)}
+.seg{display:flex; padding:4px; gap:4px; background:var(--panel); border-radius:9px; corner-shape:bevel}
+.seg button{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; padding:9px 20px; color:var(--muted); border-radius:7px; corner-shape:bevel; transition:color var(--dur-fast) var(--ease)}
 .seg button.on{color:var(--on-metal); background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 18px var(--glow-metal)}
 
 /* ── Field: поле поиска ── */
-.field{flex:1; display:flex; align-items:center; gap:10px; height:42px; padding:0 16px; background:var(--panel); clip-path:var(--notch); --cut:10px; color:var(--faint)}
+.field{flex:1; display:flex; align-items:center; gap:10px; height:42px; padding:0 16px; background:var(--panel); border-radius:10px; corner-shape:bevel; color:var(--faint)}
 .field input{font:var(--t-body); letter-spacing:var(--tr-body); flex:1; min-width:0; background:none; border:0; outline:0; color:var(--ink);}
 
 /* ── Logo ── */
@@ -106,7 +110,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* ── NavItem / GameRow (боковое меню, вырез-шеврон) ── */
 .nav{display:flex; flex-direction:column; gap:6px}
 .nav a{font:var(--t-label); letter-spacing:var(--tr-label); display:flex; align-items:center; gap:12px; padding:11px 22px 11px 12px; color:var(--muted); transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
-  clip-path:polygon(8px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)}
+  border-radius:8px}
 .nav a:hover{background:var(--panel-hi); color:var(--ink)}
 .nav a.on{color:var(--ink); background:linear-gradient(90deg, color-mix(in oklch, var(--metal-deep) 55%, transparent), transparent); box-shadow:inset 3px 0 0 var(--metal), inset 0 0 24px color-mix(in oklch, var(--metal) 8%, transparent)}
 .nav .ic{width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--panel); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 40%, transparent); flex:none}
@@ -115,7 +119,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .sub-h{font:var(--t-eyebrow); letter-spacing:var(--tr-eyebrow); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin:18px 8px 8px; color:var(--metal)}
 .glist{display:flex; flex-direction:column; gap:6px}
 .grow{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); display:flex; align-items:center; gap:10px; padding:8px 16px 8px 8px; color:var(--muted); transition:background var(--dur-fast);
-  clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 0 100%)}
+  border-radius:8px}
 .grow.new{background:linear-gradient(90deg, color-mix(in oklch, var(--accent-deep) 45%, transparent), color-mix(in oklch, var(--accent-dark) 30%, transparent) 75%, transparent)}
 .grow.hot{background:linear-gradient(90deg, color-mix(in oklch, var(--pos) 25%, transparent), color-mix(in oklch, var(--on-pos) 30%, transparent) 75%, transparent)}
 .grow:hover{background:linear-gradient(90deg, color-mix(in oklch, var(--metal-deep) 55%, transparent), transparent); color:var(--ink)}
@@ -298,7 +302,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .pointer .pb{fill:var(--metal-shade)} .pointer .pe{fill:var(--metal)} .pointer .pg{fill:var(--accent); stroke:var(--metal-hi); stroke-width:1}
 .pointer .ph{fill:oklch(100% 0 0 / .7)}
 .win{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; position:absolute; z-index:3; bottom:-10px; left:50%; translate:-50% 0; padding:9px 18px; white-space:nowrap; overflow:hidden; color:var(--on-metal);
-  background:var(--metal-tex), var(--metal-grad); clip-path:var(--notch); --cut:8px; filter:var(--tf-glow)}
+  background:var(--metal-tex), var(--metal-grad); border-radius:8px; corner-shape:bevel; filter:var(--tf-glow)}
 .win::after{content:''; position:absolute; inset:0; background:linear-gradient(105deg, transparent 35%, oklch(100% 0 0 / .6) 50%, transparent 65%); transform:translateX(-120%); animation:gemsheen 1.1s .25s var(--ease) forwards}
 
 /* ── Ticker ── */
@@ -306,6 +310,10 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* края — шторки цвета фона поверх (было mask-image на постоянно движущемся треке — перемаскировка каждый кадр) */
 .ticker::before, .ticker::after{content:''; position:absolute; top:0; bottom:0; width:8%; z-index:1; pointer-events:none}
 .ticker::before{left:0; background:linear-gradient(90deg, var(--bg), transparent)} .ticker::after{right:0; background:linear-gradient(-90deg, var(--bg), transparent)}
+.ticker-track{display:flex; width:max-content; animation:ticker var(--dur, 38s) linear infinite; will-change:transform}
+.ticker-row{display:flex; flex:none}
+.ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes ticker{to{transform:translateX(-50%)}}
 .ticker .t{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); display:inline-flex; align-items:center; gap:10px; margin-right:34px; color:var(--muted)}
 .ticker .t b{color:var(--metal); font-weight:800; text-shadow:0 0 10px var(--glow-metal)}
 
@@ -341,6 +349,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 /* HeroBanner с иллюстрацией: картинка справа, левый край растворяется в фоне под текстом */
 .hero.has-art .in{grid-template-columns:minmax(0, .9fr) minmax(0, 1.1fr); min-height:400px; background:var(--panel)}
+.wp-status time, .countdown time{display:inline-block; will-change:transform}   /* тикающие цифры — отдельный слой: не перерисовывают панель под собой */
 .hero.has-art p{max-width:390px}
 .hero-art{display:block; position:absolute; inset:0 0 0 34%; z-index:0; pointer-events:none}
 .hero-art img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 18%}
@@ -395,7 +404,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .field-x{display:grid; place-items:center; width:22px; height:22px; border-radius:50%; font:var(--t-label); color:var(--muted); background:var(--panel-hi)}
 /* HeroBanner: строка над заголовком, действия, точки слайдов */
 .hero-top{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
-.hero-timer{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--ink); padding:5px 10px; border-radius:999px; background:color-mix(in oklch, var(--panel) 70%, transparent);
+.hero-timer{will-change:transform; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--ink); padding:5px 10px; border-radius:999px; background:color-mix(in oklch, var(--panel) 70%, transparent);
   box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent)}
 .hero-actions{display:flex; align-items:center; gap:18px; flex-wrap:wrap}
 .hero-link{font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--muted); text-decoration:underline; text-underline-offset:3px; text-decoration-color:color-mix(in oklch, var(--metal-dim) 50%, transparent)}
@@ -451,6 +460,9 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 /* ── Guilloche ── */
 .guilloche{fill:none; stroke:var(--metal); stroke-width:.45; opacity:calc(.22 * var(--texture)); pointer-events:none}
+
+/* Спокойная прокрутка (calmScroll): пока едем — декор на паузе */
+.is-scrolling *, .is-scrolling *::before, .is-scrolling *::after{animation-play-state:paused !important}
 
 @media (max-width:640px){ .perks{grid-template-columns:1fr} .medal{width:36px; height:36px} .ladder::before,.ladder::after{top:17px} }
 @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }

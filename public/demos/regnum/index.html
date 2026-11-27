@@ -29,6 +29,11 @@
 #root{position:relative; z-index:1}
 .app{display:grid; grid-template-columns:268px 1fr; gap:22px; max-width:1360px; margin:0 auto; padding:18px 22px 60px}
 .top{grid-column:1 / -1; display:flex; align-items:center; gap:14px}
+.soon .in{padding:56px 32px}
+.soon-in{position:relative; z-index:1; display:grid; justify-items:center; gap:12px; text-align:center}
+.soon-emb{width:96px} .soon-in h2{margin:0} .soon-in p{margin:0 0 8px; max-width:440px; font:var(--t-body); color:var(--muted)}
+.promos{grid-template-columns:repeat(4, minmax(0, 1fr)); margin-top:0}
+@media (max-width: 900px){ .promos{grid-template-columns:1fr 1fr} }
 .games-sec{display:flex; flex-direction:column; gap:16px; scroll-margin-top:20px}
 .games-bar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
 .games-count{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
@@ -80,8 +85,9 @@ footer.foot a{text-decoration:underline}
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
-import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard,
-  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality } from './ds/components.js';
+import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard, Perk, GhostButton, Emblem,
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll } from './ds/components.js';
+calmScroll();
 
 // ── данные ──
 const GAMES = [
@@ -100,23 +106,22 @@ const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label
 const COINS = [['₿', 65, '0.0425 BTC', '≈ €2,610'], ['₮', 170, '4,120 USDT', '≈ €3,800'], ['€', 260, '€6,070', 'Main wallet']];
 
 // ── разделы страницы ──
-function Top({ q, setQ }) {
-  const [tab, setTab] = useState('casino');
+function Top({ q, setQ, route }) {
   return html`<header class="top">
     <${Logo}/>
-    <${Seg} items=${['sport', 'casino']} value=${tab} onChange=${setTab}/>
-    <${Field} placeholder="Search games…" value=${q} onChange=${(v) => { setQ(v); if (v) document.getElementById('games')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}/>
+    <${Seg} items=${['sport', 'casino']} value=${route === 'sports' ? 'sport' : 'casino'} onChange=${(t) => go(t === 'sport' ? 'sports' : 'casino')}/>
+    <${Field} placeholder="Search games…" value=${q} onChange=${(v) => { setQ(v); if (v) requestAnimationFrame(() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }}/>
     <${BalanceChip} amount="€12,480"/>
     <${UserMenu} name="Lady Morgane" unread=${3}/>
     <div class="links"><a class="back lab" href="lab/index.html">✦ Lab</a><a class="back" href="/#work">← Elocate</a></div>
   </header>`;
 }
 
-function Side() {
+function Side({ route }) {
   const fresh = GAMES.filter((g) => g.badge === 'new'), hot = GAMES.filter((g) => g.badge === 'hot').concat(GAMES.slice(2, 3));
   return html`<aside class="side"><${Orn} deco>
     <${Flourish}/>
-    <nav class="nav">${[['home', 'Main hall'], ['casino', 'Casino', true], ['live', 'Live casino'], ['sports', 'Sports'], ['promo', 'Promotions']].map(([i, l, on]) => html`<${NavItem} key=${l} icon=${i} label=${l} on=${on}/>`)}</nav>
+    <nav class="nav" aria-label="Sections">${ROUTES.map(([k, i, l]) => html`<${NavItem} key=${k} icon=${i} label=${l} href=${'#/' + k} on=${route === k}/>`)}</nav>
     <${SubHead}>New games<//><div class="glist">${fresh.map((g) => html`<${GameRow} key=${g.name} game=${g} kind="new"/>`)}</div>
     <${SubHead}>Popular<//><div class="glist">${hot.map((g) => html`<${GameRow} key=${g.name} game=${g} kind="hot"/>`)}</div>
     <nav class="nav" style=${{ marginTop: '16px' }}><${NavItem} icon="support" label="Royal support"/></nav>
@@ -140,34 +145,63 @@ const Stats = () => html`<div class="stats">
   <${VipCard} level=${7} next="Princess" points=${4820} goal=${6000} rungs=${RUNGS} cur=${2} perks=${PERKS}/>
 </div>`;
 
+// ── разделы (левое меню): адрес #/раздел — работает «назад» в браузере ──
+const ROUTES = [['hall', 'home', 'Main hall'], ['casino', 'casino', 'Casino'], ['live', 'live', 'Live casino'], ['sports', 'sports', 'Sports'], ['promos', 'promo', 'Promotions']];
+const routeOf = () => { const r = location.hash.replace(/^#\/?/, ''); return ROUTES.some(([k]) => k === r) ? r : 'hall'; };
+function useRoute() {
+  const [r, setR] = useState(routeOf);
+  React.useEffect(() => { const on = () => { setR(routeOf()); scrollTo({ top: 0 }); }; addEventListener('hashchange', on); return () => removeEventListener('hashchange', on); }, []);
+  return r;
+}
+const go = (r) => { if (routeOf() !== r) location.hash = '#/' + r; };
+
 const TYPES = ['all', 'slots', 'table', 'live'];
-function Games({ q, setQ }) {
-  const [type, setType] = useState('all');
+function Games({ q, setQ, title = 'Royal games', fixedType }) {
+  const [type0, setType] = useState('all'); const type = fixedType || type0;
   const qq = q.trim().toLowerCase();
   const list = GAMES.filter((g) => (type === 'all' || g.type === type) && (!qq || g.name.toLowerCase().includes(qq)));
   return html`<section id="games" class="games-sec">
-    <${Reveal}><${SectionHead} title="Royal games"/><//>
-    <div class="games-bar"><${Seg} items=${TYPES} value=${type} onChange=${setType}/><span class="games-count">${list.length} of ${GAMES.length}${qq ? html` · “${q.trim()}”` : ''}</span></div>
+    <${Reveal}><${SectionHead} title=${title}/><//>
+    <div class="games-bar">${fixedType ? html`<span></span>` : html`<${Seg} items=${TYPES} value=${type} onChange=${setType}/>`}<span class="games-count">${list.length} of ${GAMES.length}${qq ? html` · “${q.trim()}”` : ''}</span></div>
     <div class="games">${list.length ? list.map((g, i) => html`<${Reveal} key=${g.name} delay=${i * 0.04}><${GameCard} game=${g}/><//>`)
       : html`<div class="empty">No games match “${q.trim()}” in ${type === 'all' ? 'the library' : type}. <a href="#" onClick=${(e) => { e.preventDefault(); setQ(''); setType('all'); }} style=${{ textDecoration: 'underline' }}>Clear filters</a></div>`}</div>
   </section>`;
 }
 
+const PROMOS = [{ value: '50%', label: 'Weekend reload · up to €500' }, { value: '12%', label: 'Weekly cashback · every Monday' }, { value: '×2', label: 'Crown points on live tables' }, { value: 'Royal chest', label: 'Unlocks at Princess', lock: 'LV 8' }];
+
+const Hall = () => html`
+  <${Reveal}><${Hero}/><//>
+  <${WinsTicker} wins=${WINS}/>
+  <${Reveal}><div class="row"><${Profile}/><${Stats}/></div><//>
+  <${Reveal}><${SectionHead} title="Your wallets"/><//>
+  <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>`;
+const Casino = ({ q, setQ }) => html`
+  <${Reveal}><${WheelPanel} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
+  <${WinsTicker} wins=${WINS}/>
+  <${Games} q=${q} setQ=${setQ}/>`;
+const Live = ({ q, setQ }) => html`<${Games} q=${q} setQ=${setQ} title="Live casino" fixedType="live"/>`;
+const Sports = () => html`<${Reveal}><${Orn} className="soon" lit deco><div class="soon-in"><div class="soon-emb"><${Emblem} k="trophy"/></div>
+  <div class="eyebrow">Sportsbook</div><h2 class="t-display">The royal arena opens soon</h2>
+  <p>Live odds, tournaments and crown points on every match. Until then — the tables are open.</p>
+  <${GhostButton} icon="casino" label="Go to casino" href="#/casino"/></div><//><//>`;
+const Promos = () => html`
+  <${Reveal}><${Hero}/><//>
+  <${Reveal}><${SectionHead} title="Active rewards"/><//>
+  <div class="perks promos">${PROMOS.map((p) => html`<${Perk} key=${p.label} ...${p}/>`)}</div>`;
+
 function App() {
   const [q, setQ] = useState('');
+  const route = useRoute();
+  const setSearch = (v) => { setQ(v); if (v && route !== 'casino' && route !== 'live') go('casino'); };
   return html`<${React.Fragment}>
     <${Dust}/>
     <div class="app">
-      <${Top} q=${q} setQ=${setQ}/>
-      <${Side}/>
-      <main class="main">
-        <${Reveal}><${Hero}/><//>
-        <${WinsTicker} wins=${WINS}/>
-        <${Reveal}><${WheelPanel} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
-        <${Reveal}><div class="row"><${Profile}/><${Stats}/></div><//>
-        <${Reveal}><${SectionHead} title="Your wallets"/><//>
-        <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>
-        <${Games} q=${q} setQ=${setQ}/>
+      <${Top} q=${q} setQ=${setSearch} route=${route}/>
+      <${Side} route=${route}/>
+      <main class="main" key=${route}>
+        ${route === 'hall' ? html`<${Hall}/>` : route === 'casino' ? html`<${Casino} q=${q} setQ=${setSearch}/>` : route === 'live' ? html`<${Live} q=${q} setQ=${setSearch}/>`
+          : route === 'sports' ? html`<${Sports}/>` : html`<${Promos}/>`}
       </main>
     </div>
     <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio. <a href="lab/index.html">Design system lab</a> · <a href="/#work">Elocate</a></span><span>Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · Play responsibly · 18+</span></footer>
