@@ -104,7 +104,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
 import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, SearchResults, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
-  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight } from './ds/components.js';
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, WheelStage, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight } from './ds/components.js';
 calmScroll(); initSpotlight();
 
 // ── данные ──
@@ -197,7 +197,7 @@ const Hall = () => html`
   <${Reveal}><${SectionHead} title="Your wallets"/><//>
   <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>`;
 const Casino = () => html`
-  <${Reveal}><${WheelPanel} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
+  <${Reveal}><${WheelStage} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
   <${WinsTicker} wins=${WINS}/>
   <${Games}/>`;
 const Sports = () => html`<${Reveal}><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon"

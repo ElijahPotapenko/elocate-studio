@@ -127,7 +127,7 @@ import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline, notify } from '../ds/components.js';
 calmScroll(); initSpotlight();
-import { html, PH, LINE, SUITS, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, SearchResults, ResultRow, ComingSoon, Burger, RankPlate, WheelPanel, WheelStage, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
@@ -166,7 +166,7 @@ function BurgerDemo() { const [o, setO] = useState(false); return html`<${Burger
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger'];
+  'SearchResults', 'ResultRow', 'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'WheelStage', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -231,7 +231,7 @@ const TOC = [
   ['Effects', [['fx-spot', 'Spotlight'], ['fx-confetti', 'Win notification'], ['fx-title', 'Headline reveal'], ['fx-vt', 'View transitions']]],
   ['Components', [['soon', 'Coming soon'], ['loader', 'Loader'], ['account', 'Account'], ['orn', 'Orn panel'], ['gem', 'Gem button'], ['btn-states', 'Button states'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['search', 'Search results'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
     ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['logo', 'Logo · Flourish'], ['suits', 'Suits'], ['pay', 'Pay row'], ['ticker', 'Wins ticker'], ['guilloche', 'Guilloche'], ['section', 'Section head']]],
-  ['Patterns', [['hero', 'Hero banner'], ['hero-art', 'Hero · art'], ['wheel-panel', 'Wheel panel'], ['rank', 'Rank plate'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
+  ['Patterns', [['hero', 'Hero banner'], ['hero-art', 'Hero · art'], ['wheel-stage', 'Wheel stage'], ['wheel-panel', 'Wheel panel'], ['rank', 'Rank plate'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
 ];
 // Меню слева: группы + подсветка раздела, который сейчас на экране (IntersectionObserver — без слушателя прокрутки)
 function Toc() {
@@ -485,7 +485,11 @@ function App() {
             <div class="w-full"><${HeroBanner} eyebrow="Welcome to the court" title=${html`100% up to <b class="metal-text">€500</b><br/>+ 200 free spins`}
               text="Claim the throne bonus on your first deposit." pay=${PAY} cta="Claim bonus" secondary="Bonus terms" endsAt=${Date.now() + 2 * 86400e3} slides=${3} art="../assets/hero-elves.webp" artMobile="../assets/hero-elves-m.webp" artAlt="Elven king and queen"/></div>
           <//>
-          <${Story} id="wheel-panel" title="WheelPanel" code=${'<${WheelPanel} text="One free spin every day…" prizes={PRIZES}/>'}>
+          <${Story} id="wheel-stage" title="WheelStage" note="the wheel as the hero of a section, the way premium casinos do it: no frame, a big centred wheel on a light circle with still rays (static SVG, no masks), title in metal above, status pill and prize chips below. Used on Casino"
+            code=${'<${WheelStage} text="One free spin every day…" prizes={PRIZES}/>'}>
+            <div class="w-full"><${WheelStage} text="One free spin every day. Land a suit, take the prize."/></div>
+          <//>
+          <${Story} id="wheel-panel" title="WheelPanel" note="compact version in a framed panel — for dashboards and side columns" code=${'<${WheelPanel} text="One free spin every day…" prizes={PRIZES}/>'}>
             <div class="w-full"><${WheelPanel} text="One free spin every day. Land a suit, take the prize."/></div>
           <//>
           <${Story} id="rank" title="RankPlate" note="crown · title in caps · level" code=${'<${RankPlate} title="Duchess" level="VIP level 7"/>'}>

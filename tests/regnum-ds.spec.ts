@@ -46,7 +46,7 @@ test.describe('Regnum design system', () => {
     await expect(page.locator('.hero')).toBeVisible();
     await page.click('.side .nav a:has-text("Casino")');
     await expect(page).toHaveURL(/#\/casino$/);
-    await expect(page.locator('.wheel-panel')).toBeVisible();
+    await expect(page.locator('.wheel-stage')).toBeVisible();
     await expect(page.locator('.hero')).toHaveCount(0);
     await page.click('.side .nav a:has-text("Sports")');
     await expect(page.locator('.soon')).toBeVisible();

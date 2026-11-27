@@ -299,8 +299,10 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .wheel > *{position:absolute}
 /* обод: conic-градиент металла — блики идут по кругу, как у точёной латуни */
 .bezel{inset:0; border-radius:50%;
-  background:conic-gradient(from 18deg, var(--metal-hi), var(--metal-2) 10%, var(--metal) 22%, var(--metal-deep) 34%, var(--metal-hi) 48%, var(--metal-2) 60%, var(--metal) 72%, var(--metal-deep) 86%, var(--metal-hi));
-  -webkit-mask:radial-gradient(closest-side, transparent 84.2%, #000 84.6%, #000 99.4%, transparent 100%); mask:radial-gradient(closest-side, transparent 84.2%, #000 84.6%, #000 99.4%, transparent 100%)}
+  /* кольцо без mask: тёмный диск поверх металла (центр всё равно закрыт лицом колеса). Маска в Firefox стоила прокрутке
+     раздела Casino 50 → 35 fps, когда колесо стало крупным (2026-11-27); без неё — 51 */
+  background:radial-gradient(closest-side, var(--well) 84.2%, transparent 84.6%),
+    conic-gradient(from 18deg, var(--metal-hi), var(--metal-2) 10%, var(--metal) 22%, var(--metal-deep) 34%, var(--metal-hi) 48%, var(--metal-2) 60%, var(--metal) 72%, var(--metal-deep) 86%, var(--metal-hi))}
 .bezel::after{content:''; position:absolute; inset:0; border-radius:50%; background:var(--metal-tex); opacity:.8}
 .face, .lights{inset:0; width:100%; height:100%}
 .face .sa{fill:var(--accent-deep)} .face .sb{fill:var(--well)}
@@ -609,3 +611,24 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* раздел, который ещё закрыт: тише обычного пункта, с бейджем Soon; клик — уведомление */
 .nav .soon-item{color:var(--faint)} .nav .soon-item:hover{color:var(--muted)}
 .nav .soon-item .nav-soon{margin-left:auto}
+
+/* ── Сцена колеса (WheelStage): колесо — герой, без плашки ── */
+.wheel-stage{position:relative; isolation:isolate; overflow:clip; overflow-clip-margin:0; display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px; padding:26px 0 10px}
+.ws-light{position:absolute; z-index:-1; left:50%; top:56%; width:min(980px, 160vw); aspect-ratio:1; transform:translate(-50%, -50%); pointer-events:none; border-radius:50%;
+  background:radial-gradient(closest-side, color-mix(in oklch, var(--accent) calc(24% * var(--glow)), transparent), transparent 62%)}
+.ws-light svg{position:absolute; inset:0; width:100%; height:100%}
+.ws-head{display:flex; flex-direction:column; align-items:center; gap:10px; max-width:620px}
+.ws-head h2{margin:0}   /* роль display как есть — крупнее только через шкалу, не в обход */
+.ws-head p{margin:0; font:var(--t-body); letter-spacing:var(--tr-body); color:var(--muted); max-width:520px}
+.ws-wheel{margin:6px 0 2px}
+.ws-wheel .wheel{width:min(460px, 84vw)}
+.ws-wheel .wheel-glow{width:min(620px, 130vw)}
+.ws-status{display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px; font:var(--t-body-sm); letter-spacing:var(--tr-body-sm); color:var(--pos);
+  background:color-mix(in oklch, var(--panel) 80%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--pos) 35%, transparent)}
+.ws-status .dot{width:8px; height:8px; border-radius:50%; background:var(--pos); box-shadow:0 0 10px var(--glow-pos)}
+.ws-status.wait{color:var(--muted); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent)} .ws-status b{color:var(--ink)}
+.ws-prizes{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:760px}
+.ws-prizes li{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--ink);
+  background:color-mix(in oklch, var(--panel-hi) 55%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 28%, transparent)}
+.ws-prizes .suit{fill:var(--metal)}
+@media (max-width: 640px){ .wheel-stage{gap:14px; padding-top:12px} .ws-prizes{gap:6px} .ws-prizes li{padding:7px 11px} }

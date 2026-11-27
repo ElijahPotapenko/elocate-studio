@@ -429,6 +429,20 @@ export function WheelPanel({ eyebrow = 'Daily ritual', title = 'Crown Wheel', te
     <div class=${'wp-status' + (nextAt ? ' wait' : '')}>${nextAt ? html`${won ? html`<b>${won}</b> added to your account` : 'Today’s spin is used'}` : html`<i class="dot"></i>1 free spin ready`}</div>
     <ul class="wp-prizes">${prizes.map((p, i) => { const q = typeof p === 'string' ? { label: p } : p; return html`<li key=${q.label + i}>${q.suit && html`<${Suit} s=${q.suit} w=${13}/>`}<span>${q.label}</span></li>`; })}</ul></div><//>`;
 }
+// Сцена колеса — герой раздела, как у дорогих казино: без рамки-плашки, колесо крупно по центру на световом круге с
+// неподвижными лучами; сверху надзаголовок и заголовок металлом, под колесом — статус-пилюля и призы строкой.
+// Лучи — статичный SVG: 24 клина с радиальной заливкой металл → прозрачно (ни масок, ни заливки цветом фона поверх шапки)
+const RAYS = 'M50 50L99.98 48.60L99.98 51.40ZM50 50L98.64 61.59L97.92 64.28ZM50 50L93.98 73.78L92.59 76.20ZM50 50L86.33 84.35L84.35 86.33ZM50 50L76.20 92.59L73.78 93.98ZM50 50L64.28 97.92L61.59 98.64ZM50 50L51.40 99.98L48.60 99.98ZM50 50L38.41 98.64L35.72 97.92ZM50 50L26.22 93.98L23.80 92.59ZM50 50L15.65 86.33L13.67 84.35ZM50 50L7.41 76.20L6.02 73.78ZM50 50L2.08 64.28L1.36 61.59ZM50 50L0.02 51.40L0.02 48.60ZM50 50L1.36 38.41L2.08 35.72ZM50 50L6.02 26.22L7.41 23.80ZM50 50L13.67 15.65L15.65 13.67ZM50 50L23.80 7.41L26.22 6.02ZM50 50L35.72 2.08L38.41 1.36ZM50 50L48.60 0.02L51.40 0.02ZM50 50L61.59 1.36L64.28 2.08ZM50 50L73.78 6.02L76.20 7.41ZM50 50L84.35 13.67L86.33 15.65ZM50 50L92.59 23.80L93.98 26.22ZM50 50L97.92 35.72L98.64 38.41Z';
+export function WheelStage({ eyebrow = 'Daily ritual', title = 'Crown Wheel', text, prizes = PRIZES, cooldownMs = 24 * 3600e3 }) {
+  const [nextAt, setNextAt] = useState(null), [won, setWon] = useState(null);
+  return html`<section class="wheel-stage">
+    <div class="ws-light" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="ws-ray"><stop offset=".18" style=${{ stopColor: 'var(--metal)', stopOpacity: 0.16 }}/><stop offset="1" style=${{ stopColor: 'var(--metal)', stopOpacity: 0 }}/></radialGradient></defs><path d=${RAYS} fill="url(#ws-ray)"/></svg></div>
+    <div class="ws-head"><div class="eyebrow">${eyebrow}</div><h2 class="t-display metal-text">${title}</h2>${text && html`<p>${text}</p>`}</div>
+    <div class="ws-wheel"><${CrownWheel} prizes=${prizes} locked=${nextAt || false} onWin=${(p) => { setWon(p); setTimeout(() => setNextAt(Date.now() + cooldownMs), 2600); }}/></div>
+    <div class=${'ws-status' + (nextAt ? ' wait' : '')}>${nextAt ? html`${won ? html`<b>${won}</b> added to your account` : 'Today’s spin is used'}` : html`<i class="dot"></i>1 free spin ready`}</div>
+    <ul class="ws-prizes" aria-label="Prizes on the wheel">${prizes.map((p, i) => { const q = typeof p === 'string' ? { label: p } : p; return html`<li key=${q.label + i}>${q.suit && html`<${Suit} s=${q.suit} w=${13}/>`}<span>${q.label}</span></li>`; })}</ul>
+  </section>`;
+}
 // Карточка профиля: герб с портретом, статус, имя, ранг, табы
 // Табличка титула: корона · ТИТУЛ капителью · ромбик · уровень
 export const RankPlate = ({ title, level }) => html`<div class="rank"><${Crown} size=${15}/><span class="rt">${title}</span>${level && html`<i class="rs"></i><span class="rl">${level}</span>`}</div>`;
