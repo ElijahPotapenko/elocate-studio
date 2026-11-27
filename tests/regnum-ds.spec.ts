@@ -88,6 +88,32 @@ test.describe('Regnum design system', () => {
     await expect(page.locator('.side.open')).toHaveCount(0);
   });
 
+  // левая панель в иконки: кнопка в шапке, контент забирает место, выбор помнится; узкий десктоп — свёрнута сама, телефон — без кнопки
+  test('desktop: sidebar collapses to an icon rail, content widens, choice is remembered', async ({ page }) => {
+    test.slow();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/demos/regnum/index.html?fps=0#/casino', { waitUntil: 'networkidle' });
+    await page.waitForSelector('#rg-loader', { state: 'detached' });
+    const mainW = () => page.locator('.main').evaluate((e) => e.getBoundingClientRect().width);
+    const w0 = await mainW();
+    await expect(page.locator('.side-tog')).toHaveAttribute('aria-expanded', 'true');
+    await page.click('.side-tog');
+    await expect(page.locator('.app.rail')).toHaveCount(1);
+    await expect(page.locator('.side .nav a .nl').first()).toBeHidden();
+    await expect(page.locator('.side .nav a .ic').first()).toBeVisible();
+    expect(await mainW()).toBeGreaterThan(w0 + 150);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.locator('.app.rail')).toHaveCount(1);
+    await page.click('.side-tog');
+    await expect(page.locator('.app.rail')).toHaveCount(0);
+    // узкий десктоп без сохранённого выбора — свёрнута по умолчанию
+    await page.evaluate(() => localStorage.removeItem('rg-rail'));
+    await page.setViewportSize({ width: 1024, height: 768 }); await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.locator('.app.rail')).toHaveCount(1);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator('.side-tog')).toBeHidden();
+  });
+
   test('lab: every DS component has a story', async ({ page }) => {
     test.slow();
     await page.goto('/demos/regnum/lab/index.html', { waitUntil: 'networkidle' });

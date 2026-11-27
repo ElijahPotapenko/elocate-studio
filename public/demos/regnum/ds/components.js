@@ -174,11 +174,11 @@ export const Art = ({ hue, framed, className = '', children }) => html`<div clas
 /* ───────────────────────────── Навигация ───────────────────────────── */
 // soon — раздел ещё закрыт: бейдж «Soon», клик не уводит, а говорит об этом уведомлением (единый notify)
 export const NavItem = ({ icon, label, on, href = '#', soon: closed }) => closed
-  ? html`<a class="soon-item" href=${href} onClick=${(e) => { e.preventDefault(); notify(`${label} opens soon — the court is still preparing it`, 'info'); }}><span class="ic"><${Icon} n=${icon}/></span>${label}<${Badge} kind="metal" className="nav-soon">Soon<//></a>`
-  : html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
+  ? html`<a class="soon-item" href=${href} title=${label + ' · soon'} onClick=${(e) => { e.preventDefault(); notify(`${label} opens soon — the court is still preparing it`, 'info'); }}><span class="ic"><${Icon} n=${icon}/></span><span class="nl">${label}</span><${Badge} kind="metal" className="nav-soon">Soon<//></a>`
+  : html`<a class=${on ? 'on' : ''} href=${href} title=${label} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span><span class="nl">${label}</span></a>`;
 // клик по игре: в демо — подсказка, что игра откроется в полной сборке (href="#" раньше уводил на главную)
 const openGame = (game) => soon(game.name);
-export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#" onClick=${openGame(game)}><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
+export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#" title=${game.name} onClick=${openGame(game)}><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span><span class="nl">${game.name}</span><${Badge} kind=${kind}/></a>`;
 // Результат поиска — длинная карточка: эмблема · название и студия/тип · бейдж · RTP · «Play». Клик — открыть игру
 const TYPE_NAME = { slots: 'Slots', table: 'Table game', live: 'Live table' };
 export const ResultRow = ({ game }) => html`<a class="result" href="#" role="option" onClick=${openGame(game)}>
@@ -193,7 +193,7 @@ export function SearchResults({ q, items, inline = false }) {   // inline — п
   return html`<div class=${'search-pop' + (inline ? ' inline' : '')} role="listbox" aria-label="Search results"><div class="sp-head">${list.length ? `${list.length} ${list.length === 1 ? 'game' : 'games'} for “${q.trim()}”` : 'No results'}</div>
     ${list.length ? list.map((g) => html`<${ResultRow} key=${g.name} game=${g}/>`) : html`<div class="sp-empty">Nothing matches “${q.trim()}”. Try “royal”, “slots” or “live”.</div>`}</div>`;
 }
-export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
+export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/><span class="nl">${children}</span></div>`;
 
 /* ───────────────────────────── Карточки и данные ───────────────────────────── */
 export const GameCard = ({ game, tilt = false }) => {   // tilt — 3D-наклон за мышью; по умолчанию выключен (дорого в Firefox), подъём при наведении — в CSS
@@ -432,9 +432,12 @@ export function WheelPanel({ eyebrow = 'Daily ritual', title = 'Crown Wheel', te
 // неподвижными лучами; сверху надзаголовок и заголовок металлом, под колесом — статус-пилюля и призы строкой.
 // Лучи — статичный SVG: 24 клина с радиальной заливкой металл → прозрачно (ни масок, ни заливки цветом фона поверх шапки)
 const RAYS = 'M50 50L99.98 48.60L99.98 51.40ZM50 50L98.64 61.59L97.92 64.28ZM50 50L93.98 73.78L92.59 76.20ZM50 50L86.33 84.35L84.35 86.33ZM50 50L76.20 92.59L73.78 93.98ZM50 50L64.28 97.92L61.59 98.64ZM50 50L51.40 99.98L48.60 99.98ZM50 50L38.41 98.64L35.72 97.92ZM50 50L26.22 93.98L23.80 92.59ZM50 50L15.65 86.33L13.67 84.35ZM50 50L7.41 76.20L6.02 73.78ZM50 50L2.08 64.28L1.36 61.59ZM50 50L0.02 51.40L0.02 48.60ZM50 50L1.36 38.41L2.08 35.72ZM50 50L6.02 26.22L7.41 23.80ZM50 50L13.67 15.65L15.65 13.67ZM50 50L23.80 7.41L26.22 6.02ZM50 50L35.72 2.08L38.41 1.36ZM50 50L48.60 0.02L51.40 0.02ZM50 50L61.59 1.36L64.28 2.08ZM50 50L73.78 6.02L76.20 7.41ZM50 50L84.35 13.67L86.33 15.65ZM50 50L92.59 23.80L93.98 26.22ZM50 50L97.92 35.72L98.64 38.41Z';
-export function WheelStage({ eyebrow = 'Daily ritual', title = 'Crown Wheel', text, prizes = PRIZES, cooldownMs = 24 * 3600e3 }) {
+// art/artMobile — пейзаж за колесом (WebP + мобильная). Затемнён и растворён в фон градиентами поверх (.ws-bg::after) —
+// без mask/filter: в Firefox они перерисовываются на каждом кадре прокрутки
+export function WheelStage({ eyebrow = 'Daily ritual', title = 'Crown Wheel', text, prizes = PRIZES, cooldownMs = 24 * 3600e3, art, artMobile }) {
   const [nextAt, setNextAt] = useState(null), [won, setWon] = useState(null);
-  return html`<section class="wheel-stage">
+  return html`<section class=${'wheel-stage' + (art ? ' has-art' : '')}>
+    ${art && html`<picture class="ws-bg" aria-hidden="true">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt="" decoding="async" loading="lazy"/></picture>`}
     <div class="ws-light" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="ws-ray"><stop offset=".18" style=${{ stopColor: 'var(--metal)', stopOpacity: 0.16 }}/><stop offset="1" style=${{ stopColor: 'var(--metal)', stopOpacity: 0 }}/></radialGradient></defs><path d=${RAYS} fill="url(#ws-ray)"/></svg></div>
     <div class="ws-head"><div class="eyebrow">${eyebrow}</div><h2 class="t-display metal-text">${title}</h2>${text && html`<p>${text}</p>`}</div>
     <div class="ws-wheel"><${CrownWheel} prizes=${prizes} locked=${nextAt || false} onWin=${(p) => { setWon(p); setTimeout(() => setNextAt(Date.now() + cooldownMs), 2600); }}/></div>

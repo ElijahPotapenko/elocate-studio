@@ -488,8 +488,8 @@ function App() {
               text="Claim the throne bonus on your first deposit." pay=${PAY} cta="Claim bonus" secondary="Bonus terms" endsAt=${Date.now() + 2 * 86400e3} slides=${3} art="../assets/hero-elves.webp" artMobile="../assets/hero-elves-m.webp" artAlt="Elven king and queen"/></div>
           <//>
           <${Story} id="wheel-stage" title="WheelStage" note="the wheel as the hero of a section, the way premium casinos do it: no frame, a big centred wheel on a light circle with still rays (static SVG, no masks), title in metal above, status pill and prize chips below. Used on Casino"
-            code=${'<${WheelStage} text="One free spin every day…" prizes={PRIZES}/>'}>
-            <div class="w-full"><${WheelStage} text="One free spin every day. Land a suit, take the prize."/></div>
+            code=${'<${WheelStage} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp" text="One free spin every day…" prizes={PRIZES}/>'}>
+            <div class="w-full"><${WheelStage} art="../assets/wheel-glade.webp" artMobile="../assets/wheel-glade-m.webp" text="One free spin every day. Land a suit, take the prize."/></div>
           <//>
           <${Story} id="wheel-panel" title="WheelPanel" note="compact version in a framed panel — for dashboards and side columns" code=${'<${WheelPanel} text="One free spin every day…" prizes={PRIZES}/>'}>
             <div class="w-full"><${WheelPanel} text="One free spin every day. Land a suit, take the prize."/></div>

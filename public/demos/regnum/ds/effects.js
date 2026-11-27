@@ -13,8 +13,8 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ── View Transitions: обёртка над обновлением состояния. Нет поддержки / reduced motion → просто обновить ── */
 export function viewTransition(update) {
-  if (!document.startViewTransition || reduced()) { update(); return; }
-  document.startViewTransition(() => flushSync(update));
+  if (!document.startViewTransition || reduced()) { update(); return null; }
+  return document.startViewTransition(() => flushSync(update));   // переход — для тех, кому нужен его конец (.finished)
 }
 
 /* ── Spotlight: один слушатель на документ; переменные --mx/--my пишутся только в карточку под курсором ── */

@@ -42,7 +42,6 @@
 .app{display:grid; grid-template-columns:268px 1fr; gap:22px; max-width:1360px; margin:0 auto; padding:18px 22px 60px}
 .top{grid-column:1 / -1; display:flex; align-items:center; gap:14px}
 .promos{grid-template-columns:repeat(4, minmax(0, 1fr)); margin-top:0}
-@media (max-width: 900px){ .promos{grid-template-columns:1fr 1fr} }
 .games-sec{display:flex; flex-direction:column; gap:16px; scroll-margin-top:20px}
 .games-bar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
 .games-count{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
@@ -50,7 +49,7 @@
 .back{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)} .back:hover{color:var(--metal)}
 .back.lab{color:var(--metal); text-shadow:0 0 10px var(--glow-metal)}
 .side .in{padding:18px 12px}
-.main{display:flex; flex-direction:column; gap:22px; min-width:0; view-transition-name:rg-page}
+.main{display:flex; flex-direction:column; gap:22px; min-width:0; view-transition-name:rg-page; container:main / inline-size}
 .row{display:grid; grid-template-columns:330px 1fr; gap:22px}
 .stats{display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto 1fr; gap:16px}
 .span3{grid-column:1 / -1}
@@ -61,7 +60,38 @@
 .games{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
 footer.foot{position:relative; z-index:1; max-width:1360px; margin:0 auto; padding:0 22px 40px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
 footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--ease)} footer.foot a:hover{color:var(--metal)}
-@media (max-width: 1100px){ .games{grid-template-columns:repeat(3,1fr)} .row{grid-template-columns:1fr} }
+/* сетки контента меряют ширину САМОЙ колонки .main (container query), а не окна: панель свёрнута — блоки шире, раскладка
+   та же, что дала бы такая ширина. Пороги = прежние брейкпоинты окна, пересчитанные на колонку (окно 1100 → .main 766, 640 → 612) */
+@container main (max-width: 766px){ .games{grid-template-columns:repeat(3,1fr)} .row{grid-template-columns:1fr} }
+@container main (max-width: 700px){ .promos{grid-template-columns:1fr 1fr} }
+@container main (max-width: 612px){ .games{grid-template-columns:repeat(2,1fr)} .wallets{grid-template-columns:1fr} .stats{grid-template-columns:1fr 1fr} }
+/* ── панель в иконки (rail) — только на десктопе; на ≤900 px панель — шторка, rail не действует ── */
+.side-tog{display:none}
+@media (min-width: 901px){
+  .side{view-transition-name:rg-side}
+  /* кнопка свернуть — в шапке слева от логотипа (на телефоне на этом месте бургер шторки) */
+  .side-tog{display:grid; place-items:center; width:40px; height:40px; flex:none; border-radius:10px; margin-right:-2px;
+    box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 35%, transparent); transition:background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease)}
+  .side-tog:hover{background:var(--panel-hi); box-shadow:inset 0 0 0 1px var(--metal-dim)} .side-tog:focus-visible{outline:2px solid var(--metal); outline-offset:2px}
+  .side-tog .ico{width:20px; height:20px; transition:transform var(--dur) var(--ease)}
+  .app.rail{grid-template-columns:76px 1fr}
+  .app.rail .side .in{padding:12px 8px}
+  .app.rail .side-tog .ico{transform:scaleX(-1)}
+  .app.rail .nl, .app.rail .side .flourish, .app.rail .nav-soon, .app.rail .grow .badge{display:none}
+  .app.rail .nav a{justify-content:center; gap:0; padding:7px 0}
+  .app.rail .sub-h{justify-content:center; margin:16px 0 8px}
+  .app.rail .glist{align-items:center}
+  .app.rail .grow{justify-content:center; padding:5px; gap:0; border-radius:10px}
+  .app.rail .grow .em{width:34px; height:34px}
+}
+/* шапка на узком десктопе: без имени, подписи «Balance» и служебных ссылок (они есть в подвале) — иначе поиск сжимался в ноль
+   и его текст наезжал на баланс; ещё уже — поиск своей строкой, как на телефоне */
+@media (min-width: 901px) and (max-width: 1199px){ .um-name, .bc-k, .links{display:none} }
+@media (min-width: 901px) and (max-width: 1060px){ .top{flex-wrap:wrap} .top .search{order:5; flex-basis:100%} .top .logo{margin-right:auto} }
+html[data-vt=rail]::view-transition-group(*){animation-duration:.34s; animation-timing-function:var(--ease)}
+html[data-vt=rail]::view-transition-old(rg-page), html[data-vt=rail]::view-transition-old(rg-side){animation:rg-x-out .34s var(--ease) both}
+html[data-vt=rail]::view-transition-new(rg-page), html[data-vt=rail]::view-transition-new(rg-side){animation:rg-x-in .34s var(--ease) both}
+@keyframes rg-x-out{to{opacity:0}} @keyframes rg-x-in{from{opacity:0}}
 @media (max-width: 900px){
   .app{grid-template-columns:1fr; padding:14px 14px 40px; gap:16px}
   .top-burger{display:block}
@@ -77,7 +107,7 @@ footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--
 @media (max-width: 640px){
   .top .seg{display:none} .bc-k{display:none} .links{display:none} .um-bell{display:none} .top{gap:8px}
   .top .logo svg{display:none} .balance-chip{padding:0 5px 0 10px; gap:8px} .top .logo{margin-right:auto}
-  .games{grid-template-columns:repeat(2,1fr)} .wallets{grid-template-columns:1fr} .stats{grid-template-columns:1fr 1fr}
+
   .stats .stat:first-child{grid-column:1 / -1} .links .back:not(.lab){display:none}
 }
 </style>
@@ -104,7 +134,7 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
 import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, SearchResults, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
-  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, WheelStage, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight } from './ds/components.js';
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, WheelStage, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight, Icon } from './ds/components.js';
 calmScroll(); initSpotlight();
 
 // ── данные ──
@@ -124,9 +154,11 @@ const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label
 const COINS = [['₿', 65, '0.0425 BTC', '≈ €2,610'], ['₮', 170, '4,120 USDT', '≈ €3,800'], ['€', 260, '€6,070', 'Main wallet']];
 
 // ── разделы страницы ──
-function Top({ q, setQ, route, menu, setMenu }) {
+function Top({ q, setQ, route, menu, setMenu, rail, toggleRail }) {
+  const tip = rail ? 'Expand menu' : 'Collapse menu';
   return html`<header class="top">
     <span class="top-burger"><${Burger} open=${menu} onClick=${() => setMenu(!menu)}/></span>
+    <button class="side-tog" type="button" aria-label=${tip} title=${tip} aria-expanded=${rail ? 'false' : 'true'} aria-controls="side-nav" onClick=${toggleRail}><${Icon} n="sidebar"/></button>
     <${Logo}/>
     <${Seg} items=${['sport', 'casino']} value=${route === 'sports' ? 'sport' : 'casino'} onChange=${(t) => go(t === 'sport' ? 'sports' : 'casino')}/>
     <div class="search" onKeyDown=${(e) => { if (e.key === 'Escape') { setQ(''); e.currentTarget.querySelector('input')?.blur(); } }}>
@@ -197,7 +229,7 @@ const Hall = () => html`
   <${Reveal}><${SectionHead} title="Your wallets"/><//>
   <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>`;
 const Casino = () => html`
-  <${Reveal}><${WheelStage} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
+  <${Reveal}><${WheelStage} art="assets/wheel-glade.webp" artMobile="assets/wheel-glade-m.webp" text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
   <${WinsTicker} wins=${WINS}/>
   <${Games}/>`;
 const Sports = () => html`<${Reveal}><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon"
@@ -208,10 +240,19 @@ const Promos = () => html`
   <${Reveal}><${SectionHead} title="Active rewards"/><//>
   <div class="perks promos">${PROMOS.map((p) => html`<${Perk} key=${p.label} ...${p}/>`)}</div>`;
 
+// левая панель в иконки (≥901 px). Выбор человека помнит браузер; без выбора — свёрнута на 901–1199 px, где контенту тесно
+const RAIL_KEY = 'rg-rail';
+const railStart = () => { try { const v = localStorage.getItem(RAIL_KEY); if (v !== null) return v === '1'; } catch {} return matchMedia('(min-width: 901px) and (max-width: 1199px)').matches; };
 function App() {
   const [q, setQ] = useState('');
   const route = useRoute();
   const [menu, setMenu] = useState(false);
+  const [rail, setRail] = useState(railStart);
+  const toggleRail = () => {
+    document.documentElement.dataset.vt = 'rail';   // свой переход: панель и контент плавно меняют ширину, без «смены страницы»
+    const t = viewTransition(() => setRail((r) => { try { localStorage.setItem(RAIL_KEY, r ? '0' : '1'); } catch {} return !r; }));
+    (t ? t.finished : Promise.resolve()).finally(() => { delete document.documentElement.dataset.vt; });
+  };
   React.useEffect(() => { setMenu(false); }, [route]);
   React.useEffect(() => {   // меню открыто: страница под ним не прокручивается, Esc закрывает
     document.documentElement.classList.toggle('menu-open', menu);
@@ -219,8 +260,8 @@ function App() {
   }, [menu]);
   return html`<${React.Fragment}>
     <${Dust}/>
-    <div class="app">
-      <${Top} q=${q} setQ=${setQ} route=${route} menu=${menu} setMenu=${setMenu}/>
+    <div class=${'app' + (rail ? ' rail' : '')}>
+      <${Top} q=${q} setQ=${setQ} route=${route} menu=${menu} setMenu=${setMenu} rail=${rail} toggleRail=${toggleRail}/>
       <${Side} route=${route} open=${menu} close=${() => setMenu(false)}/>
       <main class="main" key=${route}>
         ${route === 'hall' ? html`<${Hall}/>` : route === 'casino' ? html`<${Casino}/>`
