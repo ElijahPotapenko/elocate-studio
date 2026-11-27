@@ -164,8 +164,9 @@ function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
   const [ta, setTa] = useState(null);
-  useEffect(() => { const t = setTimeout(() => { const stages = document.querySelectorAll('.stage'); const all = { total: 0, on: 0, off: [] };
-    stages.forEach((st) => { const r = typeAudit(st); all.total += r.total; all.on += r.on; all.off.push(...r.off); }); setTa(all); }, 1800); return () => clearTimeout(t); }, []);
+  // аудит — после загрузки шрифтов и окончания разовых анимаций (проявление заголовка в Effects) — иначе ловит промежуточные кадры
+  useEffect(() => { let t; document.fonts.ready.then(() => { t = setTimeout(() => { const stages = document.querySelectorAll('.stage'); const all = { total: 0, on: 0, off: [] };
+    stages.forEach((st) => { const r = typeAudit(st); all.total += r.total; all.on += r.on; all.off.push(...r.off); }); setTa(all); }, 3200); }); return () => clearTimeout(t); }, []);
   return html`<${Orn} flat><div style=${{ padding: '18px 20px' }}>
     <div style=${{ font: '700 15px/1.3 var(--f-head)', marginBottom: '12px' }}>${comps.length - miss.length} / ${comps.length} components documented ${miss.length ? html`<span style=${{ color: 'var(--gem)' }}>· missing: ${miss.join(', ')}</span>` : html`<span style=${{ color: 'var(--pos)' }}>· 100%</span>`}</div>
     <div style=${{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>${comps.map((k) => html`<${Badge} key=${k} kind=${STORIED.includes(k) ? 'metal' : 'new'}>${k}<//>`)}</div>
