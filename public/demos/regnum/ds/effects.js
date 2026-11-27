@@ -71,12 +71,17 @@ export async function revealHeadline(el, { delay = 0.05 } = {}) {
   try {
     const { gsap, SplitText } = await loadGsap();
     await document.fonts.ready;
+    // высота заголовка — замок: строки-маски чуть выше обычных; без замка блок менял высоту и дёргал текст и кнопки
+    const h0 = el.getBoundingClientRect().height; el.style.height = h0 + 'px';
     const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'rv-line', wordsClass: 'rv-word' });
     // слова внутри металлического акцента (b.metal-text) получают свой градиент — иначе background-clip:text
     // родителя не красит сдвигаемые дочерние слова
     split.words.forEach((w) => { if (w.closest('.metal-text') && !w.classList.contains('metal-text')) w.classList.add('metal-text'); });
     el.style.visibility = '';
     gsap.from(split.words, { yPercent: 110, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.055, delay,
-      onComplete: () => split.revert() });                            // вернуть исходную разметку — без лишних span в DOM
-  } catch { el.style.visibility = ''; }
+      // разметку НЕ возвращаем сразу: revert в конце сдвигал вторую строку на 3 px и перекрашивал градиент «€500» —
+      // заметный рывок «после анимации» (слово Элайджи 2026-11-27). Возвращаем только при смене ширины (строки всё равно пересобираются)
+      onComplete: () => { const w0 = innerWidth; const back = () => { if (innerWidth === w0) return; removeEventListener('resize', back); split.revert(); el.style.height = ''; };
+        addEventListener('resize', back, { passive: true }); } });
+  } catch { el.style.visibility = ''; el.style.height = ''; }
 }

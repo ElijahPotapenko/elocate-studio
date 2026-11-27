@@ -410,14 +410,14 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .burger[aria-expanded="true"] i::before{transform:translateY(6px) rotate(45deg)} .burger[aria-expanded="true"] i::after{transform:translateY(-6px) rotate(-45deg)}
 
 /* ComingSoon: иллюстрация фоном, текст по центру на затемнении (без масок — градиент поверх) */
-.soon .in{position:relative; padding:56px 32px; min-height:min(640px, 72vh); display:grid; place-items:center}
+.soon .in{position:relative; padding:40px 32px; min-height:min(420px, 50vh); display:grid; place-items:center}
 .soon-art{position:absolute; inset:0; z-index:0}
 .soon-art img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 45%}
 .soon-art::after{content:''; position:absolute; inset:0; background:radial-gradient(48% 62% at 50% 50%, color-mix(in oklch, var(--panel) 88%, transparent), color-mix(in oklch, var(--panel) 55%, transparent) 70%, color-mix(in oklch, var(--panel) 80%, transparent))}
 .soon-in{position:relative; z-index:1; display:grid; justify-items:center; gap:12px; text-align:center; max-width:560px}
 .soon-in h2{margin:0} .soon-in p{margin:0 0 8px; max-width:440px; font:var(--t-body); color:var(--ink)}
 .soon .ghost-btn{background:color-mix(in oklch, var(--panel) 70%, transparent); color:var(--ink)}
-@media (max-width: 900px){ .soon .in{min-height:360px; padding:40px 20px} }
+@media (max-width: 900px){ .soon .in{min-height:300px; padding:32px 20px} }
 
 /* WheelPanel: колесо + описание и призы */
 .wheel-panel .in{position:relative; display:grid; grid-template-columns:minmax(260px, 360px) 1fr; gap:36px; align-items:center; padding:30px 40px; overflow:hidden}
