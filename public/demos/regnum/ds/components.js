@@ -10,7 +10,12 @@ import { MagneticCTA, TiltCard, CountUp, html } from '../../_shared/motion.js';
 import { LINE, SUITS, PH, PORTRAITS, BRANDS } from './icons.js';
 import { viewTransition, initSpotlight, celebrate, revealHeadline, toast } from './effects.js';
 
-export { LINE, SUITS, PH, PORTRAITS, BRANDS, html, viewTransition, initSpotlight, celebrate, revealHeadline, toast };
+export { LINE, SUITS, PH, PORTRAITS, BRANDS, html, viewTransition, initSpotlight, celebrate, revealHeadline };
+// Уведомление — одно на всю систему: плашка внизу, иконка по виду. Любое «получилось / выиграл / скоро будет» — только сюда
+const NOTE_ICON = { ok: 'check', win: 'star', info: 'info', wallet: 'wallet', bell: 'bell' };
+export const notify = (text, kind = 'info') => toast(text, { icon: LINE[NOTE_ICON[kind] || 'info'], kind, ms: kind === 'win' ? 3600 : 2800 });
+// заглушка действия демо: ссылка без адреса не прыгает по странице, а честно говорит, что откроется в полной сборке
+const soon = (what, kind = 'info') => (e) => { e.preventDefault(); notify(`${what} opens in the full build`, kind); };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -156,7 +161,7 @@ export const Art = ({ hue, framed, className = '', children }) => html`<div clas
 /* ───────────────────────────── Навигация ───────────────────────────── */
 export const NavItem = ({ icon, label, on, href = '#' }) => html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
 // клик по игре: в демо — подсказка, что игра откроется в полной сборке (href="#" раньше уводил на главную)
-const openGame = (game) => (e) => { e.preventDefault(); toast(`${game.name} — opens in the full build`); };
+const openGame = (game) => soon(game.name);
 export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#" onClick=${openGame(game)}><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
 export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
 
@@ -213,7 +218,7 @@ export function Tabs({ items, value, onChange }) {
   return html`<div class="ptabs">${items.map(([k, l]) => html`<button key=${k} class=${value === k ? 'on' : ''} onClick=${() => onChange(k)}><${Icon} n=${k} w=${20}/>${l}</button>`)}</div>`;
 }
 
-export const GhostButton = ({ icon, label, onClick, href = '#' }) => html`<a class="ghost-btn" href=${href} onClick=${onClick}>${icon && html`<${Icon} n=${icon} w=${14}/>`}<span>${label}</span></a>`;
+export const GhostButton = ({ icon, label, onClick, href = '#' }) => html`<a class="ghost-btn" href=${href} onClick=${onClick || (href === '#' ? soon(label, /deposit|withdraw/i.test(label) ? 'wallet' : 'info') : undefined)}>${icon && html`<${Icon} n=${icon} w=${14}/>`}<span>${label}</span></a>`;
 
 export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn} className="wallet"><span class="glow" style=${{ '--coin-h': hue }}></span>
   <div class="coin" style=${{ '--coin-h': hue }}>${sym}</div><div class="amt">${amount}</div><div class="sub">${sub}</div>
@@ -267,6 +272,7 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
     rot.current = target; setSpinning(false); setWin(pick); setParty(true);
     celebrate(wrap.current?.querySelector('.wheel'), { big: /€500|VIP/.test(list[pick].label) });   // салют из центра колеса
     setTimeout(() => setParty(false), 2400);
+    notify(`You won ${list[pick].label}`, 'win');
     onWin && onWin(list[pick].label);
   }
   const R = 100;
@@ -291,7 +297,6 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
       <button class="spin-btn" onClick=${spin} disabled=${spinning || locked} aria-label=${locked ? 'Next free spin is not ready yet' : 'Spin the wheel'}><span>${locked ? html`<${Icon} n="lock" w=${18}/>` : 'Spin'}</span></button>
       <div class="pointer" ref=${ptr}><svg viewBox="0 0 40 56" aria-hidden="true"><path class="pb" d="M20 55 L7 21 A15 15 0 1 1 33 21 Z"/><path class="pe" d="M20 49 L10 21 A11 11 0 1 1 30 21 Z"/><circle class="pg" cx="20" cy="16" r="5.5"/><circle class="ph" cx="18.2" cy="14.2" r="1.6"/></svg></div>
     </div>
-    ${win != null && !spinning && html`<${motion.div} class="win" initial=${{ opacity: 0, y: 10, scale: 0.92 }} animate=${{ opacity: 1, y: 0, scale: 1 }} transition=${{ type: 'spring', stiffness: 260, damping: 18 }}>★ You won ${list[win].label}<//>`}
   </div>`;
 }
 
@@ -341,11 +346,11 @@ export function Countdown({ to, prefix = '', precision = 'm' }) {
 }
 // Баланс в шапке: сумма + быстрый депозит
 export const BalanceChip = ({ amount, label = 'Balance' }) => html`<div class="balance-chip"><span class="bc-k">${label}</span><span class="bc-v metal-text">${amount}</span>
-  <a class="bc-add" href="#" aria-label="Deposit"><${Icon} n="plus" w=${14}/></a></div>`;
+  <a class="bc-add" href="#" aria-label="Deposit" onClick=${soon('Deposit', 'wallet')}><${Icon} n="plus" w=${14}/></a></div>`;
 // Игрок в шапке: колокольчик с непрочитанными + мини-портрет
 export const UserMenu = ({ avatar = 'morgane', name, unread = 0 }) => html`<div class="user-menu">
-  <button class="um-bell" aria-label=${`Notifications${unread ? ', ' + unread + ' unread' : ''}`}><${Icon} n="bell" w=${18}/>${unread > 0 && html`<i>${unread}</i>`}</button>
-  <a class="um-me" href="#" aria-label=${name}><span class="um-ava">${PORTRAITS[avatar] ? html`<svg viewBox="0 0 980 980" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: PORTRAITS[avatar] }}></svg>` : null}</span><span class="um-name">${name}</span></a></div>`;
+  <button class="um-bell" aria-label=${`Notifications${unread ? ', ' + unread + ' unread' : ''}`} onClick=${() => notify(unread ? `${unread} new messages from the court` : 'No new messages', 'bell')}><${Icon} n="bell" w=${18}/>${unread > 0 && html`<i>${unread}</i>`}</button>
+  <a class="um-me" href="#" aria-label=${name} onClick=${soon('Your profile')}><span class="um-ava">${PORTRAITS[avatar] ? html`<svg viewBox="0 0 980 980" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: PORTRAITS[avatar] }}></svg>` : null}</span><span class="um-name">${name}</span></a></div>`;
 
 // Кнопка меню (бургер): три полоски ↔ крест; состояние — aria-expanded
 export const Burger = ({ open, onClick, controls = 'side-nav', label = 'Menu' }) => html`<button class="burger" type="button" aria-label=${label} aria-expanded=${open ? 'true' : 'false'} aria-controls=${controls} onClick=${onClick}><i></i></button>`;
@@ -371,7 +376,7 @@ export function HeroBanner({ eyebrow, title, text, pay, cta = 'Join now', second
   ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
   <div class="hero-copy"><div class="hero-top"><span class="eyebrow">${eyebrow}</span>${endsAt && html`<span class="hero-timer"><${Countdown} to=${endsAt} prefix="Ends in "/></span>`}</div>
     <h1 ref=${h1}>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
-    <div class="hero-actions"><${Gem} label=${cta} magnetic onClick=${(e) => { e.preventDefault(); celebrate(e.currentTarget, { big: true }); toast('Bonus claimed — 50% up to €500 is on your balance'); }}/>${secondary && html`<a class="hero-link" href="#">${secondary}</a>`}</div>
+    <div class="hero-actions"><${Gem} label=${cta} magnetic onClick=${(e) => { e.preventDefault(); celebrate(e.currentTarget, { big: true }); notify('Bonus claimed — 50% up to €500 is on your balance', 'win'); }}/>${secondary && html`<a class="hero-link" href="#" onClick=${soon(secondary)}>${secondary}</a>`}</div>
     ${slides > 1 && html`<div class="dots" aria-label=${`Promo ${slide + 1} of ${slides}`}>${Array.from({ length: slides }, (_, i) => html`<i key=${i} class=${i === slide ? 'on' : ''}></i>`)}</div>`}</div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
 }

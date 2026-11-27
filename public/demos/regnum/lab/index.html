@@ -118,7 +118,7 @@ footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
-import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline } from '../ds/components.js';
+import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline, notify } from '../ds/components.js';
 calmScroll(); initSpotlight();
 import { html, PH, LINE, SUITS, ComingSoon, Burger, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
@@ -176,11 +176,10 @@ function Coverage() {
 
 // ── История: заголовок, сцена, код ──
 function Story({ id, title, note, code, col, children }) {
-  const [ok, setOk] = useState(false);
   return html`<div class="story" id=${id}><${Orn} flat>
     <div class="story-h"><h3>${title}</h3>${note && html`<span>${note}</span>`}</div>
     <div class=${'stage' + (col ? ' col' : '')}>${children}</div>
-    ${code && html`<pre class="code">${code}<button onClick=${() => { copy(code); setOk(true); setTimeout(() => setOk(false), 1200); }}>${ok ? 'Copied' : 'Copy'}</button></pre>`}
+    ${code && html`<pre class="code">${code}<button onClick=${() => { copy(code); notify('Code copied', 'ok'); }}>Copy</button></pre>`}
   <//></div>`;
 }
 const Lbl = ({ t, children }) => html`<div>${children}<span class="lbl no-audit">${t}</span></div>`;
@@ -192,7 +191,6 @@ function Board({ look, setLook }) {
   useEffect(() => { const o = {}; KNOBS.forEach((k) => o[k.v] = readKnob(k)); setVals(o); }, [look.theme, JSON.stringify(look.vars)]);
   const set = (k, x) => setLook({ ...look, vars: { ...look.vars, [k.v]: x + (k.unit || '') } });
   const groups = [...new Set(KNOBS.map((k) => k.group))];
-  const [ok, setOk] = useState(false);
   const css = lookCSS(look);
   return html`<div class="board">
     <${Orn} className="knobs" deco>
@@ -202,7 +200,7 @@ function Board({ look, setLook }) {
         : html`<label key=${k.v} class=${'knob' + (k.v.endsWith('-h') ? ' hue' : '') + (look.vars[k.v] != null ? ' changed' : '')}>
         <span>${k.label}</span><input type="range" min=${k.min} max=${k.max} step=${k.step} value=${vals[k.v] ?? 0} onChange=${(e) => set(k, e.target.value)}/><b>${vals[k.v] ?? ''}${k.unit || ''}</b></label>`)}</div>`)}
       <div class="board-actions">
-        <${Gem} label=${ok ? 'Copied' : 'Copy theme CSS'} tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); copy(css); setOk(true); setTimeout(() => setOk(false), 1200); }}/>
+        <${Gem} label="Copy theme CSS" tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); copy(css); notify('Theme CSS copied', 'ok'); }}/>
         <button class="ghost" style=${{ fontSize: '12px', color: 'var(--muted)', padding: '8px 12px' }} onClick=${() => setLook({ ...look, vars: {} })}>Reset to ${look.theme}</button>
       </div>
       <pre class="code" style=${{ marginTop: '14px', borderRadius: '8px' }}>${css}</pre>

@@ -33,12 +33,17 @@ export function initSpotlight(selector = '.spot') {
   addEventListener('scroll', () => { if (el) rect = el.getBoundingClientRect(); }, { passive: true });
 }
 
-/* ── Тост: короткое подтверждение действия внизу экрана (одно сообщение за раз, само уходит) ── */
+/* ── Тост: ЕДИНСТВЕННЫЙ способ сообщить что-то пользователю — плашка внизу экрана (одна за раз, сама уходит).
+   icon — путь линейной иконки 24×24, kind — вид (ok · win · info · wallet · bell): красит значок. Обёртка с выбором
+   иконки по виду — notify() в components.js; напрямую toast() не зовём ── */
 let toastEl = null, toastT = 0;
-export function toast(text) {
+export function toast(text, { icon = '', kind = 'info', ms = 2800 } = {}) {
   if (!toastEl) { toastEl = document.createElement('div'); toastEl.className = 'rg-toast'; toastEl.setAttribute('role', 'status'); toastEl.setAttribute('aria-live', 'polite'); document.body.appendChild(toastEl); }
-  toastEl.textContent = text; toastEl.classList.remove('on'); void toastEl.offsetWidth; toastEl.classList.add('on');
-  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 2600);
+  toastEl.dataset.kind = kind;
+  toastEl.innerHTML = (icon ? `<span class="tt-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="${icon}"/></svg></span>` : '') + '<span class="tt-tx"></span>';
+  toastEl.querySelector('.tt-tx').textContent = text;
+  toastEl.classList.remove('on'); void toastEl.offsetWidth; toastEl.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), ms);
 }
 
 /* ── Цвета темы → hex (canvas-confetti понимает только hex/rgb) ── */
