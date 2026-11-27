@@ -2,22 +2,22 @@
 import { useTranslations, resolveLang } from '../i18n/utils';
 const t = useTranslations(resolveLang(Astro.currentLocale));
 // Тексты (title/desc) — в i18n-словаре по ключу work.<n>.*; здесь только структура/ассеты.
-// href — пока заглушка `#contact` (рабочая навигация); заменить на реальные кейс-URL/страницы.
+// href — кейс: свои демо (/demos/…) или шоты на Dribbble (внешние — открываются в новой вкладке).
 const projects = [
   {
     n: '04',
     tags: ['Motion', '3D'],
     img: null,
     video: { src: '/assets/work/travel.mp4', poster: '/assets/work/travel-poster.jpg' },
-    href: '#contact',
+    href: 'https://dribbble.com/shots/12135443-Travel-to-Asia-3D',
   },
-  { n: '02', tags: ['Product', 'Data Viz'], img: '/assets/work/chat.webp', href: '#contact' },
+  { n: '02', tags: ['Product', 'Data Viz'], img: '/assets/work/chat.webp', href: 'https://dribbble.com/shots/8139279-Save-Finance-App' },
   {
     n: '03',
     tags: ['Type', 'Motion'],
     img: null,
     video: { src: '/assets/work/identity.mp4', poster: '/assets/work/identity-poster.jpg' },
-    href: '#contact',
+    href: 'https://dribbble.com/shots/25267671--design',
   },
   { n: '05', tags: ['AI', 'Automation'], img: '/assets/work/support-bot.webp', posMobile: '4% 50%', href: '/demos/support-bot/' },
   { n: '06', tags: ['Product', 'Data Viz'], img: '/assets/work/analytics-pulse.webp', href: '/demos/analytics-pulse/' },
@@ -37,7 +37,7 @@ const projects = [
     <ul class="work-list">
       {projects.map((p) => (
         <li class="work-item" data-tilt>
-          <a class="work-link" href={p.href}>
+          <a class="work-link" href={p.href} {...(p.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}>
           <div class="work-media">
             {p.video
               ? <video
