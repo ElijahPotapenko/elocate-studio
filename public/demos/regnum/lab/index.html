@@ -16,7 +16,9 @@
     "react-dom": "https://esm.sh/react-dom@18.3.1",
     "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
     "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
-    "htm": "https://esm.sh/htm@3.1.1"
+    "htm": "https://esm.sh/htm@3.1.1",
+    "gsap": "https://esm.sh/gsap@3.13.0",
+    "gsap/SplitText": "https://esm.sh/gsap@3.13.0/SplitText"
   }
 }
 </script>
@@ -116,8 +118,8 @@ footer.foot{max-width:1440px; margin:0 auto; padding:0 22px 40px; font-size:12px
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
-import { Text, TYPE_ROLES, typeAudit, calmScroll } from '../ds/components.js';
-calmScroll();
+import { Text, TYPE_ROLES, typeAudit, calmScroll, initSpotlight, celebrate, revealHeadline } from '../ds/components.js';
+calmScroll(); initSpotlight();
 import { html, PH, LINE, SUITS, ComingSoon, Burger, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
@@ -148,6 +150,10 @@ function TypeScale() {
       <div class="ts-spec">${specs[r] || ''}</div></div>`)}</div><//>`;
 }
 
+function FxCelebrate() { const r = React.useRef(null); return html`<div ref=${r} style=${{ display: 'flex', gap: '12px', alignItems: 'center' }}><${Gem} label="Celebrate" size="sm" onClick=${(e) => { e.preventDefault(); celebrate(r.current); }}/><${Gem} label="Big win" tone="metal" size="sm" onClick=${(e) => { e.preventDefault(); celebrate(r.current, { big: true }); }}/></div>`; }
+function FxTitle() { const [k, setK] = useState(0); const ref = React.useRef(null);
+  React.useEffect(() => { if (ref.current) { delete ref.current.dataset.revealed; revealHeadline(ref.current); } }, [k]);
+  return html`<div style=${{ display: 'grid', gap: '12px', justifyItems: 'start' }}><h2 key=${k} ref=${ref} class="t-display" style=${{ margin: 0 }}>50% up to <b class="metal-text">€500</b><br/>+ 100 free spins</h2><${GhostButton} icon="casino" label="Replay" onClick=${(e) => { e.preventDefault(); setK(k + 1); }}/></div>`; }
 function BurgerDemo() { const [o, setO] = useState(false); return html`<${Burger} open=${o} onClick=${() => setO(!o)}/><span class="t-caption" style=${{ color: 'var(--muted)' }}>${o ? 'open' : 'closed'} — click</span>`; }
 
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
@@ -216,6 +222,7 @@ function Board({ look, setLook }) {
 const TOC = [
   ['Start', [['playground', 'Playground'], ['themes', 'Themes']]],
   ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['text', 'Text'], ['iconography', 'Iconography']]],
+  ['Effects', [['fx-spot', 'Spotlight'], ['fx-confetti', 'Celebrate'], ['fx-title', 'Headline reveal'], ['fx-vt', 'View transitions']]],
   ['Components', [['soon', 'Coming soon'], ['loader', 'Loader'], ['account', 'Account'], ['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
     ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['logo', 'Logo · Flourish'], ['suits', 'Suits'], ['pay', 'Pay row'], ['ticker', 'Wins ticker'], ['guilloche', 'Guilloche'], ['section', 'Section head']]],
   ['Patterns', [['hero', 'Hero banner'], ['hero-art', 'Hero · art'], ['wheel-panel', 'Wheel panel'], ['rank', 'Rank plate'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
@@ -359,6 +366,19 @@ function App() {
           <${Story} id="wheel" title="CrownWheel" note="lights are pure CSS; spin lands exactly on the prize" code=${'<${CrownWheel} prizes={[{ label: \'50 FS\', suit: \'spade\' }, …]} onWin={(p) => …}/>   // или просто строки: [\'×2\', \'×3\', …]'}>
             <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel}/></div>
             <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel} prizes=${['×2', '×3', '×5', '×10', '×20', '×50']}/></div>
+          <//>
+
+          <${Story} id="fx-spot" title="Effect · Spotlight" note="light follows the cursor inside the card and on its rim (Linear/Vercel pattern) — only the hovered card repaints; add the spot prop to any Orn" code=${'initSpotlight();   // once per page\n<${Orn} spot>…<//>   // GameCard, Stat, Wallet, Meter, VipCard, Perk have it'}>
+            <div class="mini-games">${GAMES.slice(0, 3).map((g) => html`<${GameCard} key=${g.name} game=${g}/>`)}</div>
+          <//>
+          <${Story} id="fx-confetti" title="Effect · Celebrate" note="canvas-confetti (MIT, ~6 KB, loaded on demand) in theme metal + accent; fires on a wheel win, bigger for €500 / VIP+" code=${'celebrate(element, { big: true })'}>
+            <${FxCelebrate}/>
+          <//>
+          <${Story} id="fx-title" title="Effect · Headline reveal" note="GSAP SplitText (free since 2025): words rise from line masks once on mount, markup restored after" code=${'revealHeadline(h1Element)   // HeroBanner does it'}>
+            <${FxTitle}/>
+          <//>
+          <${Story} id="fx-vt" title="Effect · View Transitions" note="native API (Chrome 111+, Safari 18+, Firefox 144+): switching sections fades content up and the active-nav pill flows to the new item; no support / reduced motion → instant" code=${'viewTransition(() => setRoute(next))\n.main{view-transition-name:rg-page}   .nav .ind{view-transition-name:rg-nav-ind}'}>
+            <span class="t-body-sm" style=${{ color: 'var(--muted)' }}>Open the demo and switch sections in the sidebar — <a href="../index.html#/casino" style=${{ textDecoration: 'underline' }}>try it</a>.</span>
           <//>
 
           <${Story} id="burger" title="Burger" note="mobile menu button — bars morph into a cross; state in aria-expanded" code=${'<${Burger} open={menu} onClick={() => setMenu(!menu)}/>'}>

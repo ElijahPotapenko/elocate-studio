@@ -15,7 +15,9 @@
     "react-dom": "https://esm.sh/react-dom@18.3.1",
     "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
     "framer-motion": "https://esm.sh/framer-motion@11.11.17?external=react,react-dom",
-    "htm": "https://esm.sh/htm@3.1.1"
+    "htm": "https://esm.sh/htm@3.1.1",
+    "gsap": "https://esm.sh/gsap@3.13.0",
+    "gsap/SplitText": "https://esm.sh/gsap@3.13.0/SplitText"
   }
 }
 </script>
@@ -38,7 +40,7 @@
 .back{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)} .back:hover{color:var(--metal)}
 .back.lab{color:var(--metal); text-shadow:0 0 10px var(--glow-metal)}
 .side .in{padding:18px 12px}
-.main{display:flex; flex-direction:column; gap:22px; min-width:0}
+.main{display:flex; flex-direction:column; gap:22px; min-width:0; view-transition-name:rg-page}
 .row{display:grid; grid-template-columns:330px 1fr; gap:22px}
 .stats{display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto 1fr; gap:16px}
 .span3{grid-column:1 / -1}
@@ -92,8 +94,8 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
 import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
-  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll } from './ds/components.js';
-calmScroll();
+  Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll, viewTransition, initSpotlight } from './ds/components.js';
+calmScroll(); initSpotlight();
 
 // ── данные ──
 const GAMES = [
@@ -158,7 +160,7 @@ const ROUTES = [['hall', 'home', 'Main hall'], ['casino', 'casino', 'Casino'], [
 const routeOf = () => { const r = location.hash.replace(/^#\/?/, ''); return ROUTES.some(([k]) => k === r) ? r : 'hall'; };
 function useRoute() {
   const [r, setR] = useState(routeOf);
-  React.useEffect(() => { const on = () => { setR(routeOf()); scrollTo({ top: 0 }); }; addEventListener('hashchange', on); return () => removeEventListener('hashchange', on); }, []);
+  React.useEffect(() => { const on = () => viewTransition(() => { setR(routeOf()); scrollTo(0, 0); }); addEventListener('hashchange', on); return () => removeEventListener('hashchange', on); }, []);
   return r;
 }
 const go = (r) => { if (routeOf() !== r) location.hash = '#/' + r; };
@@ -206,7 +208,7 @@ function App() {
     document.documentElement.classList.toggle('menu-open', menu);
     const k = (e) => { if (e.key === 'Escape') setMenu(false); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k);
   }, [menu]);
-  const setSearch = (v) => { setQ(v); if (v && route !== 'casino' && route !== 'live') go('casino'); };
+  const setSearch = (v) => { setQ(v); const now = routeOf(); if (v && now !== 'casino' && now !== 'live') go('casino'); };   // по текущему адресу: состояние может отставать на время перехода
   return html`<${React.Fragment}>
     <${Dust}/>
     <div class="app">

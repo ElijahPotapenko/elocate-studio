@@ -57,6 +57,28 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
    мягкое скругление: маски на ~40 панелях стоили Firefox ×2.5 по кадрам */
 @supports not (corner-shape: bevel){ .orn{border-radius:calc(var(--cut) * .75)} .orn > .in{border-radius:calc(var(--cut) * .75 - 1px)} }
 
+/* ── Spotlight: пятно света ездит за курсором СДВИГОМ (transform — композитор, без перерисовки) — координаты пишет
+   initSpotlight() в --mx/--my карточки под мышью; рамка при наведении разгорается один раз (без слежения). ── */
+.spot > .orn > .in::before{content:''; position:absolute; left:-200px; top:-200px; width:400px; height:400px; z-index:-1; pointer-events:none; border-radius:50%;
+  background:radial-gradient(closest-side, color-mix(in oklch, var(--metal-hi) calc(20% + 10% * var(--glow)), transparent), color-mix(in oklch, var(--metal) 6%, transparent) 55%, transparent);
+  transform:translate(var(--mx, 50%), var(--my, 50%)); opacity:0; transition:opacity .3s var(--ease); will-change:transform}
+.spot:hover > .orn > .in::before{opacity:1}
+.spot:hover > .orn{background:linear-gradient(160deg, var(--metal-hi), var(--metal-2) 45%, color-mix(in oklch, var(--metal) 70%, transparent) 70%, var(--metal-hi))}   /* кант разгорается — одна перерисовка на вход */
+.perk.spot{isolation:isolate; overflow:hidden}
+.perk.spot::before{content:''; position:absolute; left:-160px; top:-160px; width:320px; height:320px; z-index:-1; pointer-events:none; border-radius:50%;
+  background:radial-gradient(closest-side, color-mix(in oklch, var(--metal-hi) calc(20% + 10% * var(--glow)), transparent), transparent);
+  transform:translate(var(--mx, 50%), var(--my, 50%)); opacity:0; transition:opacity .3s var(--ease); will-change:transform}
+.perk.spot:hover::before{opacity:1}
+
+/* ── View Transitions: смена раздела — контент уходит вверх и проявляется снизу; индикатор меню перетекает ── */
+::view-transition-old(root), ::view-transition-new(root){animation:none}
+::view-transition-old(rg-page){animation:rg-vt-out .2s var(--ease) both}
+::view-transition-new(rg-page){animation:rg-vt-in .45s var(--ease) both}
+::view-transition-group(rg-nav-ind){animation-duration:.45s; animation-timing-function:var(--ease)}
+@keyframes rg-vt-out{to{opacity:0; transform:translateY(-10px)}}
+@keyframes rg-vt-in{from{opacity:0; transform:translateY(14px)}}
+.rv-line{padding-bottom:.06em}
+
 /* ── Diamond: ромбик-маркер ── */
 .diamond{width:8px; height:8px; transform:rotate(45deg); background:var(--metal-tex), var(--metal-grad); box-shadow:0 0 12px var(--glow-metal-strong); display:inline-block; flex:none}
 
@@ -83,7 +105,10 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .gem.sm{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; --h:36px;} .gem.sm > span{padding:0 22px}
 .gem.lg{font:var(--t-control); letter-spacing:var(--tr-control); text-transform:uppercase; --h:56px;} .gem.lg > span{padding:0 44px}
 .gem.metal > span{background:var(--metal-tex), linear-gradient(180deg, var(--metal), var(--metal-2)); color:var(--on-metal); text-shadow:none}
-.cta:hover .gem{background:var(--metal-tex), linear-gradient(180deg, var(--metal-hi), var(--metal-2))}
+@property --cta-a{syntax:'<angle>'; initial-value:0deg; inherits:false}
+/* рамка главной кнопки при наведении: свет бежит по контуру (conic + @property) — перерисовывается только тонкий кант */
+.cta:hover .gem{background:conic-gradient(from var(--cta-a), var(--metal-hi), var(--metal-2) 22%, var(--accent-2) 50%, var(--metal-2) 78%, var(--metal-hi)); animation:cta-rim 2.2s linear infinite}
+@keyframes cta-rim{to{--cta-a:360deg}}
 .cta:hover .gem > span{filter:brightness(1.18) saturate(1.15)}
 .cta:hover .gem::before,.cta:hover .gem::after{background:var(--metal-hi); box-shadow:0 0 12px var(--glow-accent-strong)}
 
@@ -112,7 +137,11 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .nav a{font:var(--t-label); letter-spacing:var(--tr-label); display:flex; align-items:center; gap:12px; padding:11px 22px 11px 12px; color:var(--muted); transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
   border-radius:8px}
 .nav a:hover{background:var(--panel-hi); color:var(--ink)}
-.nav a.on{color:var(--ink); background:linear-gradient(90deg, color-mix(in oklch, var(--metal-deep) 55%, transparent), transparent); box-shadow:inset 3px 0 0 var(--metal), inset 0 0 24px color-mix(in oklch, var(--metal) 8%, transparent)}
+.nav a{position:relative; isolation:isolate}
+.nav a.on{color:var(--ink)}
+/* индикатор активного пункта — отдельный элемент: при смене раздела перетекает к новому пункту (View Transitions) */
+.nav .ind{position:absolute; inset:0; z-index:-1; border-radius:8px; view-transition-name:rg-nav-ind;
+  background:linear-gradient(90deg, color-mix(in oklch, var(--metal-deep) 55%, transparent), transparent); box-shadow:inset 3px 0 0 var(--metal), inset 0 0 24px color-mix(in oklch, var(--metal) 8%, transparent)}
 .nav .ic{width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--panel); box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 40%, transparent); flex:none}
 .nav a.on .ic{box-shadow:inset 0 0 0 1px var(--metal), 0 0 14px var(--glow-metal)}
 .nav .ic svg{width:15px; height:15px}
@@ -155,7 +184,6 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .game:hover .art .emb{transform:scale(1.06)}
 .game:hover .ornw::before{box-shadow:0 0 26px var(--glow-metal), 0 16px 34px var(--shade)}
 .game .orn{transition:background var(--dur) var(--ease)}
-.game:hover .orn{background:var(--metal-tex), linear-gradient(160deg, var(--metal-hi), var(--metal-2))}   /* без свечений: ховер = рамка загорается металлом */
 
 /* ── SectionHead ── */
 .sec-head{display:flex; align-items:center; gap:12px; margin:4px 0 -6px}
@@ -484,6 +512,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 /* ── Облегчённый режим (autoQuality или ?quality=lite): что ещё дорогое — гасим ── */
 [data-quality="lite"] .lamp-group{animation-duration:2.4s}
 [data-quality="lite"] .ticker-track{animation-play-state:paused}
+[data-quality="lite"] .spot > .orn > .in::before, [data-quality="lite"] .perk.spot::before{display:none}   /* lite: без пятна света — только подъём и кант */
+[data-quality="lite"] .game:hover .art .emb{transform:none}
    /* облегчённый режим: строка стоит (листать — наведение/свайп не нужен) */
 [data-quality="lite"] .ornw::before{box-shadow:0 10px 24px var(--shade)}
 [data-quality="lite"] .orn > .in::after, [data-quality="lite"] .art::before{display:none}

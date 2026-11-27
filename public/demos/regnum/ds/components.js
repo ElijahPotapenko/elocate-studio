@@ -8,8 +8,9 @@ import React, { useState, useRef, useId, useMemo, useEffect } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, html } from '../../_shared/motion.js';
 import { LINE, SUITS, PH, PORTRAITS, BRANDS } from './icons.js';
+import { viewTransition, initSpotlight, celebrate, revealHeadline } from './effects.js';
 
-export { LINE, SUITS, PH, PORTRAITS, BRANDS, html };
+export { LINE, SUITS, PH, PORTRAITS, BRANDS, html, viewTransition, initSpotlight, celebrate, revealHeadline };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -65,7 +66,7 @@ const uid = () => useId().replace(/[^a-zA-Z0-9]/g, '');
 
 /* ───────────────────────────── Примитивы ───────────────────────────── */
 // Панель со срезанными углами. lit — ореол, sheen — блик, deco — завитки по углам, flat — плоское тело
-export const Orn = ({ className = '', flat, lit, sheen, deco, children, style }) => html`<div class=${'ornw ' + (lit ? 'lit ' : '') + className} style=${style}>
+export const Orn = ({ className = '', flat, lit, sheen, deco, spot, children, style }) => html`<div class=${'ornw ' + (lit ? 'lit ' : '') + (spot ? 'spot ' : '') + className} style=${style}>
   <div class=${'orn' + (flat ? ' flat' : '') + (sheen ? ' sheen' : '')}><div class="in">${deco && html`<i class="cr tl"></i><i class="cr tr"></i><i class="cr bl"></i><i class="cr br"></i>`}${children}</div></div></div>`;
 
 // ── Текст: роли = text styles (tokens.css → --t-*). Любой текст интерфейса — одна из них ──
@@ -152,22 +153,22 @@ export const SectionHead = ({ title }) => html`<div class="sec-head"><${Diamond}
 export const Art = ({ hue, framed, className = '', children }) => html`<div class=${'art ' + (framed ? 'framed ' : '') + className} style=${{ '--art-h': hue }}>${children}</div>`;
 
 /* ───────────────────────────── Навигация ───────────────────────────── */
-export const NavItem = ({ icon, label, on, href = '#' }) => html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}><span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
+export const NavItem = ({ icon, label, on, href = '#' }) => html`<a class=${on ? 'on' : ''} href=${href} aria-current=${on ? 'page' : undefined}>${on && html`<i class="ind" aria-hidden="true"></i>`}<span class="ic"><${Icon} n=${icon}/></span>${label}</a>`;
 export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href="#"><span class="em art" style=${{ '--art-h': game.hue }}><${Emblem} k=${game.k} halo=${false}/></span>${game.name}<${Badge} kind=${kind}/></a>`;
 export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
 
 /* ───────────────────────────── Карточки и данные ───────────────────────────── */
 export const GameCard = ({ game, tilt = false }) => {   // tilt — 3D-наклон за мышью; по умолчанию выключен (дорого в Firefox), подъём при наведении — в CSS
-  const body = html`<${Orn}><${Art} hue=${game.hue} framed>${game.badge && html`<${Badge} kind=${game.badge} className="tag"/>`}<${Emblem} k=${game.k}/><//>
+  const body = html`<${Orn} spot><${Art} hue=${game.hue} framed>${game.badge && html`<${Badge} kind=${game.badge} className="tag"/>`}<${Emblem} k=${game.k}/><//>
     <h5>${game.name}</h5><div class="meta"><span>${game.studio || 'Regnum Originals'}</span><b>RTP ${game.rtp}</b></div><//>`;
   return tilt ? html`<${TiltCard} className="game" maxTilt=${8} hoverY=${-4}>${body}<//>` : html`<div class="game">${body}</div>`;
 };
 
-export const Stat = ({ k, to, prefix = '', delta }) => html`<${Orn} className="stat"><div class="k">${k}</div><div class="v metal-text">${prefix}<${CountUp} to=${to} locale/></div>${delta && html`<div class="d">${delta}</div>`}<//>`;
+export const Stat = ({ k, to, prefix = '', delta }) => html`<${Orn} className="stat" spot><div class="k">${k}</div><div class="v metal-text">${prefix}<${CountUp} to=${to} locale/></div>${delta && html`<div class="d">${delta}</div>`}<//>`;
 
 export function Meter({ title, value, min = 1, max = 5, className = '' }) {
   const ticks = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-  return html`<${Orn} className=${'meter ' + className}><div class="meter-head"><h4>${title}</h4><span>${value.toFixed(1)}× active</span></div>
+  return html`<${Orn} className=${'meter ' + className} spot><div class="meter-head"><h4>${title}</h4><span>${value.toFixed(1)}× active</span></div>
     <div class="track"><${motion.div} class="fill" initial=${{ width: 0 }} whileInView=${{ width: `${(value - min) / (max - min) * 100}%` }} viewport=${{ once: true }} transition=${{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}/></div>
     <div class="ticks">${ticks.map((x) => html`<span key=${x} class=${x <= value ? 'hit' : ''}>${x}×</span>`)}</div><//>`;
 }
@@ -181,10 +182,10 @@ export function Ladder({ rungs, cur }) {
   return html`<div class="ladder" style=${{ '--n': n, '--done': done + '%' }}>${rungs.map(([num, t], i) => html`<div key=${num} class=${'rung ' + (i < cur ? 'done' : i === cur ? 'cur' : '')}><div class="medal"><b>${num}</b></div><span>${t}</span></div>`)}</div>`;
 }
 
-export const Perk = ({ value, label, lock }) => html`<div class=${'perk' + (lock ? ' next' : '')}><div class="pv metal-text">${value}</div><div class="pl">${label}</div>${lock && html`<${Badge} className="lock">${lock}<//>`}</div>`;
+export const Perk = ({ value, label, lock }) => html`<div class=${'perk spot' + (lock ? ' next' : '')}><div class="pv metal-text">${value}</div><div class="pl">${label}</div>${lock && html`<${Badge} className="lock">${lock}<//>`}</div>`;
 
 export function VipCard({ level, next, points, goal, rungs, cur, perks, className = 'span3' }) {
-  return html`<${Orn} className=${'vipc ' + className}><div class="vip-head"><${Crown} size=${42}/><div class="t"><h4>VIP level ${level} → ${level + 1}</h4><small>${(goal - points).toLocaleString('en')} points to ${next}</small></div>
+  return html`<${Orn} className=${'vipc ' + className} spot><div class="vip-head"><${Crown} size=${42}/><div class="t"><h4>VIP level ${level} → ${level + 1}</h4><small>${(goal - points).toLocaleString('en')} points to ${next}</small></div>
       <div class="pts metal-text"><${CountUp} to=${points} locale/><small> / ${goal.toLocaleString('en')}</small></div></div>
     <${VipBar} pct=${Math.round(points / goal * 100)}/>
     <${Ladder} rungs=${rungs} cur=${cur}/>
@@ -210,7 +211,7 @@ export function Tabs({ items, value, onChange }) {
 
 export const GhostButton = ({ icon, label, onClick, href = '#' }) => html`<a class="ghost-btn" href=${href} onClick=${onClick}>${icon && html`<${Icon} n=${icon} w=${14}/>`}<span>${label}</span></a>`;
 
-export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn} className="wallet"><span class="glow" style=${{ '--coin-h': hue }}></span>
+export const Wallet = ({ sym, hue, amount, sub, actions = true }) => html`<${Orn} className="wallet" spot><span class="glow" style=${{ '--coin-h': hue }}></span>
   <div class="coin" style=${{ '--coin-h': hue }}>${sym}</div><div class="amt">${amount}</div><div class="sub">${sub}</div>
   ${actions && html`<div class="wallet-actions"><${GhostButton} icon="arrowDown" label="Deposit"/><${GhostButton} icon="arrowUp" label="Withdraw"/></div>`}<//>`;
 
@@ -236,6 +237,7 @@ export const PRIZES = [   // масти по кругу ♠ ♦ ♣ ♥ — ст
 const norm = (p) => (typeof p === 'string' ? { label: p } : p);
 
 export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
+  const wrap = useRef(null);
   const list0 = prizes.length, face = useRef(null), ptr = useRef(null), rot = useRef(-180 / list0), lastSeg = useRef(0);   // в покое стрелка — в середине сектора
   const [spinning, setSpinning] = useState(false), [win, setWin] = useState(null), [party, setParty] = useState(false);
   const list = useMemo(() => prizes.map(norm), [prizes]);
@@ -259,6 +261,7 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
     await animate(rot.current - 14, target + 5, { duration: 5.2, ease: [0.16, 0.72, 0.12, 1], onUpdate: paint });              // разгон → торможение с перекатом
     await animate(target + 5, target, { type: 'spring', stiffness: 140, damping: 9, onUpdate: paint });                        // возврат
     rot.current = target; setSpinning(false); setWin(pick); setParty(true);
+    celebrate(wrap.current?.querySelector('.wheel'), { big: /€500|VIP/.test(list[pick].label) });   // салют из центра колеса
     setTimeout(() => setParty(false), 2400);
     onWin && onWin(list[pick].label);
   }
@@ -271,7 +274,7 @@ export function CrownWheel({ prizes = PRIZES, onWin, locked = false }) {
         ${p.suit && html`<path class="si" d=${SUITS[p.suit]} transform=${`translate(${C - 7} 29) scale(.14)`}/>`}
         <text x=${C} y=${p.suit ? 58 : 44} text-anchor="middle">${p.label}</text></g></g>`;
   });
-  return html`<div class=${'wheel-wrap' + (spinning ? ' fast' : '') + (party ? ' won' : '')}>
+  return html`<div ref=${wrap} class=${'wheel-wrap' + (spinning ? ' fast' : '') + (party ? ' won' : '')}>
     <div class="wheel-glow"></div>
     <div class="wheel">
       <div class="bezel"></div>
@@ -357,13 +360,17 @@ export const WinsTicker = ({ wins, duration = 38 }) => { const row = wins.map(([
 /* ───────────────────────────── Паттерны (собраны из компонентов) ───────────────────────────── */
 // Баннер: текст слева, что угодно справа (колесо). Фон — гильош-гравировка.
 // art — иллюстрация справа (растворяется в фоне к тексту), artMobile — версия для телефона (встаёт сверху)
-export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', secondary, endsAt, slides = 0, slide = 0, aside, art, artMobile, artAlt = '' }) => html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit deco>
+export function HeroBanner({ eyebrow, title, text, pay, cta = 'Join now', secondary, endsAt, slides = 0, slide = 0, aside, art, artMobile, artAlt = '' }) {
+  const h1 = useRef(null);
+  useEffect(() => { revealHeadline(h1.current); }, []);   // заголовок проявляется по словам (GSAP SplitText), один раз
+  return html`<${Orn} className=${'hero' + (art ? ' has-art' : '')} lit deco>
   ${art ? html`<picture class="hero-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" fetchpriority="high"/></picture>` : html`<${Guilloche}/>`}
   <div class="hero-copy"><div class="hero-top"><span class="eyebrow">${eyebrow}</span>${endsAt && html`<span class="hero-timer"><${Countdown} to=${endsAt} prefix="Ends in "/></span>`}</div>
-    <h1>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
+    <h1 ref=${h1}>${title}</h1><p>${text}</p>${pay && html`<${PayRow} items=${pay}/>`}
     <div class="hero-actions"><${Gem} label=${cta} magnetic/>${secondary && html`<a class="hero-link" href="#">${secondary}</a>`}</div>
     ${slides > 1 && html`<div class="dots" aria-label=${`Promo ${slide + 1} of ${slides}`}>${Array.from({ length: slides }, (_, i) => html`<i key=${i} class=${i === slide ? 'on' : ''}></i>`)}</div>`}</div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
+}
 
 // Заглушка раздела «скоро откроется»: иллюстрация фоном (WebP + мобильная), затемнённая середина под текстом
 export const ComingSoon = ({ eyebrow, title, text, cta, href = '#', icon = 'casino', art, artMobile, artAlt = '' }) => html`<${Orn} className=${'soon' + (art ? ' has-art' : '')} lit deco>
