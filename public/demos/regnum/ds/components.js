@@ -157,7 +157,7 @@ export const GameRow = ({ game, kind }) => html`<a class=${'grow ' + kind} href=
 export const SubHead = ({ children }) => html`<div class="sub-h"><${Diamond}/>${children}</div>`;
 
 /* ───────────────────────────── Карточки и данные ───────────────────────────── */
-export const GameCard = ({ game, tilt = true }) => {
+export const GameCard = ({ game, tilt = false }) => {   // tilt — 3D-наклон за мышью; по умолчанию выключен (дорого в Firefox), подъём при наведении — в CSS
   const body = html`<${Orn}><${Art} hue=${game.hue} framed>${game.badge && html`<${Badge} kind=${game.badge} className="tag"/>`}<${Emblem} k=${game.k}/><//>
     <h5>${game.name}</h5><div class="meta"><span>${game.studio || 'Regnum Originals'}</span><b>RTP ${game.rtp}</b></div><//>`;
   return tilt ? html`<${TiltCard} className="game" maxTilt=${8} hoverY=${-4}>${body}<//>` : html`<div class="game">${body}</div>`;

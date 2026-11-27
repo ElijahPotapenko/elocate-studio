@@ -10,8 +10,8 @@ for (const pg of PAGES) {
     const project = info.project.name;
     const cpu = Number((info.project.metadata as { cpu?: number })?.cpu || 1);
     await throttleCpu(page, cpu);
-    const sep = pg.url.includes('?') ? '&' : '?';
-    await page.goto(pg.url + sep + 'fps=0', { waitUntil: 'load' });      // плашку FPS убираем — она сама стоит кадров
+    const [path, hash = ''] = pg.url.split('#'); const sep = path.includes('?') ? '&' : '?';
+    await page.goto(path + sep + 'fps=0' + (hash ? '#' + hash : ''), { waitUntil: 'load' });      // плашку FPS убираем — она сама стоит кадров
     if (pg.ready) await page.waitForSelector(pg.ready, { state: 'attached', timeout: 20_000 }).catch(() => {});
     await page.waitForTimeout(pg.settleMs ?? 2000);
     const budget = { ...DEFAULT_BUDGET, ...(pg.budget?.['*'] || {}), ...(pg.budget?.[project] || {}) };

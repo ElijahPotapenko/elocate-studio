@@ -36,8 +36,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 /* ── Orn: панель со срезанными углами. Обёртка .ornw = ореол, .orn = рамка-градиент, .in = тело ── */
 .ornw{position:relative; isolation:isolate}
-.ornw::before{content:''; position:absolute; inset:3px; z-index:-1; border-radius:16px; pointer-events:none;
-  box-shadow:0 14px 34px var(--shade), 0 0 18px color-mix(in oklch, var(--metal) calc(7% * var(--glow)), transparent); transition:box-shadow var(--dur) var(--ease)}
+.ornw::before{content:''; position:absolute; inset:3px; z-index:-1; border-radius:16px; pointer-events:none; transition:none;
+  box-shadow:0 14px 34px var(--shade), 0 0 18px color-mix(in oklch, var(--metal) calc(7% * var(--glow)), transparent)}
 .ornw.lit::before{box-shadow:0 0 22px var(--glow-metal-soft), 0 0 44px color-mix(in oklch, var(--accent) calc(20% * var(--glow)), transparent), 0 12px 26px var(--shade)}
 .orn{position:relative; padding:1px; border-radius:var(--cut); corner-shape:bevel; background:var(--frame-grad); height:100%; contain:layout paint}   /* перерисовка внутри панели не расползается наружу (и так обрезана clip-path) */
 .orn > .in{position:relative; height:100%; border-radius:calc(var(--cut) - 1px); corner-shape:bevel; overflow:hidden; box-shadow:var(--edge); background:radial-gradient(120% 80% at 50% -10%, var(--panel-hi), transparent 60%), linear-gradient(180deg, var(--panel-2), var(--panel))}
@@ -148,7 +148,11 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .game h5::before{content:''; width:6px; height:6px; transform:rotate(45deg); background:var(--metal-grad); flex:none}
 .game .meta{font:var(--t-caption); letter-spacing:var(--tr-caption); display:flex; justify-content:space-between; margin:0 2px; color:var(--muted)}
 .game .meta b{color:var(--metal)}
-.game:hover .art .emb{transform:scale(1.07) translateY(-3px)}
+/* Карточка игры — для ВСЕХ браузеров одинаково: без 3D-наклона за мышью, только дешёвый подъём (transform) при наведении;
+   тень меняется без плавного перехода (анимация размытой тени = перерисовка каждый кадр). Firefox: мышь по играм 23 → 41 fps */
+.game .ornw{transition:transform var(--dur) var(--ease)}
+.game:hover .ornw{transform:translateY(-4px)}
+.game:hover .art .emb{transform:scale(1.06)}
 .game:hover .ornw::before{box-shadow:0 0 26px var(--glow-metal), 0 16px 34px var(--shade)}
 .game .orn{transition:background var(--dur) var(--ease)}
 .game:hover .orn{background:var(--metal-tex), linear-gradient(160deg, var(--metal-hi), var(--metal-2))}   /* без свечений: ховер = рамка загорается металлом */
@@ -479,7 +483,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 
 /* ── Облегчённый режим (autoQuality или ?quality=lite): что ещё дорогое — гасим ── */
 [data-quality="lite"] .lamp-group{animation-duration:2.4s}
-[data-quality="lite"] .ticker-track{animation-play-state:paused}   /* облегчённый режим: строка стоит (листать — наведение/свайп не нужен) */
+[data-quality="lite"] .ticker-track{animation-play-state:paused}
+   /* облегчённый режим: строка стоит (листать — наведение/свайп не нужен) */
 [data-quality="lite"] .ornw::before{box-shadow:0 10px 24px var(--shade)}
 [data-quality="lite"] .orn > .in::after, [data-quality="lite"] .art::before{display:none}
 

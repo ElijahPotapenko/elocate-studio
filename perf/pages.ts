@@ -22,5 +22,6 @@ export const PAGES: PerfPage[] = [
   { name: 'support-bot', url: '/demos/support-bot/index.html', settleMs: 3000 },
   // экран загрузки (~1–3 с) + замер автокачества (1.5 с) — ждём, пока страница придёт в своё постоянное состояние
   { name: 'regnum', url: '/demos/regnum/index.html', settleMs: 1000, ready: 'html[data-quality]' },
+  { name: 'regnum-casino', url: '/demos/regnum/index.html#/casino', settleMs: 1000, ready: 'html[data-quality]' },
   { name: 'regnum-lab', url: '/demos/regnum/lab/index.html', settleMs: 3000 },
 ];
