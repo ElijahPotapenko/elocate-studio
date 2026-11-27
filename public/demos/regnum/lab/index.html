@@ -118,13 +118,13 @@ import { createRoot } from 'react-dom/client';
 import * as DS from '../ds/components.js';
 import { Text, TYPE_ROLES, typeAudit, calmScroll } from '../ds/components.js';
 calmScroll();
-import { html, PH, LINE, SUITS, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
+import { html, PH, LINE, SUITS, ComingSoon, Burger, RankPlate, WheelPanel, BalanceChip, UserMenu, Countdown, GhostButton, Loader, THEMES, KNOBS, loadLook, saveLook, applyLook, lookCSS, Suit, Flourish, PayRow, WinsTicker, HeroBanner, ProfileCard, Presence, MetalText,
   Orn, Diamond, Gem, Badge, Icon, Emblem, Crown, Logo, Seg, Field, SectionHead, Art, NavItem, GameRow, SubHead,
   GameCard, Stat, Meter, VipBar, Ladder, Perk, VipCard, Crest, Avatar, Tabs, Wallet, CrownWheel, Dust, Guilloche } from '../ds/components.js';
 
 const G = { name: "Dragon's Hoard", k: 'flame', hue: 30, rtp: '96.4%', badge: 'new' };
 const GAMES = [G, { name: "Joker's Court", k: 'mask-happy', hue: 300, rtp: '97.0%', badge: 'hot' }, { name: 'Lucky Clover', k: 'clover', hue: 150, rtp: '96.2%' }, { name: 'Golden Dice', k: 'dice-five', hue: 60, rtp: '95.9%', badge: 'new' }];
-const PAY = [['VISA', 'oklch(45% 0.15 260)'], ['MC', 'oklch(62% 0.19 40)'], ['ETH', 'oklch(55% 0.13 270)'], ['₮', 'oklch(62% 0.13 170)'], ['₿', 'oklch(72% 0.16 65)']];
+const PAY = ['visa', 'mastercard', 'ethereum', 'tether', 'bitcoin'];
 const WINS = [['Lady Morgane', '€1,240', "Dragon's Hoard"], ['Sir Aldric', '€380', 'Royal Flush'], ['Baron K.', '€9,700', 'Crown Jewels']];
 const RUNGS = [['V', 'Baroness'], ['VI', 'Countess'], ['VII', 'Duchess'], ['VIII', 'Princess'], ['IX', 'Queen']];
 const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label: 'Crown points boost' }, { value: 'Royal chest', label: 'Unlocks at Princess', lock: 'LV 8' }];
@@ -148,10 +148,12 @@ function TypeScale() {
       <div class="ts-spec">${specs[r] || ''}</div></div>`)}</div><//>`;
 }
 
+function BurgerDemo() { const [o, setO] = useState(false); return html`<${Burger} open=${o} onClick=${() => setO(!o)}/><span class="t-caption" style=${{ color: 'var(--muted)' }}>${o ? 'open' : 'closed'} — click</span>`; }
+
 // ── Покрытие: все компоненты DS (функции с заглавной буквы) против историй на странице ──
 const STORIED = ['Orn', 'Diamond', 'MetalText', 'Gem', 'Badge', 'Icon', 'Emblem', 'Crown', 'Logo', 'Seg', 'Field', 'SectionHead', 'Art', 'NavItem', 'GameRow', 'SubHead',
   'GameCard', 'Stat', 'Meter', 'VipBar', 'Ladder', 'Perk', 'VipCard', 'Crest', 'Avatar', 'Presence', 'Tabs', 'Wallet', 'CrownWheel', 'Dust', 'Guilloche',
-  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader'];
+  'Suit', 'Flourish', 'PayRow', 'WinsTicker', 'HeroBanner', 'ProfileCard', 'Text', 'RankPlate', 'WheelPanel', 'BalanceChip', 'UserMenu', 'Countdown', 'GhostButton', 'Loader', 'ComingSoon', 'Burger'];
 function Coverage() {
   const comps = Object.keys(DS).filter((k) => /^[A-Z][a-z]/.test(k) && typeof DS[k] === 'function').sort();
   const miss = comps.filter((k) => !STORIED.includes(k));
@@ -214,7 +216,7 @@ function Board({ look, setLook }) {
 const TOC = [
   ['Start', [['playground', 'Playground'], ['themes', 'Themes']]],
   ['Foundations', [['colors', 'Colors'], ['type', 'Typography'], ['text', 'Text'], ['iconography', 'Iconography']]],
-  ['Components', [['loader', 'Loader'], ['account', 'Account'], ['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
+  ['Components', [['soon', 'Coming soon'], ['loader', 'Loader'], ['account', 'Account'], ['orn', 'Orn panel'], ['gem', 'Gem button'], ['badge', 'Badge'], ['seg', 'Seg · Field · Tabs'], ['nav', 'Nav · Game row'], ['art', 'Art · Emblem'],
     ['gamecard', 'Game card'], ['stat', 'Stat · Meter'], ['vip', 'VIP: bar · ladder · perk'], ['crest', 'Crest · Avatar'], ['wallet', 'Wallet'], ['wheel', 'Crown wheel'], ['logo', 'Logo · Flourish'], ['suits', 'Suits'], ['pay', 'Pay row'], ['ticker', 'Wins ticker'], ['guilloche', 'Guilloche'], ['section', 'Section head']]],
   ['Patterns', [['hero', 'Hero banner'], ['hero-art', 'Hero · art'], ['wheel-panel', 'Wheel panel'], ['rank', 'Rank plate'], ['profile', 'Profile card'], ['coverage', 'Coverage']]],
 ];
@@ -359,6 +361,14 @@ function App() {
             <div style=${{ width: '340px', maxWidth: '100%', padding: '10px 0 20px' }}><${CrownWheel} prizes=${['×2', '×3', '×5', '×10', '×20', '×50']}/></div>
           <//>
 
+          <${Story} id="burger" title="Burger" note="mobile menu button — bars morph into a cross; state in aria-expanded" code=${'<${Burger} open={menu} onClick={() => setMenu(!menu)}/>'}>
+            <${BurgerDemo}/>
+          <//>
+
+          <${Story} id="soon" title="ComingSoon" note="section placeholder with illustration (WebP + mobile)" code=${'<${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon" text="…" cta="Go to casino" href="#/casino"\n  art="assets/sports-hoard.webp" artMobile="assets/sports-hoard-m.webp"/>'}>
+            <div class="w-full"><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon" text="Live odds, tournaments and crown points on every match." cta="Go to casino" art="../assets/sports-hoard.webp" artMobile="../assets/sports-hoard-m.webp"/></div>
+          <//>
+
           <${Story} id="loader" title="Loader" note="splash while fonts, hero art and the app load; in the demo it is static HTML so it paints before React" code=${'<${Loader} note="Preparing the court…" progress={0.6}/>'}>
             <div style=${{ position: 'relative', width: '100%', height: '260px', borderRadius: '12px', overflow: 'hidden', transform: 'translateZ(0)' }}><${Loader} progress=${0.6}/></div>
           <//>
@@ -378,7 +388,7 @@ function App() {
             ${Object.keys(SUITS).map((k) => html`<${Suit} key=${k + 's'} s=${k} w=${14}/>`)}
           <//>
 
-          <${Story} id="pay" title="PayRow" note="brand colours muted by --art-c" code=${'<${PayRow} items={[[\'VISA\', \'oklch(45% .15 260)\'], …]}/>'}>
+          <${Story} id="pay" title="PayRow" note="real payment marks (Simple Icons, CC0) in the theme ink; brand colour on hover" code=${'<${PayRow} items={[\'visa\', \'mastercard\', \'ethereum\', \'tether\', \'bitcoin\']}/>   // BRANDS: Simple Icons (CC0)'}>
             <${PayRow} items=${PAY}/>
           <//>
 
@@ -425,7 +435,7 @@ function App() {
         </section>
       </main>
     </div>
-    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0).</footer>
+    <footer class="foot">Regnum is a fictional brand — UI case study by Elocate Studio. Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · payment marks: Simple Icons (CC0), trademarks of their owners.</footer>
   <//>`;
 }
 

@@ -29,9 +29,6 @@
 #root{position:relative; z-index:1}
 .app{display:grid; grid-template-columns:268px 1fr; gap:22px; max-width:1360px; margin:0 auto; padding:18px 22px 60px}
 .top{grid-column:1 / -1; display:flex; align-items:center; gap:14px}
-.soon .in{padding:56px 32px}
-.soon-in{position:relative; z-index:1; display:grid; justify-items:center; gap:12px; text-align:center}
-.soon-emb{width:96px} .soon-in h2{margin:0} .soon-in p{margin:0 0 8px; max-width:440px; font:var(--t-body); color:var(--muted)}
 .promos{grid-template-columns:repeat(4, minmax(0, 1fr)); margin-top:0}
 @media (max-width: 900px){ .promos{grid-template-columns:1fr 1fr} }
 .games-sec{display:flex; flex-direction:column; gap:16px; scroll-margin-top:20px}
@@ -45,6 +42,7 @@
 .row{display:grid; grid-template-columns:330px 1fr; gap:22px}
 .stats{display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto auto 1fr; gap:16px}
 .span3{grid-column:1 / -1}
+.top-burger{display:none} .side-veil{display:none}
 /* секции ниже первого экрана: браузер не рисует их (и не крутит их анимации), пока они вне экрана */
 .main > .row, .main > .wallets, .main > .games-sec, .side{content-visibility:auto; contain-intrinsic-size:auto 600px}
 .wallets{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
@@ -54,11 +52,19 @@ footer.foot a{text-decoration:underline}
 @media (max-width: 1100px){ .games{grid-template-columns:repeat(3,1fr)} .row{grid-template-columns:1fr} }
 @media (max-width: 900px){
   .app{grid-template-columns:1fr; padding:14px 14px 40px; gap:16px}
-  .side{order:2} .main{order:1}
+  .top-burger{display:block}
+  /* сайдбар → шторка слева */
+  .side{position:fixed; z-index:60; top:0; left:0; bottom:0; width:min(300px, 84vw); padding:12px; overflow-y:auto; overscroll-behavior:contain;
+    background:var(--bg); transform:translateX(-102%); transition:transform .35s var(--ease), visibility 0s .35s; visibility:hidden; content-visibility:visible}
+  .side.open{transform:none; visibility:visible; transition:transform .35s var(--ease)}
+  .side-veil{display:block; position:fixed; inset:0; z-index:55; background:oklch(0% 0 0 / .55); opacity:0; pointer-events:none; transition:opacity .3s var(--ease)}
+  .side-veil.on{opacity:1; pointer-events:auto}
+  html.menu-open{overflow:hidden}
   .top{flex-wrap:wrap; gap:10px} .top .field{order:5; flex-basis:100%} .um-name{display:none} .top .logo{margin-right:auto}
 }
 @media (max-width: 640px){
   .top .seg{display:none} .bc-k{display:none} .links{display:none} .um-bell{display:none} .top{gap:8px}
+  .top .logo svg{display:none} .balance-chip{padding:0 5px 0 10px; gap:8px} .top .logo{margin-right:auto}
   .games{grid-template-columns:repeat(2,1fr)} .wallets{grid-template-columns:1fr} .stats{grid-template-columns:1fr 1fr}
   .stats .stat:first-child{grid-column:1 / -1} .links .back:not(.lab){display:none}
 }
@@ -85,7 +91,7 @@ footer.foot a{text-decoration:underline}
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Reveal } from '../_shared/motion.js';
-import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard, Perk, GhostButton, Emblem,
+import { html, Orn, Logo, Seg, Field, SubHead, NavItem, GameRow, GameCard, Stat, Meter, VipCard, Perk, GhostButton, Emblem, ComingSoon, Burger,
   Wallet, SectionHead, Dust, Flourish, WinsTicker, HeroBanner, WheelPanel, ProfileCard, BalanceChip, UserMenu, autoQuality, calmScroll } from './ds/components.js';
 calmScroll();
 
@@ -106,8 +112,9 @@ const PERKS = [{ value: '12%', label: 'Weekly cashback' }, { value: '×2', label
 const COINS = [['₿', 65, '0.0425 BTC', '≈ €2,610'], ['₮', 170, '4,120 USDT', '≈ €3,800'], ['€', 260, '€6,070', 'Main wallet']];
 
 // ── разделы страницы ──
-function Top({ q, setQ, route }) {
+function Top({ q, setQ, route, menu, setMenu }) {
   return html`<header class="top">
+    <span class="top-burger"><${Burger} open=${menu} onClick=${() => setMenu(!menu)}/></span>
     <${Logo}/>
     <${Seg} items=${['sport', 'casino']} value=${route === 'sports' ? 'sport' : 'casino'} onChange=${(t) => go(t === 'sport' ? 'sports' : 'casino')}/>
     <${Field} placeholder="Search games…" value=${q} onChange=${(v) => { setQ(v); if (v) requestAnimationFrame(() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }}/>
@@ -117,18 +124,19 @@ function Top({ q, setQ, route }) {
   </header>`;
 }
 
-function Side({ route }) {
+function Side({ route, open, close }) {
   const fresh = GAMES.filter((g) => g.badge === 'new'), hot = GAMES.filter((g) => g.badge === 'hot').concat(GAMES.slice(2, 3));
-  return html`<aside class="side"><${Orn} deco>
+  return html`<${React.Fragment}><div class=${'side-veil' + (open ? ' on' : '')} onClick=${close} aria-hidden="true"></div>
+  <aside class=${'side' + (open ? ' open' : '')} id="side-nav" onClick=${(e) => { if (e.target.closest('a')) close(); }}><${Orn} deco>
     <${Flourish}/>
     <nav class="nav" aria-label="Sections">${ROUTES.map(([k, i, l]) => html`<${NavItem} key=${k} icon=${i} label=${l} href=${'#/' + k} on=${route === k}/>`)}</nav>
     <${SubHead}>New games<//><div class="glist">${fresh.map((g) => html`<${GameRow} key=${g.name} game=${g} kind="new"/>`)}</div>
     <${SubHead}>Popular<//><div class="glist">${hot.map((g) => html`<${GameRow} key=${g.name} game=${g} kind="hot"/>`)}</div>
     <nav class="nav" style=${{ marginTop: '16px' }}><${NavItem} icon="support" label="Royal support"/></nav>
-  <//></aside>`;
+  <//></aside><//>`;
 }
 
-const PAY = [['VISA', 'oklch(45% 0.15 260)'], ['MC', 'oklch(62% 0.19 40)'], ['ETH', 'oklch(55% 0.13 270)'], ['₮', 'oklch(62% 0.13 170)'], ['₿', 'oklch(72% 0.16 65)']];
+const PAY = ['visa', 'mastercard', 'ethereum', 'tether', 'bitcoin'];
 const PROMO_ENDS = Date.now() + ((2 * 24 + 14) * 3600 + 3 * 60) * 1000;   // акция «уикенда» — 2 дня 14 часов
 const Hero = () => html`<${HeroBanner} eyebrow="Weekend reload" endsAt=${PROMO_ENDS} title=${html`50% up to <b class="metal-text">€500</b><br/>+ 100 free spins`}
   text="Your Duchess reload is ready: top up by Sunday and the court doubles half of it — free spins land on Dragon's Hoard." pay=${PAY}
@@ -181,10 +189,9 @@ const Casino = ({ q, setQ }) => html`
   <${WinsTicker} wins=${WINS}/>
   <${Games} q=${q} setQ=${setQ}/>`;
 const Live = ({ q, setQ }) => html`<${Games} q=${q} setQ=${setQ} title="Live casino" fixedType="live"/>`;
-const Sports = () => html`<${Reveal}><${Orn} className="soon" lit deco><div class="soon-in"><div class="soon-emb"><${Emblem} k="trophy"/></div>
-  <div class="eyebrow">Sportsbook</div><h2 class="t-display">The royal arena opens soon</h2>
-  <p>Live odds, tournaments and crown points on every match. Until then — the tables are open.</p>
-  <${GhostButton} icon="casino" label="Go to casino" href="#/casino"/></div><//><//>`;
+const Sports = () => html`<${Reveal}><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon"
+  text="Live odds, tournaments and crown points on every match. Until then — the treasury is open at the tables." cta="Go to casino" href="#/casino"
+  art="assets/sports-hoard.webp" artMobile="assets/sports-hoard-m.webp" artAlt="Forest creatures guarding a royal treasure chest"/><//>`;
 const Promos = () => html`
   <${Reveal}><${Hero}/><//>
   <${Reveal}><${SectionHead} title="Active rewards"/><//>
@@ -193,18 +200,24 @@ const Promos = () => html`
 function App() {
   const [q, setQ] = useState('');
   const route = useRoute();
+  const [menu, setMenu] = useState(false);
+  React.useEffect(() => { setMenu(false); }, [route]);
+  React.useEffect(() => {   // меню открыто: страница под ним не прокручивается, Esc закрывает
+    document.documentElement.classList.toggle('menu-open', menu);
+    const k = (e) => { if (e.key === 'Escape') setMenu(false); }; addEventListener('keydown', k); return () => removeEventListener('keydown', k);
+  }, [menu]);
   const setSearch = (v) => { setQ(v); if (v && route !== 'casino' && route !== 'live') go('casino'); };
   return html`<${React.Fragment}>
     <${Dust}/>
     <div class="app">
-      <${Top} q=${q} setQ=${setSearch} route=${route}/>
-      <${Side} route=${route}/>
+      <${Top} q=${q} setQ=${setSearch} route=${route} menu=${menu} setMenu=${setMenu}/>
+      <${Side} route=${route} open=${menu} close=${() => setMenu(false)}/>
       <main class="main" key=${route}>
         ${route === 'hall' ? html`<${Hall}/>` : route === 'casino' ? html`<${Casino} q=${q} setQ=${setSearch}/>` : route === 'live' ? html`<${Live} q=${q} setQ=${setSearch}/>`
           : route === 'sports' ? html`<${Sports}/>` : html`<${Promos}/>`}
       </main>
     </div>
-    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio. <a href="lab/index.html">Design system lab</a> · <a href="/#work">Elocate</a></span><span>Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · Play responsibly · 18+</span></footer>
+    <footer class="foot"><span>Regnum is a fictional brand — UI case study by Elocate Studio. <a href="lab/index.html">Design system lab</a> · <a href="/#work">Elocate</a></span><span>Icons: <a href="https://phosphoricons.com">Phosphor</a> (MIT) · portraits: Lorelei by Lisa Wischofsky (CC0) · payment marks: Simple Icons (CC0), trademarks of their owners · Play responsibly · 18+</span></footer>
   <//>`;
 }
 

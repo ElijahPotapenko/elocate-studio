@@ -41,6 +41,24 @@ test.describe('Regnum design system', () => {
     await expect(page.locator('.games .game')).toHaveCount(1);
   });
 
+  test('mobile: burger opens the sidebar drawer; nav / veil / Esc close it', async ({ page }) => {
+    test.slow();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/demos/regnum/index.html?fps=0', { waitUntil: 'networkidle' });
+    await page.waitForSelector('#rg-loader', { state: 'detached' });
+    await expect(page.locator('.side')).toBeHidden();
+    await page.click('.burger');
+    await expect(page.locator('.side.open')).toBeVisible();
+    await expect(page.locator('.burger')).toHaveAttribute('aria-expanded', 'true');
+    await page.click('.side .nav a:has-text("Casino")');
+    await expect(page).toHaveURL(/#\/casino$/);
+    await expect(page.locator('.side.open')).toHaveCount(0);
+    await page.click('.burger'); await page.mouse.click(370, 500);
+    await expect(page.locator('.side.open')).toHaveCount(0);
+    await page.click('.burger'); await page.keyboard.press('Escape');
+    await expect(page.locator('.side.open')).toHaveCount(0);
+  });
+
   test('lab: every DS component has a story', async ({ page }) => {
     test.slow();
     await page.goto('/demos/regnum/lab/index.html', { waitUntil: 'networkidle' });

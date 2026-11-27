@@ -327,8 +327,10 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .flourish{display:flex; justify-content:center; margin:-4px 0 12px; opacity:.85}
 .flourish .fl{fill:none; stroke:var(--metal-dim); stroke-width:1} .flourish .fd{fill:var(--metal)}
 .pay{display:flex; gap:8px; flex-wrap:wrap}
-.pay i{font:var(--t-micro); letter-spacing:var(--tr-micro); display:grid; place-items:center; width:38px; height:38px; border-radius:50%; font-style:normal; color:var(--ink);
-  background:var(--metal-tex), color-mix(in oklch, var(--b) calc(100% * min(var(--art-c), 1)), var(--panel-hi)); box-shadow:inset 0 0 0 1px oklch(100% 0 0 / .14)}
+.pay-chip{display:grid; place-items:center; width:52px; height:34px; border-radius:8px; background:color-mix(in oklch, var(--panel-hi) 70%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); transition:box-shadow var(--dur-fast), background var(--dur-fast)}
+.pay-chip svg{width:24px; height:24px; fill:var(--ink); opacity:.88; transition:fill var(--dur-fast), opacity var(--dur-fast)}
+.pay-chip:hover{background:var(--ink)} .pay-chip:hover svg{fill:var(--brand); opacity:1}
 
 /* ── HeroBanner (паттерн) ── */
 .hero .in{display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:10px; padding:34px 36px; min-height:330px; overflow:hidden;
@@ -362,6 +364,25 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   .hero-art img{object-position:50% 22%}
   .hero-art::after{background:linear-gradient(180deg, transparent 58%, var(--panel))}
 }
+
+/* Burger: кнопка меню (мобильная шапка) — три полоски превращаются в крест */
+.burger{display:grid; place-items:center; width:42px; height:42px; border-radius:var(--radius); background:var(--panel); flex:none;
+  box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent)}
+.burger i{position:relative; display:block; width:18px; height:2px; border-radius:1px; background:var(--metal); transition:background var(--dur-fast)}
+.burger i::before, .burger i::after{content:''; position:absolute; left:0; width:18px; height:2px; border-radius:1px; background:var(--metal); transition:transform var(--dur) var(--ease)}
+.burger i::before{top:-6px} .burger i::after{top:6px}
+.burger[aria-expanded="true"] i{background:transparent}
+.burger[aria-expanded="true"] i::before{transform:translateY(6px) rotate(45deg)} .burger[aria-expanded="true"] i::after{transform:translateY(-6px) rotate(-45deg)}
+
+/* ComingSoon: иллюстрация фоном, текст по центру на затемнении (без масок — градиент поверх) */
+.soon .in{position:relative; padding:56px 32px; min-height:min(640px, 72vh); display:grid; place-items:center}
+.soon-art{position:absolute; inset:0; z-index:0}
+.soon-art img{display:block; width:100%; height:100%; object-fit:cover; object-position:50% 45%}
+.soon-art::after{content:''; position:absolute; inset:0; background:radial-gradient(48% 62% at 50% 50%, color-mix(in oklch, var(--panel) 88%, transparent), color-mix(in oklch, var(--panel) 55%, transparent) 70%, color-mix(in oklch, var(--panel) 80%, transparent))}
+.soon-in{position:relative; z-index:1; display:grid; justify-items:center; gap:12px; text-align:center; max-width:560px}
+.soon-in h2{margin:0} .soon-in p{margin:0 0 8px; max-width:440px; font:var(--t-body); color:var(--ink)}
+.soon .ghost-btn{background:color-mix(in oklch, var(--panel) 70%, transparent); color:var(--ink)}
+@media (max-width: 900px){ .soon .in{min-height:360px; padding:40px 20px} }
 
 /* WheelPanel: колесо + описание и призы */
 .wheel-panel .in{position:relative; display:grid; grid-template-columns:minmax(260px, 360px) 1fr; gap:36px; align-items:center; padding:30px 40px; overflow:hidden}

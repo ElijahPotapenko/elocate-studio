@@ -7,9 +7,9 @@
 import React, { useState, useRef, useId, useMemo, useEffect } from 'react';
 import { motion, animate } from 'framer-motion';
 import { MagneticCTA, TiltCard, CountUp, html } from '../../_shared/motion.js';
-import { LINE, SUITS, PH, PORTRAITS } from './icons.js';
+import { LINE, SUITS, PH, PORTRAITS, BRANDS } from './icons.js';
 
-export { LINE, SUITS, PH, PORTRAITS, html };
+export { LINE, SUITS, PH, PORTRAITS, BRANDS, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
@@ -332,12 +332,15 @@ export const UserMenu = ({ avatar = 'morgane', name, unread = 0 }) => html`<div 
   <button class="um-bell" aria-label=${`Notifications${unread ? ', ' + unread + ' unread' : ''}`}><${Icon} n="bell" w=${18}/>${unread > 0 && html`<i>${unread}</i>`}</button>
   <a class="um-me" href="#" aria-label=${name}><span class="um-ava">${PORTRAITS[avatar] ? html`<svg viewBox="0 0 980 980" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: PORTRAITS[avatar] }}></svg>` : null}</span><span class="um-name">${name}</span></a></div>`;
 
+// Кнопка меню (бургер): три полоски ↔ крест; состояние — aria-expanded
+export const Burger = ({ open, onClick, controls = 'side-nav', label = 'Menu' }) => html`<button class="burger" type="button" aria-label=${label} aria-expanded=${open ? 'true' : 'false'} aria-controls=${controls} onClick=${onClick}><i></i></button>`;
+
 /* ───────────────────────────── Мелочи бренда ───────────────────────────── */
 export const Suit = ({ s = 'spade', w = 16 }) => html`<svg class="suit" width=${w} height=${w} viewBox="0 0 100 100" aria-hidden="true"><path d=${SUITS[s]}/></svg>`;
 // орнамент-разделитель: две линии и ромб
 export const Flourish = ({ w = 70 }) => html`<div class="flourish"><svg width=${w} height="18" viewBox="0 0 70 18" aria-hidden="true"><path class="fl" d="M0 9 H26 M44 9 H70"/><path class="fd" d="M35 1 L41 9 L35 17 L29 9 Z"/></svg></div>`;
-// платёжные методы: бренд-цвет гасится ручкой --art-c (как обложки игр)
-export const PayRow = ({ items }) => html`<div class="pay">${items.map(([t, c]) => html`<i key=${t} style=${{ '--b': c }}>${t}</i>`)}</div>`;
+// платёжные методы: настоящие логотипы (Simple Icons), монохромом темы; на ховере — фирменный цвет
+export const PayRow = ({ items = ['visa', 'mastercard', 'ethereum', 'tether', 'bitcoin'] }) => html`<div class="pay" role="list" aria-label="Payment methods">${items.map((k) => html`<span key=${k} class="pay-chip" role="listitem" title=${BRANDS[k].name} aria-label=${BRANDS[k].name} style=${{ '--brand': BRANDS[k].hex }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d=${BRANDS[k].d}/></svg></span>`)}</div>`;
 // Бегущая строка — чистая CSS-анимация (композитор), две копии трека, сдвиг на -50%. Было: rAF-скрипт каждый кадр
 // (VelocityMarquee) — в Firefox каждое изменение заставляло перерисовать всю страницу (простой 9 fps → 49).
 export const WinsTicker = ({ wins, duration = 38 }) => { const row = wins.map(([who, amt, g], i) => html`<span key=${i} class="t"><${Diamond}/>${who} won <b>${amt}</b> in ${g}</span>`);
@@ -353,6 +356,11 @@ export const HeroBanner = ({ eyebrow, title, text, pay, cta = 'Join now', second
     <div class="hero-actions"><${Gem} label=${cta} magnetic/>${secondary && html`<a class="hero-link" href="#">${secondary}</a>`}</div>
     ${slides > 1 && html`<div class="dots" aria-label=${`Promo ${slide + 1} of ${slides}`}>${Array.from({ length: slides }, (_, i) => html`<i key=${i} class=${i === slide ? 'on' : ''}></i>`)}</div>`}</div>
   ${aside && html`<div class="hero-aside">${aside}</div>`}<//>`;
+
+// Заглушка раздела «скоро откроется»: иллюстрация фоном (WebP + мобильная), затемнённая середина под текстом
+export const ComingSoon = ({ eyebrow, title, text, cta, href = '#', icon = 'casino', art, artMobile, artAlt = '' }) => html`<${Orn} className=${'soon' + (art ? ' has-art' : '')} lit deco>
+  ${art && html`<picture class="soon-art">${artMobile && html`<source media="(max-width: 900px)" srcset=${artMobile}/>`}<img src=${art} alt=${artAlt} decoding="async" loading="lazy"/></picture>`}
+  <div class="soon-in"><div class="eyebrow">${eyebrow}</div><h2 class="t-display">${title}</h2>${text && html`<p>${text}</p>`}${cta && html`<${GhostButton} icon=${icon} label=${cta} href=${href}/>`}</div><//>`;
 
 // Секция колеса: колесо + описание и список призов (масть · приз)
 // После спина колесо запирается до следующего дня: статус показывает обратный отсчёт (как в настоящих продуктах).
