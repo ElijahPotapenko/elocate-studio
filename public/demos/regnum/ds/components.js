@@ -13,9 +13,9 @@ export { LINE, SUITS, PH, PORTRAITS, html };
 
 /* ───────────────────────────── Темы и ручки ───────────────────────────── */
 export const THEMES = [
+  { id: 'elven', name: 'Elven', note: 'лунное серебро · изумруд · хвоя' },
   { id: 'noir', name: 'Noir', note: 'шампань · бордо · чёрный бархат, без свечений' },
   { id: 'royal', name: 'Royal', note: 'золото · рубин · королевская ночь' },
-  { id: 'elven', name: 'Elven', note: 'лунное серебро · изумруд · хвоя' },
   { id: 'arcane', name: 'Arcane', note: 'серебро-лёд · аметист · индиго' },
 ];
 // Ручки, которые крутит лаба. Всё остальное в tokens.css выводится из них.
@@ -43,13 +43,13 @@ export const KNOBS = [
   { v: '--cut', label: 'Corner cut', min: 0, max: 28, step: 1, unit: 'px', group: 'Light & form' },
   { v: '--ornament', label: 'Ornament', min: 0, max: 1, step: 0.05, group: 'Light & form' },
 ];
-const LS = 'regnum-ds-look-v2';   // v2: тема по умолчанию стала noir — старые подкрутки не тянем
+const LS = 'regnum-ds-look-v3';   // v3: тема по умолчанию стала elven — старые подкрутки не тянем
 // look = { theme: 'royal', vars: { '--metal-h': '120', … } } — общий для демо и лабы (один origin)
-export function loadLook() { try { return JSON.parse(localStorage.getItem(LS)) || { theme: 'noir', vars: {} }; } catch { return { theme: 'noir', vars: {} }; } }
+export function loadLook() { try { return JSON.parse(localStorage.getItem(LS)) || { theme: 'elven', vars: {} }; } catch { return { theme: 'elven', vars: {} }; } }
 export function saveLook(look) { try { localStorage.setItem(LS, JSON.stringify(look)); } catch { /* приватный режим — живём без памяти */ } }
 export function applyLook(look) {
   const r = document.documentElement;
-  r.dataset.theme = look.theme || 'noir';
+  r.dataset.theme = look.theme || 'elven';
   KNOBS.forEach(({ v }) => r.style.removeProperty(v));
   Object.entries(look.vars || {}).forEach(([v, x]) => r.style.setProperty(v, x));
 }
