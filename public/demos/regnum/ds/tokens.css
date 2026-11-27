@@ -133,7 +133,10 @@
      всё мелкое — читаемым --f-head/--f-body; цифры-подписи (деления, мета) — Manrope, не капитель.
      Роли (как text styles в Figma). Компоненты берут ТОЛЬКО их: font:var(--t-…) + letter-spacing:var(--tr-…).
      Аудит typeAudit() (components.js) и тест проверяют, что любой текст на странице стоит на одной из ролей. */
-  --t-logo:       900 calc(clamp(24px, 1.6vw + 18px, 30px) * var(--ts))/1 var(--f-logo);   /* 24 на телефоне → 30 на десктопе */                    --tr-logo: .02em;
+  /* ЛОГОТИП — один на весь бренд (как на обложке кейса на elocate): корона + «Regnum» шрифтом Cinzel. Темы его НЕ меняют —
+     они перекрашивают металл; --f-logo темы остался для имён тем и декора, не для знака */
+  --f-brand: 'Cinzel', serif;
+  --t-logo:       700 calc(clamp(22px, 1.6vw + 16px, 28px) * var(--ts))/1 var(--f-brand);   /* 22 на телефоне → 28 на десктопе */                   --tr-logo: .06em;
   --t-display:    800 calc(clamp(30px, 4vw, 48px) * var(--ts))/1.05 var(--f-display); --tr-display: .01em;
   --t-title:      700 calc(20px * var(--ts))/1.2 var(--f-display);                 --tr-title: .04em;
   --t-subtitle:   700 calc(16px * var(--ts))/1.2 var(--f-head);                  --tr-subtitle: .02em;

@@ -12,7 +12,7 @@
 <style>html,body{background:oklch(8.5% .02 165);margin:0}
 .rg-loader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:var(--bg,oklch(8.5% .02 165))}
 .rg-loader .rl-in{display:flex;flex-direction:column;align-items:center;gap:14px;visibility:hidden}
-.rg-loader .rl-crown{width:64px;height:64px}</style>
+.rg-loader .rl-crown{width:52px;height:52px}</style>
 <title>Regnum — royal casino dashboard · Elocate Studio</title>
 <meta name="description" content="A royal casino dashboard UI — gamedev case study demo by Elocate Studio. Fictional brand.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,9 +103,11 @@ footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--
   html.menu-open{overflow:hidden}
   .top{flex-wrap:wrap; gap:10px} .top .search{order:5; flex-basis:100%} .um-name{display:none} .top .logo{margin-right:auto}
 }
+/* самые узкие телефоны: корона уступает место аватару — остаётся слово (иначе аватар уезжал на вторую строку) */
+@media (max-width: 374px){ .top .logo .crown{display:none} }
 @media (max-width: 640px){
   .top .seg{display:none} .bc-k{display:none} .links{display:none} .um-bell{display:none} .top{gap:8px}
-  .top .logo svg{display:none} .balance-chip{padding:0 5px 0 10px; gap:8px} .top .logo{margin-right:auto}
+  .top .logo{gap:5px} .top .logo .crown{width:22px; height:22px} .top{gap:6px} .balance-chip{padding:0 5px 0 10px; gap:8px} .top .logo{margin-right:auto}
 
   .stats .stat:first-child{grid-column:1 / -1} .links .back:not(.lab){display:none}
 }
@@ -114,7 +116,7 @@ footer.foot a{text-decoration:underline; transition:color var(--dur-fast) var(--
 <body class="ambient">
 <!-- Экран загрузки: статичный HTML — виден сразу, до шрифтов и React. Шкала растёт по этапам: шрифты → картинка баннера → интерфейс -->
 <div class="rg-loader" id="rg-loader" role="status" aria-live="polite"><div class="rl-in">
-  <svg class="rl-crown" width="64" height="64" viewBox="0 0 256 256" aria-hidden="true"><path d="M216.71,99.73l-15.6,93.59a8,8,0,0,1-7.89,6.68H62.78a8,8,0,0,1-7.89-6.68L39.29,99.73l.08,0a19.82,19.82,0,0,0,9.22-4.16h0L88,144l32-73.65h0a20,20,0,0,0,15.92,0h0L168,144l39.39-48.48h0a19.82,19.82,0,0,0,9.22,4.16Z"/><path d="M248,80a28,28,0,1,0-51.12,15.77l-26.79,33L146,73.4a28,28,0,1,0-36.06,0L85.91,128.74l-26.79-33a28,28,0,1,0-26.6,12L47,194.63A16,16,0,0,0,62.78,208H193.22A16,16,0,0,0,209,194.63l14.47-86.85A28,28,0,0,0,248,80ZM128,40a12,12,0,1,1-12,12A12,12,0,0,1,128,40ZM24,80A12,12,0,1,1,36,92,12,12,0,0,1,24,80ZM193.22,192H62.78L48.86,108.52,81.79,149A8,8,0,0,0,88,152a7.83,7.83,0,0,0,1.08-.07,8,8,0,0,0,6.26-4.74l29.3-67.4a27,27,0,0,0,6.72,0l29.3,67.4a8,8,0,0,0,6.26,4.74A7.83,7.83,0,0,0,168,152a8,8,0,0,0,6.21-3l32.93-40.52ZM220,92a12,12,0,1,1,12-12A12,12,0,0,1,220,92Z"/></svg>
+  <svg class="rl-crown" width="52" height="52" viewBox="0 0 256 256" aria-hidden="true"><path d="M216.71,99.73l-15.6,93.59a8,8,0,0,1-7.89,6.68H62.78a8,8,0,0,1-7.89-6.68L39.29,99.73l.08,0a19.82,19.82,0,0,0,9.22-4.16h0L88,144l32-73.65h0a20,20,0,0,0,15.92,0h0L168,144l39.39-48.48h0a19.82,19.82,0,0,0,9.22,4.16Z"/><path d="M248,80a28,28,0,1,0-51.12,15.77l-26.79,33L146,73.4a28,28,0,1,0-36.06,0L85.91,128.74l-26.79-33a28,28,0,1,0-26.6,12L47,194.63A16,16,0,0,0,62.78,208H193.22A16,16,0,0,0,209,194.63l14.47-86.85A28,28,0,0,0,248,80ZM128,40a12,12,0,1,1-12,12A12,12,0,0,1,128,40ZM24,80A12,12,0,1,1,36,92,12,12,0,0,1,24,80ZM193.22,192H62.78L48.86,108.52,81.79,149A8,8,0,0,0,88,152a7.83,7.83,0,0,0,1.08-.07,8,8,0,0,0,6.26-4.74l29.3-67.4a27,27,0,0,0,6.72,0l29.3,67.4a8,8,0,0,0,6.26,4.74A7.83,7.83,0,0,0,168,152a8,8,0,0,0,6.21-3l32.93-40.52ZM220,92a12,12,0,1,1,12-12A12,12,0,0,1,220,92Z"/></svg>
   <div class="rl-word">Regnum</div><div class="rl-bar"><i></i></div><div class="rl-note">Preparing the court…</div></div></div>
 <script>
 (function(){
@@ -229,7 +231,6 @@ const Hall = () => html`
   <div class="wallets">${COINS.map(([s, h, a, sub]) => html`<${Wallet} key=${s} sym=${s} hue=${h} amount=${a} sub=${sub}/>`)}</div>`;
 const Casino = () => html`
   <${Reveal}><${WheelStage} text="One free spin every day. Land a suit, take the prize — free spins, cash, XP boosts and a shot at VIP+."/><//>
-  <${WinsTicker} wins=${WINS}/>
   <${Games}/>`;
 const Sports = () => html`<${Reveal}><${ComingSoon} eyebrow="Sportsbook" title="The royal arena opens soon"
   text="Live odds, tournaments and crown points on every match. Until then — the treasury is open at the tables." cta="Go to casino" href="#/casino"

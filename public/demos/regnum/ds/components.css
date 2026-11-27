@@ -505,9 +505,9 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .rg-loader{position:fixed; inset:0; z-index:9999; display:grid; place-items:center; background:var(--bg); transition:opacity .6s var(--ease), visibility .6s}
 .rg-loader.out{opacity:0; visibility:hidden}
 .rg-loader .rl-in{display:flex; flex-direction:column; align-items:center; gap:14px; visibility:visible}   /* в странице скрыто до прихода этих стилей — без «голого» текста */
-.rg-loader .rl-crown{width:64px; height:64px; animation:rl-breathe 2.4s ease-in-out infinite}
+.rg-loader .rl-crown{width:52px; height:52px; animation:rl-breathe 2.4s ease-in-out infinite}
 .rg-loader .rl-crown path{fill:var(--metal)} .rg-loader .rl-crown path:first-child{opacity:.35}
-.rg-loader .rl-word{font:var(--t-display); letter-spacing:.2em; padding-left:.2em; color:var(--metal-hi)}
+.rg-loader .rl-word{font:var(--t-logo); letter-spacing:var(--tr-logo); color:var(--metal-hi)}   /* тот же знак, что в шапке: корона над словом, как на обложке */
 .rg-loader .rl-bar{position:relative; width:180px; height:2px; margin-top:6px; overflow:hidden; border-radius:2px; background:color-mix(in oklch, var(--metal-dim) 30%, transparent)}
 .rg-loader .rl-bar i{position:absolute; inset:0; transform-origin:left; transform:scaleX(var(--p, .08)); background:var(--metal-tex), var(--metal-grad); transition:transform .45s var(--ease)}
 .rg-loader .rl-note{font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--faint)}
