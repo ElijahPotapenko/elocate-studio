@@ -89,7 +89,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .cta::before{content:''; position:absolute; inset:-14px -18px; z-index:-1; pointer-events:none; border-radius:40px;
   background:radial-gradient(closest-side, color-mix(in oklch, var(--accent) calc(55% * var(--glow)), transparent), transparent);
   opacity:.75; transition:opacity var(--dur) var(--ease); will-change:opacity}
-.cta:hover::before{opacity:1}
+.cta:not(.is-off):hover::before{opacity:1}
+.cta.is-off::before{display:none}
 .cta.metal::before{background:radial-gradient(closest-side, color-mix(in oklch, var(--metal) calc(45% * var(--glow)), transparent), transparent)}
 .gem{font:var(--t-control); letter-spacing:var(--tr-control); text-transform:uppercase; --h:46px; position:relative; display:inline-flex; align-items:center; justify-content:center; height:var(--h); padding:2px; color:var(--ink); cursor:pointer;
   clip-path:polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
@@ -97,7 +98,7 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .gem > span{position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; gap:10px; width:100%; height:100%; padding:0 34px;
   clip-path:inherit; background:var(--metal-tex), var(--accent-grad); box-shadow:inset 0 1px 0 oklch(100% 0 0 / .22); transition:filter var(--dur) var(--ease)}
 .gem > span::after{content:''; position:absolute; inset:0; background:linear-gradient(105deg, transparent 35%, oklch(100% 0 0 / .45) 50%, transparent 65%); transform:translateX(-120%)}
-.gem:hover > span::after{animation:gemsheen .9s var(--ease)}
+.gem:not(.off):not(.done):hover > span::after{animation:gemsheen .9s var(--ease)}
 @keyframes gemsheen{to{transform:translateX(120%)}}
 .gem::before,.gem::after{content:''; position:absolute; top:50%; width:9px; height:9px; transform:translateY(-50%) rotate(45deg); z-index:2;
   background:var(--gem-grad); box-shadow:0 0 10px var(--glow-gem)}
@@ -107,10 +108,10 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .gem.metal > span{background:var(--metal-tex), linear-gradient(180deg, var(--metal), var(--metal-2)); color:var(--on-metal); text-shadow:none}
 @property --cta-a{syntax:'<angle>'; initial-value:0deg; inherits:false}
 /* рамка главной кнопки при наведении: свет бежит по контуру (conic + @property) — перерисовывается только тонкий кант */
-.cta:hover .gem{background:conic-gradient(from var(--cta-a), var(--metal-hi), var(--metal-2) 22%, var(--accent-2) 50%, var(--metal-2) 78%, var(--metal-hi)); animation:cta-rim 2.2s linear infinite}
+.cta:not(.is-off):hover .gem{background:conic-gradient(from var(--cta-a), var(--metal-hi), var(--metal-2) 22%, var(--accent-2) 50%, var(--metal-2) 78%, var(--metal-hi)); animation:cta-rim 2.2s linear infinite}
 @keyframes cta-rim{to{--cta-a:360deg}}
-.cta:hover .gem > span{filter:brightness(1.18) saturate(1.15)}
-.cta:hover .gem::before,.cta:hover .gem::after{background:var(--metal-hi); box-shadow:0 0 12px var(--glow-accent-strong)}
+.cta:not(.is-off):hover .gem > span{filter:brightness(1.18) saturate(1.15)}
+.cta:not(.is-off):hover .gem::before,.cta:not(.is-off):hover .gem::after{background:var(--metal-hi); box-shadow:0 0 12px var(--glow-accent-strong)}
 
 /* ── Badge ── */
 .badge{font:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase; display:inline-block; padding:3px 7px; border-radius:var(--radius-sm); color:var(--ink); background:var(--accent); box-shadow:0 0 12px var(--glow-accent)}
@@ -327,10 +328,15 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
   background:conic-gradient(from 40deg, var(--metal-hi), var(--metal-2) 14%, var(--metal) 26%, var(--metal-deep) 40%, var(--metal-hi) 52%, var(--metal-2) 64%, var(--metal) 76%, var(--metal-deep) 90%, var(--metal-hi));
   box-shadow:inset 0 0 0 1px var(--metal-shade), inset 0 1.5px 0 oklch(100% 0 0 / .4)}
 .spin-btn::after{content:''; position:absolute; inset:22%; border-radius:50%; background:radial-gradient(circle at 40% 32%, oklch(100% 0 0 / .28), transparent 60%); pointer-events:none}
-.spin-btn:hover::before{transform:rotate(140deg)}
-.spin-btn:active::before{transform:rotate(140deg) scale(.96)}
+.spin-btn:not(:disabled):hover::before{transform:rotate(140deg)}
+.spin-btn:not(:disabled):active::before{transform:rotate(140deg) scale(.96)}
 .spin-btn span{font:var(--t-control-sm); letter-spacing:var(--tr-control); text-transform:uppercase; position:relative; z-index:1; color:var(--on-metal); text-shadow:0 1px 0 oklch(100% 0 0 / .4)}
-.spin-btn:disabled{cursor:default} .spin-btn:disabled span{opacity:.45}
+.spin-btn:disabled{cursor:default} .spin-btn:disabled:not(.locked) span{opacity:.45}
+/* заперто до следующего спина — центр серебряный (та же ступица, металл без золота): «сейчас нельзя», но красиво;
+   золото возвращается, когда спин снова доступен. Свои --metal-* только на кнопке — остальное колесо золотое */
+.spin-btn.locked{--metal-hi:oklch(96% .004 250); --metal:oklch(80% .008 250); --metal-2:oklch(67% .01 250); --metal-deep:oklch(44% .012 250);
+  --metal-shade:oklch(30% .012 250); --on-metal:oklch(24% .012 250); cursor:not-allowed}
+.spin-btn.locked .ico{stroke:var(--on-metal); stroke-width:2.2}
 /* стрелка-маятник: качается вокруг камня */
 .pointer{z-index:3; left:calc(50% - 15px); top:-5%; width:30px; transform-origin:50% 28%}
 .pointer .pb{fill:var(--metal-shade)} .pointer .pe{fill:var(--metal)} .pointer .pg{fill:var(--accent); stroke:var(--metal-hi); stroke-width:1}
@@ -448,7 +454,8 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .um-name{font:var(--t-label); letter-spacing:var(--tr-label); color:var(--ink)}
 .ghost-btn{display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 11px; border-radius:8px; font:var(--t-caption); letter-spacing:var(--tr-caption); color:var(--muted);
   box-shadow:inset 0 0 0 1px color-mix(in oklch, var(--metal-dim) 30%, transparent); transition:color var(--dur-fast), box-shadow var(--dur-fast)}
-.ghost-btn:hover{color:var(--ink); box-shadow:inset 0 0 0 1px var(--metal-2)}
+.ghost-btn:not(.off):hover{color:var(--ink); box-shadow:inset 0 0 0 1px var(--metal-2)}
+.ghost-btn.off{opacity:.45; cursor:not-allowed}
 .ghost-btn .ico{stroke:currentColor}
 .wallet-actions{display:flex; gap:8px; margin-top:16px; position:relative}
 .field{position:relative}
@@ -553,3 +560,21 @@ button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
 .rg-toast[data-kind="bell"] .tt-ic{--tc:var(--info)}
 .rg-toast .tt-tx{min-width:0}
 @media (prefers-reduced-motion: reduce){ .rg-toast{transition:opacity var(--dur-fast)} }
+
+/* ── Неактивные состояния кнопок (Gem state='disabled' | 'done', GhostButton disabled).
+   disabled — «сейчас нельзя»: кант и тело гаснут до тусклого металла, без сияния, ромбики без огня, курсор «нельзя».
+   done — «уже получено»: тело тёмное, кант и текст металлом, галочка; спокойно, но благородно — не выглядит сломанным ── */
+.gem.off, .gem.done{cursor:default}
+.gem.off{cursor:not-allowed; color:var(--faint); text-shadow:none; background:color-mix(in oklch, var(--metal-dim) 45%, transparent)}
+.gem.off > span{background:color-mix(in oklch, var(--panel-hi) 92%, transparent); box-shadow:none}
+.gem.off::before, .gem.off::after{background:var(--metal-dim); box-shadow:none; opacity:.55}
+.gem.done{color:var(--metal-hi); text-shadow:none; background:var(--metal-tex), var(--metal-grad)}
+.gem.done > span{background:color-mix(in oklch, var(--metal) 12%, var(--panel)); box-shadow:inset 0 1px 0 color-mix(in oklch, var(--metal-hi) 25%, transparent)}
+.gem.done > span .ico{stroke:var(--metal-hi); stroke-width:2.2}
+.gem.done::before, .gem.done::after{background:var(--metal); box-shadow:none}
+.gem.metal.off > span{color:var(--faint)} .gem.metal.done > span{color:var(--metal-hi)}   /* у металлической кнопки свой тёмный текст — в неактивных состояниях его перекрываем */
+/* отсчёт на кнопке: после «получено» время до следующего раза — прямо на кнопке */
+.gem .countdown{font-variant-numeric:tabular-nums; opacity:.85}
+.gem .gem-sep{width:5px; height:5px; transform:rotate(45deg); background:currentColor; opacity:.5; flex:none}
+.spin-btn span{display:flex; flex-direction:column; align-items:center; gap:2px}
+.spin-btn .countdown{font:var(--t-micro); letter-spacing:var(--tr-micro); font-variant-numeric:tabular-nums; white-space:nowrap}

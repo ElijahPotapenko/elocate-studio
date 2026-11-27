@@ -315,6 +315,16 @@ function App() {
             <${Lbl} t="metal · sm"><${Gem} label="Join" tone="metal" size="sm"/><//>
             <${Lbl} t="metal · md"><${Gem} label="Deposit" tone="metal"/><//>
           <//>
+          <${Story} id="btn-states" title="Button states" note="inactive states — not clickable, no hover, no magnet, aria-disabled. disabled = not now (dimmed, no glow) · done = already received (quiet metal plate with a check); until = when it comes back — the countdown sits on the button itself. Claim bonus turns into done after the claim; the Crown Wheel hub turns silver with its countdown while locked"
+            code=${'<${Gem} label="Claim bonus" state="disabled"/>\n<${Gem} label="Claimed" state="done" until={nextAt}/>\n<${GhostButton} label="Withdraw" icon="arrowUp" disabled/>'}>
+            <${Lbl} t="accent · active"><${Gem} label="Claim bonus"/><//>
+            <${Lbl} t="accent · disabled"><${Gem} label="Claim bonus" state="disabled"/><//>
+            <${Lbl} t="accent · done"><${Gem} label="Claimed" state="done"/><//>
+            <${Lbl} t="done · until — countdown on the button"><${Gem} label="Claimed" state="done" until=${Date.now() + 7 * 86400e3}/><//>
+            <${Lbl} t="metal · disabled"><${Gem} label="Deposit" tone="metal" state="disabled"/><//>
+            <${Lbl} t="metal · done"><${Gem} label="Deposited" tone="metal" state="done"/><//>
+            <${Lbl} t="ghost · active / disabled"><span style=${{ display: 'flex', gap: '8px' }}><${GhostButton} icon="arrowUp" label="Withdraw"/><${GhostButton} icon="arrowUp" label="Withdraw" disabled/></span><//>
+          <//>
 
           <${Story} id="badge" title="Badge" note="kind: new | hot | metal" code=${'<${Badge} kind="hot"/>\n<${Badge} kind="metal">VIP<//>'}>
             <${Badge} kind="new"/><${Badge} kind="hot"/><${Badge} kind="metal">VIP<//><${Badge}>LV 8<//>
